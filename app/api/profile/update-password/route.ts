@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { compare, hash } from "bcryptjs";
-import { connectToDB } from "@/lib/mongodb";
+import connectdb from "@/lib/connectdb";
 import { getServerSession } from "next-auth";
 import User from "@/lib/models/User";
 
@@ -12,7 +12,7 @@ export async function PUT(req: Request) {
     }
 
     const { oldPassword, newPassword } = await req.json();
-    await connectToDB();
+    await new connectdb();
 
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
@@ -21,15 +21,24 @@ export async function PUT(req: Request) {
 
     const isMatch = await compare(oldPassword, user.password);
     if (!isMatch) {
-      return NextResponse.json({ error: "Incorrect old password" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Incorrect old password" },
+        { status: 400 }
+      );
     }
 
     user.password = await hash(newPassword, 10);
     await user.save();
 
-    return NextResponse.json({ message: "Password updated successfully!" }, { status: 200 });
+    return NextResponse.json(
+      { message: "Password updated successfully!" },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Password update error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

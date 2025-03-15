@@ -6,7 +6,7 @@ import connectdb from "@/lib/connectdb";
 
 export async function GET() {
   try {
-    await connectdb();
+    await new connectdb();
     const admins = await Admin.find();
     return NextResponse.json(admins, { status: 200 });
   } catch (error) {
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await hashPassword(password);
-    await connectdb();
+    await new connectdb();
 
     const newAdmin = new Admin({
       matricNumber,
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const { id, ...updatedData } = await req.json();
-    await connectdb();
+    await new connectdb();
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid admin ID" }, { status: 400 });
@@ -102,7 +102,7 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const { id } = await req.json();
-    await connectdb();
+    await new connectdb();
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid admin ID" }, { status: 400 });

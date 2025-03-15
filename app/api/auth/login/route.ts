@@ -6,14 +6,14 @@ import connectdb from "@/lib/connectdb";
 
 export async function POST(req: Request) {
   try {
-    await connectdb();
+    await new connectdb();
 
     const { matricNumber, email, password } = await req.json();
     console.log("Received login data:", { matricNumber, email });
 
     const student = await Student.findOne({ matricNumber, email });
     if (!student) {
-      console.error("❌ Student not found.");
+      console.error("Student not found.");
       return NextResponse.json(
         { message: "Invalid credentials" },
         { status: 401 }
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
     const isValidPassword = await bcrypt.compare(password, student.password);
     if (!isValidPassword) {
-      console.error("❌ Invalid password.");
+      console.error("Invalid password.");
       return NextResponse.json(
         { message: "Invalid credentials" },
         { status: 401 }
@@ -45,10 +45,10 @@ export async function POST(req: Request) {
       `token=${token}; HttpOnly; Path=/; Max-Age=604800; SameSite=Strict`
     );
 
-    console.log("✅ Login successful!");
+    console.log("Login successful!");
     return response;
   } catch (error) {
-    console.error("❌ Error during login:", error);
+    console.error("Error during login:", error);
     return NextResponse.json(
       {
         message: "Login failed",

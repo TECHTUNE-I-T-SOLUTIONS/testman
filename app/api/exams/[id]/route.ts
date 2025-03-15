@@ -11,7 +11,7 @@ interface Params {
 
 export async function GET(req: NextRequest, { params }: Params) {
   try {
-    await connectdb();
+    await new connectdb();
     const resolvedParams = await params;
     const { id } = resolvedParams;
 
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 export async function PUT(req: NextRequest, { params }: Params) {
   try {
-    await connectdb();
+    await new connectdb();
     const resolvedParams = await params;
     const { id } = resolvedParams;
     const { title, questions, duration, scheduledTime, isPublished } =
@@ -74,8 +74,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 export async function DELETE(req: NextRequest, { params }: Params) {
   try {
-    await connectdb();
-    const resolvedParams = await params; 
+    await new connectdb();
+    const resolvedParams = await params;
     const { id } = resolvedParams;
 
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {

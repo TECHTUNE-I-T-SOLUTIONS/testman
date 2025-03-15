@@ -6,7 +6,7 @@ import connectdb from "@/lib/connectdb";
 
 // GET: Fetch exams or a specific exam based on query parameters
 export async function GET(req: Request) {
-  await connectdb();
+  await new connectdb();
   const url = new URL(req.url);
   const examId = url.searchParams.get("examId");
   const courseIdOrName = url.searchParams.get("courseId");
@@ -63,7 +63,7 @@ export async function GET(req: Request) {
 
 // POST: Create a new exam
 export async function POST(req: Request) {
-  await connectdb();
+  await new connectdb();
   try {
     const {
       courseId,
@@ -111,7 +111,7 @@ export async function POST(req: Request) {
 
 // PUT: Update an existing exam
 export async function PUT(req: Request) {
-  await connectdb();
+  await new connectdb();
   try {
     const { examId, title, questions, duration, scheduledTime, isPublished } =
       await req.json();
@@ -148,7 +148,7 @@ export async function PUT(req: Request) {
 
 // DELETE: Delete an exam
 export async function DELETE(req: Request) {
-  await connectdb();
+  await new connectdb();
   try {
     const { examId } = await req.json();
 

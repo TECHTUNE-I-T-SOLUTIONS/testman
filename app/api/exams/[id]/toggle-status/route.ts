@@ -7,7 +7,7 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  await connectdb();
+  await new connectdb();
 
   try {
     const resolvedParams = await params;

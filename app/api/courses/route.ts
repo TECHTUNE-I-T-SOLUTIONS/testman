@@ -5,11 +5,9 @@ import mongoose from "mongoose";
 import connectdb from "@/lib/connectdb";
 
 export async function GET() {
-  await connectdb();
+  await new connectdb();
   try {
-    const courses = await Course.find().populate(
-      "levelId"
-    );
+    const courses = await Course.find().populate("levelId");
     console.log("course details", courses);
     return NextResponse.json(courses);
   } catch (error) {
@@ -22,7 +20,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  await connectdb();
+  await new connectdb();
 
   try {
     const { name, code, facultyId, departmentId, levelId } = await req.json();
@@ -45,7 +43,7 @@ export async function POST(req: Request) {
       code,
       facultyId,
       departmentId,
-      levelId, 
+      levelId,
     });
 
     return NextResponse.json(newCourse, { status: 201 });
@@ -58,10 +56,9 @@ export async function POST(req: Request) {
   }
 }
 
-
 // Update an existing course
 export async function PUT(req: Request) {
-  await connectdb();
+  await new connectdb();
 
   try {
     const { id, name, code, facultyId, departmentId, levelId } =
@@ -107,7 +104,7 @@ export async function PUT(req: Request) {
 
 // Delete a course and remove its reference from Level
 export async function DELETE(req: Request) {
-  await connectdb();
+  await new connectdb();
 
   try {
     const { id } = await req.json();

@@ -4,7 +4,7 @@ import connectdb from "@/lib/connectdb";
 
 export async function GET(req: Request) {
   try {
-    await connectdb();
+    await new connectdb();
     const url = new URL(req.url);
     const courseId = url.searchParams.get("courseId");
 
@@ -19,7 +19,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(questions, { status: 200 });
   } catch (error) {
-      console.error("Error getting question status:", error); 
+    console.error("Error getting question status:", error);
     return NextResponse.json(
       { message: "Error fetching questions" },
       { status: 500 }
@@ -27,10 +27,9 @@ export async function GET(req: Request) {
   }
 }
 
-
 export async function POST(req: Request) {
   try {
-    await connectdb();
+    await new connectdb();
     const { courseId, questionText, options } = await req.json();
 
     if (!courseId || !questionText || options.length < 2) {
@@ -44,7 +43,7 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error) {
-      console.error("Error posting question status:", error); 
+    console.error("Error posting question status:", error);
     return NextResponse.json(
       { message: "Error creating question" },
       { status: 500 }
@@ -52,10 +51,9 @@ export async function POST(req: Request) {
   }
 }
 
-
 export async function DELETE(req: Request) {
   try {
-    await connectdb();
+    await new connectdb();
     const { id } = await req.json();
 
     const deletedQuestion = await Question.findByIdAndDelete(id);
@@ -68,11 +66,10 @@ export async function DELETE(req: Request) {
 
     return NextResponse.json({ message: "Question deleted" }, { status: 200 });
   } catch (error) {
-      console.error("Error deleting question status:", error); 
+    console.error("Error deleting question status:", error);
     return NextResponse.json(
       { message: "Error deleting question" },
       { status: 500 }
     );
   }
 }
-

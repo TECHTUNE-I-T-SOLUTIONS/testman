@@ -10,6 +10,7 @@ export async function getStudentFromToken() {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+      matricNumber: any;
       name: string;
       id: string;
     };

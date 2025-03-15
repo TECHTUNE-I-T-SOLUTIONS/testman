@@ -5,7 +5,7 @@ import connectdb from "@/lib/connectdb";
 
 export async function GET(req: NextRequest) {
   try {
-    await connectdb();
+    await new connectdb();
 
     const { searchParams } = new URL(req.url);
     const departmentId = searchParams.get("departmentId");
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: Request) {
-  await connectdb();
+  await new connectdb();
 
   try {
     const { name, departmentId } = await req.json();

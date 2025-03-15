@@ -12,7 +12,7 @@ interface DetailedResult {
 }
 
 export async function POST(req: Request) {
-  await connectdb();
+  await new connectdb();
 
   const student = await getStudentFromToken();
   if (!student)

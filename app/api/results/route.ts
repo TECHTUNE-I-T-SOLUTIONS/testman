@@ -5,7 +5,7 @@ import Exam from "@/lib/models/exams";
 import connectdb from "@/lib/connectdb";
 
 export async function GET(req: Request) {
-  await connectdb();
+  await new connectdb();
   const { searchParams } = new URL(req.url);
   const studentId = searchParams.get("studentId");
 

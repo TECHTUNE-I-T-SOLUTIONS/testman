@@ -2,18 +2,17 @@ import { NextResponse } from "next/server";
 import mongoose from "mongoose";
 import connectdb from "@/lib/connectdb";
 
-
 const STUDENT_COLLECTION = "students";
 
 export async function POST(req: Request) {
   try {
     const student = await req.json();
-    const db = await connectdb();
+    const db = await new connectdb();
     if (!db) throw new Error("Database connection failed");
 
     const result = await db.collection(STUDENT_COLLECTION).insertOne({
       ...student,
-      isActive: false, 
+      isActive: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -30,7 +29,7 @@ export async function POST(req: Request) {
 
 export async function GET() {
   try {
-    const db = await connectdb();
+    const db = await new connectdb();
     if (!db) throw new Error("Database connection failed");
 
     const students = await db
@@ -83,7 +82,7 @@ export async function GET() {
         },
       ])
       .toArray();
-   console.log(students)
+    console.log(students);
     return NextResponse.json(students, { status: 200 });
   } catch (error) {
     console.error("Error fetching students:", error);
@@ -94,17 +93,18 @@ export async function GET() {
   }
 }
 
-
 export async function PUT(req: Request) {
   try {
     const { id, ...updateData } = await req.json();
-    const db = await connectdb();
+    const db = await new connectdb();
     if (!db) throw new Error("Database connection failed");
 
-    await db.collection(STUDENT_COLLECTION).updateOne(
-      { _id: new mongoose.Types.ObjectId(id) }, 
-      { $set: { ...updateData, updatedAt: new Date() } }
-    );
+    await db
+      .collection(STUDENT_COLLECTION)
+      .updateOne(
+        { _id: new mongoose.Types.ObjectId(id) },
+        { $set: { ...updateData, updatedAt: new Date() } }
+      );
 
     return NextResponse.json(
       { message: "Student updated successfully" },
@@ -122,12 +122,12 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const { id } = await req.json();
-    const db = await connectdb();
+    const db = await new connectdb();
     if (!db) throw new Error("Database connection failed");
 
     await db
       .collection(STUDENT_COLLECTION)
-      .deleteOne({ _id: new mongoose.Types.ObjectId(id) }); 
+      .deleteOne({ _id: new mongoose.Types.ObjectId(id) });
 
     return NextResponse.json(
       { message: "Student deleted successfully" },

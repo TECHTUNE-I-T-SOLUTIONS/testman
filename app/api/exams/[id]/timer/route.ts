@@ -9,8 +9,8 @@ interface Params {
 }
 
 export async function GET(req: NextRequest, { params }: Params) {
-  await connectdb();
-  const resolvedParams = await params; 
+  await new connectdb();
+  const resolvedParams = await params;
   const { examId } = resolvedParams;
 
   try {

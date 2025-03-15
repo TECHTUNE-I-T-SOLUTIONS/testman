@@ -16,7 +16,7 @@ const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        await connectdb();
+        await new connectdb();
         console.log("Database connected.");
 
         if (

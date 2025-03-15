@@ -18,7 +18,7 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  await connectdb();
+  await new connectdb();
   const resolvedParams = await params;
   const { id: examId } = resolvedParams;
   const student = await getStudentFromToken();
@@ -53,7 +53,7 @@ export async function POST(
       });
     });
     const studentDoc = await Student.findById(student.id);
-    
+
     await Result.create({
       studentId: student.id,
       examId,

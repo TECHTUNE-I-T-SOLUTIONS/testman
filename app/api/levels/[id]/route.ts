@@ -6,7 +6,7 @@ import { parse } from "url"; // Import URL parser
 
 export async function DELETE(req: Request) {
   try {
-    await connectdb();
+    await new connectdb();
 
     // Extract ID from the request URL
     const { pathname } = parse(req.url, true);

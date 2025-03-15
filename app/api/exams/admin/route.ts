@@ -6,12 +6,12 @@ import connectdb from "@/lib/connectdb";
 
 export async function GET(req: NextRequest) {
   try {
-    await connectdb();
+    await new connectdb();
 
     const { searchParams } = new URL(req.url);
     const courseId = searchParams.get("courseId");
 
-    console.log("Received courseId:", courseId); 
+    console.log("Received courseId:", courseId);
 
     if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
       console.error("Invalid or missing courseId:", courseId);
@@ -37,9 +37,8 @@ export async function GET(req: NextRequest) {
   }
 }
 
-
 export async function POST(req: Request) {
-  await connectdb();
+  await new connectdb();
   try {
     const {
       courseId,

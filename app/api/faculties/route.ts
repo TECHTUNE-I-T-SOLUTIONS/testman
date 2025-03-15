@@ -5,7 +5,7 @@ import connectdb from "@/lib/connectdb";
 
 export async function GET() {
   try {
-    await connectdb();
+    await new connectdb();
     const faculties = await Faculty.find({});
     return NextResponse.json(faculties);
   } catch (error) {
@@ -17,13 +17,10 @@ export async function GET() {
   }
 }
 
-
-
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    await connectdb();
+    await new connectdb();
     const newFaculty = new Faculty(body);
     await newFaculty.save();
     return NextResponse.json(newFaculty, { status: 201 });
@@ -38,7 +35,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    await connectdb();
+    await new connectdb();
 
     const { id, name, session } = await request.json();
 
@@ -69,7 +66,6 @@ export async function PUT(request: Request) {
   }
 }
 
-
 export async function DELETE(request: Request) {
   try {
     const url = new URL(request.url);
@@ -78,7 +74,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
     }
 
-    await connectdb();
+    await new connectdb();
     const deletedFaculty = await Faculty.findByIdAndDelete(id);
 
     if (!deletedFaculty) {

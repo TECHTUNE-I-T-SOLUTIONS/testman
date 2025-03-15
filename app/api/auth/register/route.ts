@@ -4,7 +4,7 @@ import Student from "@/lib/models/student";
 import connectdb from "@/lib/connectdb";
 
 export async function POST(req: Request) {
-  await connectdb();
+  await new connectdb();
 
   try {
     const {
