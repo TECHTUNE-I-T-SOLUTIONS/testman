@@ -30,15 +30,24 @@ export async function GET(req: Request) {
       })
       .select("score totalMarks examId createdAt");
 
+    results.forEach((result) => {
+      if (!result.examId) {
+        console.warn(`Missing examId for result: ${result._id}`);
+      } else if (!result.examId.courseId) {
+        console.warn(`Missing courseId for exam: ${result.examId._id}`);
+      }
+    });
+
     const data = results.map((result) => ({
       _id: result._id,
-      course: result.examId.courseId.name, // Course name
-      examTitle: result.examId.title, // Exam title
+      course: result.examId?.courseId?.name || "N/A",
+      examTitle: result.examId?.title || "Unknown Exam",
       score: result.score,
-      totalQuestions: result.totalMarks, // Assuming this means total questions
+      totalQuestions: result.totalMarks,
       createdAt: result.createdAt,
     }));
-    console.log(data);
+
+    console.log("Processed Results Data:", data);
     return NextResponse.json({ results: data }, { status: 200 });
   } catch (error) {
     console.error("Error fetching results:", error);

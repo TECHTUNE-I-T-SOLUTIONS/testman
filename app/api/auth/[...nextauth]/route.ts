@@ -5,7 +5,6 @@ import bcrypt from "bcryptjs";
 import connectdb from "@/lib/connectdb";
 import User from "@/lib/models/User";
 
-
 const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -39,7 +38,7 @@ const authOptions: NextAuthOptions = {
           matricNumber: sanitizedMatricNumber,
           email: sanitizedEmail,
         });
-        
+
         if (!user) {
           user = await Admin.findOne({
             matricNumber: sanitizedMatricNumber,

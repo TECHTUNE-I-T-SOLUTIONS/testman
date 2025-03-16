@@ -32,7 +32,7 @@ export default function Profile() {
 
     if (response.ok) {
       alert("Password changed successfully");
-      setNewPassword(""); // Clear input after success
+      setNewPassword(""); 
     } else {
       alert("Failed to change password");
     }

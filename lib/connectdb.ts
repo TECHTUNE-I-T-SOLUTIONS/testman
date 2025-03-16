@@ -30,21 +30,22 @@ declare global {
 }
 /* eslint-enable no-var */
 export async function connectdb() {
-  const cached = globalThis.mongooseConnection;
-
-  if (cached && cached.readyState === 1) {
+  if (
+    globalThis.mongooseConnection &&
+    globalThis.mongooseConnection.readyState === 1
+  ) {
     console.log("Using existing database connection.");
-    return cached.db;
+    return globalThis.mongooseConnection.db;
   }
 
-  const MONGODB_URI = process.env.MONGO_URI;
-  if (!MONGODB_URI) {
+  const MONGO_URI = process.env.MONGO_URI;
+  if (!MONGO_URI) {
     throw new Error("MONGO_URI is not defined in environment variables.");
   }
 
   try {
     console.log("Connecting to MongoDB...");
-    const connection = await mongoose.connect(MONGODB_URI, {
+    const connection = await mongoose.connect(MONGO_URI, {
       bufferCommands: false,
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 60000,
@@ -59,7 +60,6 @@ export async function connectdb() {
     throw error;
   }
 }
-
 
 export { User };
 export default User;

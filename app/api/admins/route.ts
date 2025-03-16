@@ -10,7 +10,7 @@ export async function GET() {
     const admins = await Admin.find();
     return NextResponse.json(admins, { status: 200 });
   } catch (error) {
-    console.error("Error fetching admins:", error); 
+    console.error("Error fetching admins:", error);
     return NextResponse.json(
       { error: "Failed to fetch admins" },
       { status: 500 }
@@ -114,7 +114,7 @@ export async function DELETE(req: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error deleting admin:", error); 
+    console.error("Error deleting admin:", error);
     return NextResponse.json(
       { error: "Failed to delete admin" },
       { status: 500 }
