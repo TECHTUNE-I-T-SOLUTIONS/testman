@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Student from "@/lib/models/student";
-import connectdb from "@/lib/connectdb";
+import {connectdb} from "@/lib/connectdb";
 
 export async function POST(req: Request) {
   try {
-    await new connectdb();
+    await connectdb();
 
     const { matricNumber, email, password } = await req.json();
     console.log("Received login data:", { matricNumber, email });
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
         matricNumber: student.matricNumber,
       },
       process.env.JWT_SECRET!,
-      { expiresIn: "7d" }
+      { expiresIn: "3d" }
     );
 
     const response = NextResponse.json({ message: "Login successful" });

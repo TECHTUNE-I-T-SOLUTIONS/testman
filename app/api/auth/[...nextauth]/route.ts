@@ -2,7 +2,7 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import Admin from "@/lib/models/admin";
 import bcrypt from "bcryptjs";
-import connectdb from "@/lib/connectdb";
+import {connectdb} from "@/lib/connectdb";
 import User from "@/lib/models/User";
 
 const authOptions: NextAuthOptions = {
@@ -15,7 +15,7 @@ const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        await new connectdb();
+        await connectdb();
         console.log("Database connected.");
 
         if (

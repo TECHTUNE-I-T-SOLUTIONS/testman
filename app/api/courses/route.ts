@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import Course from "@/lib/models/course";
 import Level from "@/lib/models/Level";
 import mongoose from "mongoose";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 export async function GET() {
-  await new connectdb();
+  await connectdb();
   try {
     const courses = await Course.find().populate("levelId");
     console.log("course details", courses);
@@ -20,7 +20,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  await new connectdb();
+  await connectdb();
 
   try {
     const { name, code, facultyId, departmentId, levelId } = await req.json();
@@ -37,7 +37,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Level not found" }, { status: 404 });
     }
 
-    // Create the new course
     const newCourse = await Course.create({
       name,
       code,
@@ -56,9 +55,8 @@ export async function POST(req: Request) {
   }
 }
 
-// Update an existing course
 export async function PUT(req: Request) {
-  await new connectdb();
+  await connectdb();
 
   try {
     const { id, name, code, facultyId, departmentId, levelId } =
@@ -71,13 +69,11 @@ export async function PUT(req: Request) {
       );
     }
 
-    // Check if course exists
     const existingCourse = await Course.findById(id);
     if (!existingCourse) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
-    // If the level changes, remove the course from the old level
     if (existingCourse.levelId.toString() !== levelId) {
       await Level.findByIdAndUpdate(existingCourse.levelId, {
         $pull: { courses: id },
@@ -85,7 +81,6 @@ export async function PUT(req: Request) {
       await Level.findByIdAndUpdate(levelId, { $push: { courses: id } });
     }
 
-    // Update the course
     const updatedCourse = await Course.findByIdAndUpdate(
       id,
       { name, code, facultyId, departmentId, levelId },
@@ -102,9 +97,8 @@ export async function PUT(req: Request) {
   }
 }
 
-// Delete a course and remove its reference from Level
 export async function DELETE(req: Request) {
-  await new connectdb();
+  await connectdb();
 
   try {
     const { id } = await req.json();
@@ -113,13 +107,11 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Invalid course ID" }, { status: 400 });
     }
 
-    // Find and delete course
     const deletedCourse = await Course.findByIdAndDelete(id);
     if (!deletedCourse) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
-    // Remove course reference from Level
     await Level.findByIdAndUpdate(deletedCourse.levelId, {
       $pull: { courses: id },
     });

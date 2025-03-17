@@ -4,11 +4,11 @@ import Department from "@/lib/models/department";
 import Faculty from "@/lib/models/faculty";
 import Level from "@/lib/models/Level";
 import Course from "@/lib/models/course";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 export async function GET(request: Request) {
   try {
-    await new connectdb();
+    await connectdb();
     const { searchParams } = new URL(request.url);
     const facultyId = searchParams.get("facultyId");
 
@@ -65,7 +65,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const { name, facultyId } = await request.json();
-    await new connectdb();
+    await connectdb();
 
     if (!name || !facultyId) {
       return NextResponse.json(
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    await new connectdb();
+    await connectdb();
     const { searchParams } = new URL(request.url);
     const departmentId = searchParams.get("id");
 
@@ -145,7 +145,7 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    await new connectdb();
+    await connectdb();
     const { searchParams } = new URL(request.url);
     const departmentId = searchParams.get("id");
 

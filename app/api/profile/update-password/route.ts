@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { compare, hash } from "bcryptjs";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 import { getServerSession } from "next-auth";
 import User from "@/lib/models/User";
 
@@ -12,7 +12,7 @@ export async function PUT(req: Request) {
     }
 
     const { oldPassword, newPassword } = await req.json();
-    await new connectdb();
+    await connectdb();
 
     const user = await User.findOne({ email: session.user.email });
     if (!user) {

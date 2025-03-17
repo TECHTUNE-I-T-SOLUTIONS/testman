@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import Level from "@/lib/models/Level";
 import Department from "@/lib/models/department";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 export async function GET(req: NextRequest) {
   try {
-    await new connectdb();
+    await connectdb();
 
     const { searchParams } = new URL(req.url);
     const departmentId = searchParams.get("departmentId");
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: Request) {
-  await new connectdb();
+  await connectdb();
 
   try {
     const { name, departmentId } = await req.json();

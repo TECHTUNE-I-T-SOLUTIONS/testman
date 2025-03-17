@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import Exam from "@/lib/models/exams";
 import { ObjectId } from "mongodb";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  await new connectdb();
+  await connectdb();
 
   try {
     const resolvedParams = await params;

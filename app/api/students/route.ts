@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 const STUDENT_COLLECTION = "students";
 
 export async function POST(req: Request) {
   try {
     const student = await req.json();
-    const db = await new connectdb();
+    const db = await connectdb();
     if (!db) throw new Error("Database connection failed");
 
     const result = await db.collection(STUDENT_COLLECTION).insertOne({
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
 export async function GET() {
   try {
-    const db = await new connectdb();
+    const db = await connectdb();
     if (!db) throw new Error("Database connection failed");
 
     const students = await db
@@ -96,7 +96,7 @@ export async function GET() {
 export async function PUT(req: Request) {
   try {
     const { id, ...updateData } = await req.json();
-    const db = await new connectdb();
+    const db = await connectdb();
     if (!db) throw new Error("Database connection failed");
 
     await db
@@ -122,7 +122,7 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const { id } = await req.json();
-    const db = await new connectdb();
+    const db = await connectdb();
     if (!db) throw new Error("Database connection failed");
 
     await db

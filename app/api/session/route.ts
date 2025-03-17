@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import AcademicSession from "@/lib/models/session";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 export async function POST(req: Request) {
   try {
     const { name, startDate, endDate } = await req.json();
-    await new connectdb();
+    await connectdb();
 
     const sessionExists = await AcademicSession.findOne({ name });
     if (sessionExists) {
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 
 export async function GET() {
   try {
-    await new connectdb();
+    await connectdb();
     const sessions = await AcademicSession.find().sort({ createdAt: -1 });
     return NextResponse.json(sessions, { status: 200 });
   } catch (error) {
@@ -48,7 +48,7 @@ export async function GET() {
 export async function PUT(req: Request) {
   try {
     const { id, name, startDate, endDate, isActive } = await req.json();
-    await new connectdb();
+    await connectdb();
 
     const session = await AcademicSession.findById(id);
     if (!session) {
@@ -77,7 +77,7 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const { id } = await req.json();
-    await new connectdb();
+    await connectdb();
 
     await AcademicSession.findByIdAndDelete(id);
     return NextResponse.json(

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Exam from "@/lib/models/exams";
 import mongoose from "mongoose";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 interface Params {
   params: Promise<{
@@ -11,7 +11,7 @@ interface Params {
 
 export async function GET(req: NextRequest, { params }: Params) {
   try {
-    await new connectdb();
+    await connectdb();
     const resolvedParams = await params;
     const { id } = resolvedParams;
 
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 
 export async function PUT(req: NextRequest, { params }: Params) {
   try {
-    await new connectdb();
+    await connectdb();
     const resolvedParams = await params;
     const { id } = resolvedParams;
     const { title, questions, duration, scheduledTime, isPublished } =
@@ -74,7 +74,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 export async function DELETE(req: NextRequest, { params }: Params) {
   try {
-    await new connectdb();
+    await connectdb();
     const resolvedParams = await params;
     const { id } = resolvedParams;
 

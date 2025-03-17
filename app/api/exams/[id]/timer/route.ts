@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Exam from "@/lib/models/exams";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 interface Params {
   params: Promise<{
@@ -9,7 +9,7 @@ interface Params {
 }
 
 export async function GET(req: NextRequest, { params }: Params) {
-  await new connectdb();
+  await connectdb();
   const resolvedParams = await params;
   const { examId } = resolvedParams;
 

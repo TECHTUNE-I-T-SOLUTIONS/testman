@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Question from "@/lib/models/question";
 import Result from "@/lib/models/results";
 import { getStudentFromToken } from "@/utils/auth";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 import { Option } from "@/types/types";
 import Student from "@/lib/models/student";
 
@@ -18,7 +18,7 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  await new connectdb();
+  await connectdb();
   const resolvedParams = await params;
   const { id: examId } = resolvedParams;
   const student = await getStudentFromToken();

@@ -2,12 +2,17 @@ import { NextResponse } from "next/server";
 import Result from "@/lib/models/results";
 import Course from "@/lib/models/course";
 import Exam from "@/lib/models/exams";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 export async function GET(req: Request) {
-  await new connectdb();
+  await connectdb();
   const { searchParams } = new URL(req.url);
+
   const studentId = searchParams.get("studentId");
+  const searchQuery = searchParams.get("search") || "";
+  const page = Number(searchParams.get("page")) || 1;
+  const limit = Number(searchParams.get("limit")) || 10;
+  const skip = (page - 1) * limit;
 
   if (!studentId) {
     return NextResponse.json(
@@ -17,7 +22,16 @@ export async function GET(req: Request) {
   }
 
   try {
-    const results = await Result.find({ studentId })
+    const searchFilter = searchQuery
+      ? {
+          $or: [
+            { "examId.title": { $regex: searchQuery, $options: "i" } },
+            { "examId.courseId.name": { $regex: searchQuery, $options: "i" } },
+          ],
+        }
+      : {};
+
+    const results = await Result.find({ studentId, ...searchFilter })
       .populate({
         path: "examId",
         model: Exam,
@@ -28,15 +42,16 @@ export async function GET(req: Request) {
           select: "name",
         },
       })
-      .select("score totalMarks examId createdAt");
+      .select("score totalMarks examId createdAt")
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
-    results.forEach((result) => {
-      if (!result.examId) {
-        console.warn(`Missing examId for result: ${result._id}`);
-      } else if (!result.examId.courseId) {
-        console.warn(`Missing courseId for exam: ${result.examId._id}`);
-      }
+    const totalResults = await Result.countDocuments({
+      studentId,
+      ...searchFilter,
     });
+    const totalPages = Math.ceil(totalResults / limit);
 
     const data = results.map((result) => ({
       _id: result._id,
@@ -47,8 +62,7 @@ export async function GET(req: Request) {
       createdAt: result.createdAt,
     }));
 
-    console.log("Processed Results Data:", data);
-    return NextResponse.json({ results: data }, { status: 200 });
+    return NextResponse.json({ results: data, totalPages }, { status: 200 });
   } catch (error) {
     console.error("Error fetching results:", error);
     return NextResponse.json(

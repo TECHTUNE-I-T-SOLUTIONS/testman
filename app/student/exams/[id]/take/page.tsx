@@ -32,6 +32,8 @@ export default function AttemptExam() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -45,8 +47,22 @@ export default function AttemptExam() {
         );
         if (!response.ok) throw new Error("Failed to fetch exam");
 
-        const data = await response.json();
+        const data: Exam = await response.json();
         setExam(data);
+
+        const storedStartTime = localStorage.getItem(`exam_start_${examId}`);
+        const now = Date.now();
+
+        if (storedStartTime) {
+          const elapsedTime = Math.floor(
+            (now - parseInt(storedStartTime)) / 1000
+          );
+          const remainingTime = data.duration * 60 - elapsedTime;
+          setTimeLeft(remainingTime > 0 ? remainingTime : 0);
+        } else {
+          localStorage.setItem(`exam_start_${examId}`, now.toString());
+          setTimeLeft(data.duration * 60);
+        }
       } catch (error) {
         console.error("Error fetching exam:", error);
         setError("Failed to load exam. Please try again.");
@@ -58,14 +74,54 @@ export default function AttemptExam() {
     fetchExam();
   }, [examId, courseId]);
 
+  useEffect(() => {
+    if (timeLeft === null || timeLeft <= 0) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
+  useEffect(() => {
+    if (timeLeft === 0) {
+      toast.warn("⏳ Time is up! Submitting your exam...");
+
+      (async () => {
+        if (!exam || submitting) return;
+
+        try {
+          setSubmitting(true);
+          const res = await fetch(`/api/exams/${examId}/submit`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ answers }),
+          });
+
+          if (!res.ok) throw new Error("Failed to submit exam");
+
+          toast.success("Exam submitted successfully!");
+          router.push("/student/results");
+        } catch (error) {
+          console.error("Error submitting exam:", error);
+          toast.error("Error submitting exam. Try again.");
+        } finally {
+          setSubmitting(false);
+        }
+      })();
+    }
+  }, [timeLeft, exam, submitting, answers, router, examId]);
+
   const handleOptionChange = (questionId: string, selectedOption: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: selectedOption }));
   };
 
   const handleSubmit = async () => {
-    if (!exam) return;
+    if (!exam || submitting) return;
 
     try {
+      setSubmitting(true);
       const res = await fetch(`/api/exams/${examId}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -78,10 +134,13 @@ export default function AttemptExam() {
       router.push("/student/results");
     } catch (error) {
       console.error("Error submitting exam:", error);
-      toast.error(" Error submitting exam. Try again.");
+      toast.error("Error submitting exam. Try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  // ✅ Move these conditions into the main return statement
   if (loading)
     return (
       <p className="text-center text-purple-500 font-medium animate-pulse">
@@ -99,11 +158,20 @@ export default function AttemptExam() {
       </p>
     );
 
+  const formatTime = (seconds: number | null) => {
+    if (seconds === null) return "--:--";
+    const minutes = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    return `${minutes}:${sec < 10 ? "0" : ""}${sec}`;
+  };
+
   return (
     <div className="max-w-2xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
       <Header title={`📝 ${exam.title}`} />
 
-      <p className="text-gray-600">⏳ Duration: {exam.duration} minutes</p>
+      <p className="text-lg font-semibold text-purple-700 bg-purple-100 px-4 py-2 rounded-lg inline-block shadow-md">
+        ⏳ Time Left: <span className="font-bold">{formatTime(timeLeft)}</span>
+      </p>
 
       <div className="mt-6">
         {exam.questions.map((question, index) => (
@@ -137,9 +205,14 @@ export default function AttemptExam() {
 
       <button
         onClick={handleSubmit}
-        className="w-full mt-5 py-3 bg-purple-700 hover:bg-purple-800 text-white font-semibold rounded-md transition"
+        disabled={submitting}
+        className={`w-full mt-5 py-3 text-white font-semibold rounded-md transition ${
+          submitting
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-purple-700 hover:bg-purple-800"
+        }`}
       >
-        Submit Exam
+        {submitting ? "Submitting..." : "Submit Exam"}
       </button>
     </div>
   );

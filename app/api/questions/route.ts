@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import Question from "@/lib/models/question";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 export async function GET(req: Request) {
   try {
-    await new connectdb();
+    await connectdb();
     const url = new URL(req.url);
     const courseId = url.searchParams.get("courseId");
 
@@ -29,7 +29,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    await new connectdb();
+    await connectdb();
     const { courseId, questionText, options } = await req.json();
 
     if (!courseId || !questionText || options.length < 2) {
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    await new connectdb();
+    await connectdb();
     const { id } = await req.json();
 
     const deletedQuestion = await Question.findByIdAndDelete(id);

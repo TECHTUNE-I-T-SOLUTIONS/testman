@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import  connectdb  from "@/lib/connectdb";
+import  {connectdb}  from "@/lib/connectdb";
 import User from "@/lib/models/User";
 import { getServerSession } from "next-auth";
 
@@ -15,7 +15,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    await new connectdb();
+    await  connectdb();
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import Faculty from "@/lib/models/faculty";
 import mongoose from "mongoose";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 export async function GET() {
   try {
-    await new connectdb();
+    await connectdb();
     const faculties = await Faculty.find({});
     return NextResponse.json(faculties);
   } catch (error) {
@@ -20,7 +20,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    await new connectdb();
+    await connectdb();
     const newFaculty = new Faculty(body);
     await newFaculty.save();
     return NextResponse.json(newFaculty, { status: 201 });
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    await new connectdb();
+    await connectdb();
 
     const { id, name, session } = await request.json();
 
@@ -74,7 +74,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
     }
 
-    await new connectdb();
+    await connectdb();
     const deletedFaculty = await Faculty.findByIdAndDelete(id);
 
     if (!deletedFaculty) {

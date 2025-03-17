@@ -1,16 +1,15 @@
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 import department from "@/lib/models/department";
 import Level from "@/lib/models/Level";
 import { NextResponse } from "next/server";
-import { parse } from "url"; // Import URL parser
+import { parse } from "url";
 
 export async function DELETE(req: Request) {
   try {
-    await new connectdb();
+    await connectdb();
 
-    // Extract ID from the request URL
     const { pathname } = parse(req.url, true);
-    const id = pathname?.split("/").pop(); // Get the last segment of the URL
+    const id = pathname?.split("/").pop();
 
     if (!id) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });

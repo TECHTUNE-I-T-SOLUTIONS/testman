@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import Student from "@/lib/models/student";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 export async function POST(req: Request) {
-  await new connectdb();
+  await connectdb();
 
   try {
     const {

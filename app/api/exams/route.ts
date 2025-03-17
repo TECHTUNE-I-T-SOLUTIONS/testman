@@ -2,18 +2,16 @@ import { NextResponse } from "next/server";
 import Exam from "@/lib/models/exams";
 import Question from "@/lib/models/question";
 import Course from "@/lib/models/course";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
-// GET: Fetch exams or a specific exam based on query parameters
 export async function GET(req: Request) {
-  await new connectdb();
+  await connectdb();
   const url = new URL(req.url);
   const examId = url.searchParams.get("examId");
   const courseIdOrName = url.searchParams.get("courseId");
 
   try {
     if (examId) {
-      // Fetch a single exam by ID
       const exam = await Exam.findById(examId)
         .populate("courseId", "name")
         .populate("questions");
@@ -27,7 +25,6 @@ export async function GET(req: Request) {
     }
 
     if (courseIdOrName) {
-      // Fetch exams filtered by course ID or name
       let filter = {};
       if (courseIdOrName.length === 24) {
         filter = { courseId: courseIdOrName };
@@ -47,7 +44,6 @@ export async function GET(req: Request) {
       return NextResponse.json(exams, { status: 200 });
     }
 
-    // Fetch all exams
     const exams = await Exam.find()
       .populate("courseId", "name")
       .populate("questions");
@@ -61,9 +57,8 @@ export async function GET(req: Request) {
   }
 }
 
-// POST: Create a new exam
 export async function POST(req: Request) {
-  await new connectdb();
+  await connectdb();
   try {
     const {
       courseId,
@@ -109,9 +104,8 @@ export async function POST(req: Request) {
   }
 }
 
-// PUT: Update an existing exam
 export async function PUT(req: Request) {
-  await new connectdb();
+  await connectdb();
   try {
     const { examId, title, questions, duration, scheduledTime, isPublished } =
       await req.json();
@@ -146,9 +140,8 @@ export async function PUT(req: Request) {
   }
 }
 
-// DELETE: Delete an exam
 export async function DELETE(req: Request) {
-  await new connectdb();
+  await connectdb();
   try {
     const { examId } = await req.json();
 

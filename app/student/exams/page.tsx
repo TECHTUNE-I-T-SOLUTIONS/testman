@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 type Course = {
-  _id: string; 
+  _id: string;
   name: string;
 };
 
@@ -41,7 +41,7 @@ export default function Exams() {
       toast.warn(" Please select a course first.");
       return;
     }
-    router.push(`/student/exams/${selectedCourse}`); 
+    router.push(`/student/exams/${selectedCourse}`);
   };
 
   return (
@@ -68,8 +68,6 @@ export default function Exams() {
           </option>
           {courses.map((course) => (
             <option key={course._id} value={course._id}>
-              {" "}
-              {/* ✅ Using _id here */}
               {course.name}
             </option>
           ))}

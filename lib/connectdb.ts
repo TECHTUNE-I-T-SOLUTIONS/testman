@@ -1,65 +1,52 @@
-import mongoose, { Connection } from "mongoose";
+import mongoose from "mongoose";
 
-interface UserSchema {
-  matricNumber: string;
-  email: string;
-  password: string;
-  role: "user" | "admin" | "super-admin";
+const MONGODB_URI = process.env.MONGODB_URI as string;
+
+if (!MONGODB_URI) {
+  throw new Error("❌ MONGODB_URI is not defined in environment variables.");
 }
 
-const userSchema = new mongoose.Schema<UserSchema>(
-  {
-    matricNumber: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: {
-      type: String,
-      enum: ["user", "admin", "super-admin"],
-      default: "user",
-    },
-  },
-  { timestamps: true }
-);
-
-const User =
-  mongoose.models.User || mongoose.model<UserSchema>("User", userSchema);
-
-/* eslint-disable no-var */
-declare global {
-  var mongooseConnection: Connection | undefined;
-}
-/* eslint-enable no-var */
-export async function connectdb() {
-  if (
-    globalThis.mongooseConnection &&
-    globalThis.mongooseConnection.readyState === 1
-  ) {
-    console.log("Using existing database connection.");
-    return globalThis.mongooseConnection.db;
-  }
-
-  const MONGO_URI = process.env.MONGO_URI;
-  if (!MONGO_URI) {
-    throw new Error("MONGO_URI is not defined in environment variables.");
-  }
-
-  try {
-    console.log("Connecting to MongoDB...");
-    const connection = await mongoose.connect(MONGO_URI, {
-      bufferCommands: false,
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 60000,
-      connectTimeoutMS: 10000,
-    } as mongoose.ConnectOptions);
-
-    console.log("Successfully connected to the database.");
-    global.mongooseConnection = connection.connection;
-    return connection.connection.db;
-  } catch (error) {
-    console.error("Error connecting to the database:", error);
-    throw error;
-  }
+/* Extend globalThis to store the cached connection */
+interface MongooseGlobal {
+  mongooseConnection?: {
+    conn: mongoose.Connection | null;
+    promise: Promise<mongoose.Connection> | null;
+  };
 }
 
-export { User };
-export default User;
+const globalWithMongoose = globalThis as MongooseGlobal;
+
+if (!globalWithMongoose.mongooseConnection) {
+  globalWithMongoose.mongooseConnection = { conn: null, promise: null };
+}
+
+const cached = globalWithMongoose.mongooseConnection;
+
+export async function connectdb(): Promise<mongoose.Connection> {
+  if (cached.conn) {
+    console.log("🔄 Using existing MongoDB connection");
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    console.log("⏳ Connecting to MongoDB...");
+    cached.promise = mongoose
+      .connect(MONGODB_URI, {
+        bufferCommands: false,
+        serverSelectionTimeoutMS: 5000, // Wait max 5s before failing
+        socketTimeoutMS: 45000, // Close socket if inactive for 45s
+        connectTimeoutMS: 5000, // 5s timeout for initial connection
+      })
+      .then((mongoose) => {
+        console.log("✅ MongoDB Connected Successfully!");
+        return mongoose.connection;
+      })
+      .catch((err) => {
+        console.error("❌ MongoDB connection failed:", err);
+        process.exit(1); // Stop the server if DB connection fails
+      });
+  }
+
+  cached.conn = await cached.promise;
+  return cached.conn;
+}

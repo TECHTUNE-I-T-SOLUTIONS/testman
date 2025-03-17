@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Question from "@/lib/models/question";
 import Result from "@/lib/models/results";
 import { getStudentFromToken } from "@/utils/auth";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 interface DetailedResult {
   question: string;
@@ -12,7 +12,7 @@ interface DetailedResult {
 }
 
 export async function POST(req: Request) {
-  await new connectdb();
+  await connectdb();
 
   const student = await getStudentFromToken();
   if (!student)

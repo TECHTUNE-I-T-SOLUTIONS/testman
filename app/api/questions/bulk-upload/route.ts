@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import Question from "@/lib/models/question";
-import connectdb from "@/lib/connectdb";
+import { connectdb } from "@/lib/connectdb";
 
 export async function POST(req: Request) {
   try {
-    await new connectdb();
+    await connectdb();
     const { questions } = await req.json();
 
     if (!questions || !Array.isArray(questions) || questions.length === 0) {
