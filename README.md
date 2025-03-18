@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Registration and UI Enhancements Documentation
 
-## Getting Started
+## Overview
+This document outlines the recent improvements made to the registration process and overall UI enhancements within the project. The changes include refactoring layouts, implementing a multi-step registration form, enhancing form state management, improving validation, and adding a dashboard layout component.
 
-First, run the development server:
+## Key Updates
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 1. **ShadCN UI Initialization**
+- Integrated `shadcn-ui` for a faster and more efficient UI component library.
+- This simplifies UI development and ensures consistency across the application.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. **Layout Refactor**
+- Removed `RootLayout` and directly integrated `SignupPage` for an improved registration experience.
+- Simplified layout structure to reduce unnecessary complexity.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. **Multi-Step Registration Form Implementation**
+- Introduced a multi-step form to improve user experience and allow step-by-step input collection.
+- Form steps include:
+  - **Personal Information** (Name, Email, etc.)
+  - **Institutional Information** (Faculty, Department, Level)
+  - **Password Setup** (Password, Confirm Password)
+- Significant restructuring of form components to support multi-step navigation.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. **Signup Component Enhancements**
+- Removed unnecessary `Card` wrappers to improve layout structure.
+- Added a registration button and footer link for better navigation.
+- Improved form state management across all steps.
 
-## Learn More
+### 5. **Form State Management and Validation Improvements**
+- **Personal Information Form:**
+  - Improved state management for input fields.
+  - Enhanced input handling for better user experience.
+- **Institutional Information Form:**
+  - Dynamically fetches faculty, department, and level selections from an API.
+  - Ensures users select valid institutional details.
+- **Password Information Form:**
+  - Implemented validation and error handling.
+  - Added password trimming to prevent unintended spaces.
+  - Improved data handling for registration submission.
 
-To learn more about Next.js, take a look at the following resources:
+### 6. **Dashboard Enhancements**
+- Added `StudentLayout` component.
+- Implemented sidebar toggle functionality for better navigation within the dashboard.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Summary of Changes (Commits Overview)
+| Commit | Change |
+|--------|--------|
+| `b0397a7` | Initialized `shadcn-ui` for fast UI development. |
+| `f6a75c6` | Refactored layout structure, removed `RootLayout`. |
+| `fc67242` | Implemented multi-step registration form. |
+| `95314d6` | Refactored signup components, removed unnecessary `Card` wrappers. |
+| `88572bd` | Added registration button and footer link to signup page. |
+| `8694bd0` | Enhanced `PersonalInfoForm` state management. |
+| `fe9ba89` | Added validation and error handling for passwords. |
+| `2781460` | Enhanced `InstitutionalInfoForm` with API-based selections. |
+| `ced7d3f` | Improved state management and error handling across signup forms. |
+| `2ec7062` | Refactored password form to trim whitespace and update data handling. |
+| `1e6c684` | Added `StudentLayout` component with sidebar toggle functionality. |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This documentation serves as a guide for understanding the recent updates and improvements made to the registration process and UI layout.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
