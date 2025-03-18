@@ -1,19 +1,21 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import useFormStore from "@/lib/store/useStudentFormStore";
+import { useEffect } from "react";
 
 const PersonalInfoForm = () => {
-  const { setStep } = useFormStore();
+  const { formData, setFormData, setStep } = useFormStore();
+  useEffect(() => {
+    console.log(formData);
+  }, [formData]);
   return (
     <>
       <CardHeader>
@@ -21,13 +23,16 @@ const PersonalInfoForm = () => {
         <CardDescription>Enter your personal information</CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="space-y-4">
+        <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="fullname">Fullname</Label>
             <Input
               id="fullname"
               name="fullname"
               type="text"
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               placeholder="Enter your fullname"
               required
               autoComplete="fullname"
@@ -39,6 +44,9 @@ const PersonalInfoForm = () => {
               id="email"
               name="email"
               type="email"
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
               placeholder="Enter your email address"
               required
               autoComplete="email"
@@ -50,13 +58,16 @@ const PersonalInfoForm = () => {
               id="matricNumber"
               name="matricNumber"
               type="text"
+              onChange={(e) =>
+                setFormData({ ...formData, matricNumber: e.target.value })
+              }
               placeholder="Enter your email address"
               required
             />
           </div>
-        </form>
+        </div>
         <div className="flex justify-end mt-7">
-        <Button onClick={() => setStep(2)}>Continue</Button>
+          <Button onClick={() => setStep(2)}>Continue</Button>
         </div>
       </CardContent>
     </>
