@@ -1,7 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
   CardContent,
   CardDescription,
   CardFooter,
@@ -18,7 +17,7 @@ const PasswordInfoForm = () => {
   const { setStep } = useFormStore();
   const [showPassword, setShowPassword] = useState(false);
   return (
-    <Card className="w-full max-w-md">
+    <>
       <CardHeader>
         <CardTitle>Password Information</CardTitle>
         <CardDescription>Create pasword for your account.</CardDescription>
@@ -64,11 +63,11 @@ const PasswordInfoForm = () => {
             />
           </div>
         </form>
-      </CardContent>
-      <CardFooter className="flex justify-start">
+        <div className="flex justify-start mt-7">
         <Button onClick={() => setStep(2)}>Back</Button>
-      </CardFooter>
-    </Card>
+        </div>
+      </CardContent>
+    </>
   );
 };
 

@@ -13,16 +13,16 @@ import { Label } from "@/components/ui/label";
 import useFormStore from "@/lib/store/useStudentFormStore";
 
 const PersonalInfoForm = () => {
-  const {setStep} = useFormStore();
+  const { setStep } = useFormStore();
   return (
-    <Card className="w-full max-w-md">
+    <>
       <CardHeader>
         <CardTitle>Personal Information</CardTitle>
         <CardDescription>Enter your personal information</CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4">
-        <div className="space-y-2">
+          <div className="space-y-2">
             <Label htmlFor="fullname">Fullname</Label>
             <Input
               id="fullname"
@@ -55,11 +55,11 @@ const PersonalInfoForm = () => {
             />
           </div>
         </form>
-      </CardContent>
-      <CardFooter className="flex justify-end">
+        <div className="flex justify-end mt-7">
         <Button onClick={() => setStep(2)}>Continue</Button>
-      </CardFooter>
-    </Card>
+        </div>
+      </CardContent>
+    </>
   );
 };
 

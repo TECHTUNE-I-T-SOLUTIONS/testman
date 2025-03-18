@@ -21,7 +21,7 @@ const InstitutionalInfoForm = () => {
   const { setStep } = useFormStore();
 
   return (
-    <Card className="w-full max-w-md">
+    <>
       <CardHeader>
         <CardTitle>Institutional Details</CardTitle>
         <CardDescription>Enter your Institutional Information</CardDescription>
@@ -85,12 +85,12 @@ const InstitutionalInfoForm = () => {
             </Select>
           </div>
         </form>
-      </CardContent>
-      <CardFooter className="flex justify-between">
+        <div className="flex justify-between mt-7">
         <Button onClick={() => setStep(1)}>Back</Button>
         <Button onClick={() => setStep(3)}>Continue</Button>
-      </CardFooter>
-    </Card>
+        </div>
+      </CardContent>
+    </>
   );
 };
 
