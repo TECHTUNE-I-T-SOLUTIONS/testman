@@ -15,7 +15,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useFormStore from "@/lib/store/useStudentFormStore";
-import { set } from "mongoose";
 import { useEffect, useState } from "react";
 
 const InstitutionalInfoForm = () => {
@@ -32,7 +31,7 @@ const InstitutionalInfoForm = () => {
     { _id: string; name: string }[]
   >([]);
   const [levels, setLevels] = useState<{ _id: string; name: string }[]>([]);
-
+  console.log(errors);
   useEffect(() => {
     fetch("/api/faculties")
       .then((res) => res.json())
@@ -113,9 +112,11 @@ const InstitutionalInfoForm = () => {
           {/* Level Selection */}
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="level">Level</Label>
-            <Select  onValueChange={(value) => {
+            <Select
+              onValueChange={(value) => {
                 setFormData({ ...formData, level: value });
-              }}>
+              }}
+            >
               <SelectTrigger id="level">
                 <SelectValue placeholder={"Select Level"} />
               </SelectTrigger>

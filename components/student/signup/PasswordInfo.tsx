@@ -15,7 +15,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 const PasswordInfoForm = () => {
-  const { formData, setFormData, resetForm, setStep } = useFormStore();
+  const { formData, resetForm, setStep } = useFormStore();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState({
     password: "",
@@ -92,6 +92,7 @@ const PasswordInfoForm = () => {
         toast.error(data.message || "Registration failed. Try again.");
       }
     } catch (error) {
+      console.log(error);
       toast.error("An error occurred. Please try again.");
     }
   };
