@@ -9,13 +9,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import useFormStore from "@/lib/store/useStudentFormStore";
-import { useEffect } from "react";
 
 const PersonalInfoForm = () => {
   const { formData, setFormData, setStep } = useFormStore();
-  useEffect(() => {
-    console.log(formData);
-  }, [formData]);
   return (
     <>
       <CardHeader>

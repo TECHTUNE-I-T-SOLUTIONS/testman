@@ -15,10 +15,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useFormStore from "@/lib/store/useStudentFormStore";
+import { set } from "mongoose";
 import { useEffect, useState } from "react";
 
 const InstitutionalInfoForm = () => {
-  const { setStep } = useFormStore();
+  const { formData, setFormData, setStep } = useFormStore();
 
   const [faculties, setFaculties] = useState<{ _id: string; name: string }[]>(
     []
@@ -42,6 +43,7 @@ const InstitutionalInfoForm = () => {
     if (!selectedFaculty) return;
     setDepartments([]);
     setLevels([]);
+    setFormData({ ...formData, faculty: selectedFaculty });
     fetch(`/api/departments?facultyId=${selectedFaculty}`)
       .then((res) => res.json())
       .then((data) => setDepartments(Array.isArray(data) ? data : [])) // Ensure it's an array
@@ -50,10 +52,10 @@ const InstitutionalInfoForm = () => {
   useEffect(() => {
     if (!selectedDepartment) return;
     setLevels([]);
+    setFormData({ ...formData, department: selectedDepartment });
     fetch(`/api/levels?departmentId=${selectedDepartment}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("Levels API Response:", data);
         setLevels(Array.isArray(data?.levels) ? data.levels : []); // Ensure it's an array
       })
       .catch(() => setErrors("Failed to load levels."));
@@ -65,7 +67,7 @@ const InstitutionalInfoForm = () => {
         <CardDescription>Enter your Institutional Information</CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="space-y-4">
+        <div className="space-y-4">
           {/* Faculty Selection */}
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="faculty">Faculty</Label>
@@ -90,9 +92,11 @@ const InstitutionalInfoForm = () => {
           {/* Department Selection */}
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="department">Department</Label>
-            <Select  onValueChange={(value) => {
+            <Select
+              onValueChange={(value) => {
                 setSelectedDepartment(value);
-              }}>
+              }}
+            >
               <SelectTrigger id="department">
                 <SelectValue placeholder={"Select Department"} />
               </SelectTrigger>
@@ -109,7 +113,9 @@ const InstitutionalInfoForm = () => {
           {/* Level Selection */}
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="level">Level</Label>
-            <Select>
+            <Select  onValueChange={(value) => {
+                setFormData({ ...formData, level: value });
+              }}>
               <SelectTrigger id="level">
                 <SelectValue placeholder={"Select Level"} />
               </SelectTrigger>
@@ -122,7 +128,7 @@ const InstitutionalInfoForm = () => {
               </SelectContent>
             </Select>
           </div>
-        </form>
+        </div>
         <div className="flex justify-between mt-7">
           <Button onClick={() => setStep(1)}>Back</Button>
           <Button onClick={() => setStep(3)}>Continue</Button>

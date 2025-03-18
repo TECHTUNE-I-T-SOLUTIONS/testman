@@ -9,9 +9,11 @@ export default function RegisterForm() {
   const { step } = useFormStore();
   return (
     <SignupPage>
-      {step === 1 && <PersonalInfoForm />}
-      {step === 2 && <InstitutionalInfoForm />}
-      {step === 3 && <PasswordInfoForm />}
+      <form>
+        {step === 1 && <PersonalInfoForm />}
+        {step === 2 && <InstitutionalInfoForm />}
+        {step === 3 && <PasswordInfoForm />}
+      </form>
     </SignupPage>
   );
 }

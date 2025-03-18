@@ -10,10 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import useFormStore from "@/lib/store/useStudentFormStore";
 import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const PasswordInfoForm = () => {
-  const { formData, setFormData, setStep } = useFormStore();
+  const { formData, setFormData, resetForm, setStep } = useFormStore();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState({
     password: "",
@@ -23,6 +25,7 @@ const PasswordInfoForm = () => {
     password: "",
     confirm_password: "",
   });
+  const router = useRouter();
 
   const validatePassword = (password: string) => {
     if (password.length < 8) return "Must be at least 8 characters.";
@@ -56,7 +59,7 @@ const PasswordInfoForm = () => {
     setPassword((prev) => ({ ...prev, confirm_password: e.target.value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const passwordError = validatePassword(password.password);
     const confirmPasswordError =
@@ -67,8 +70,26 @@ const PasswordInfoForm = () => {
       return;
     }
 
-    setFormData({ ...formData, password: password.password });
-    console.log("Form submitted successfully:", password);
+    setFormData({ ...formData, password: password.password, confirmPassword: password.confirm_password });
+    
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        toast.success("Registration Successful!");
+        router.push("/login");
+        resetForm();
+      } else {
+        const data = await response.json();
+        toast.error(data.message || " Registration failed. Try again.");
+      }
+    } catch (error) {
+      toast.error(" An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -78,7 +99,7 @@ const PasswordInfoForm = () => {
         <CardDescription>Create a strong password for your account.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <div className="space-y-4" >
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <div className="relative">
@@ -127,9 +148,9 @@ const PasswordInfoForm = () => {
           </div>
           <div className="flex justify-between mt-7">
             <Button type="button" onClick={() => setStep(2)}>Back</Button>
-            <Button type="submit">Register</Button>
+            <Button type="button" onClick={handleSubmit}>Register</Button>
           </div>
-        </form>
+        </div>
       </CardContent>
     </>
   );
