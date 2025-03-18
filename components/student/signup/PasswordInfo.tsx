@@ -63,8 +63,9 @@ const PasswordInfoForm = () => {
             />
           </div>
         </form>
-        <div className="flex justify-start mt-7">
+        <div className="flex justify-between mt-7">
         <Button onClick={() => setStep(2)}>Back</Button>
+        <Button>Register</Button>
         </div>
       </CardContent>
     </>
