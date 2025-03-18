@@ -1,9 +1,8 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -16,10 +15,49 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useFormStore from "@/lib/store/useStudentFormStore";
+import { useEffect, useState } from "react";
 
 const InstitutionalInfoForm = () => {
   const { setStep } = useFormStore();
 
+  const [faculties, setFaculties] = useState<{ _id: string; name: string }[]>(
+    []
+  );
+
+  const [errors, setErrors] = useState("");
+  const [selectedFaculty, setSelectedFaculty] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [departments, setDepartments] = useState<
+    { _id: string; name: string }[]
+  >([]);
+  const [levels, setLevels] = useState<{ _id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/faculties")
+      .then((res) => res.json())
+      .then((data) => setFaculties(Array.isArray(data) ? data : []))
+      .catch(() => setErrors("Failed to load faculties."));
+  }, []);
+  useEffect(() => {
+    if (!selectedFaculty) return;
+    setDepartments([]);
+    setLevels([]);
+    fetch(`/api/departments?facultyId=${selectedFaculty}`)
+      .then((res) => res.json())
+      .then((data) => setDepartments(Array.isArray(data) ? data : [])) // Ensure it's an array
+      .catch(() => setErrors("Failed to load departments."));
+  }, [selectedFaculty]);
+  useEffect(() => {
+    if (!selectedDepartment) return;
+    setLevels([]);
+    fetch(`/api/levels?departmentId=${selectedDepartment}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Levels API Response:", data);
+        setLevels(Array.isArray(data?.levels) ? data.levels : []); // Ensure it's an array
+      })
+      .catch(() => setErrors("Failed to load levels."));
+  }, [selectedDepartment]);
   return (
     <>
       <CardHeader>
@@ -31,18 +69,20 @@ const InstitutionalInfoForm = () => {
           {/* Faculty Selection */}
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="faculty">Faculty</Label>
-            <Select>
+            <Select
+              onValueChange={(value) => {
+                setSelectedFaculty(value);
+              }}
+            >
               <SelectTrigger id="faculty">
                 <SelectValue placeholder={"Select Faculty"} />
               </SelectTrigger>
               <SelectContent position="popper">
-                <SelectItem value="Communication and Information Science">
-                  Communication and Information Science
-                </SelectItem>
-                <SelectItem value="Social Science">Social Science</SelectItem>
-                <SelectItem value="Physical Science">
-                  Physical Science
-                </SelectItem>
+                {faculties.map((faculty) => (
+                  <SelectItem key={faculty._id} value={faculty._id}>
+                    {faculty.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -50,20 +90,18 @@ const InstitutionalInfoForm = () => {
           {/* Department Selection */}
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="department">Department</Label>
-            <Select>
+            <Select  onValueChange={(value) => {
+                setSelectedDepartment(value);
+              }}>
               <SelectTrigger id="department">
                 <SelectValue placeholder={"Select Department"} />
               </SelectTrigger>
               <SelectContent position="popper">
-                <SelectItem value="Library and Information Science">
-                  Library and Information Science
-                </SelectItem>
-                <SelectItem value="Mass Communication">
-                  Mass Communication
-                </SelectItem>
-                <SelectItem value="Computer Science">
-                  Computer Science
-                </SelectItem>
+                {departments.map((department) => (
+                  <SelectItem key={department._id} value={department._id}>
+                    {department.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -76,18 +114,18 @@ const InstitutionalInfoForm = () => {
                 <SelectValue placeholder={"Select Level"} />
               </SelectTrigger>
               <SelectContent position="popper">
-                <SelectItem value="100">100</SelectItem>
-                <SelectItem value="200">200</SelectItem>
-                <SelectItem value="300">300</SelectItem>
-                <SelectItem value="400">400</SelectItem>
-                <SelectItem value="500">500</SelectItem>
+                {levels.map((level) => (
+                  <SelectItem key={level._id} value={level._id}>
+                    {level.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </form>
         <div className="flex justify-between mt-7">
-        <Button onClick={() => setStep(1)}>Back</Button>
-        <Button onClick={() => setStep(3)}>Continue</Button>
+          <Button onClick={() => setStep(1)}>Back</Button>
+          <Button onClick={() => setStep(3)}>Continue</Button>
         </div>
       </CardContent>
     </>
