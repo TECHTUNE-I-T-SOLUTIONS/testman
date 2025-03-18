@@ -44,7 +44,7 @@ const PasswordInfoForm = () => {
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword((prev) => ({ ...prev, password: e.target.value }));
+    setPassword((prev) => ({ ...prev, password: e.target.value.trim() }));
   };
 
   const handleConfirmPasswordBlur = () => {
@@ -56,7 +56,7 @@ const PasswordInfoForm = () => {
   };
 
   const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword((prev) => ({ ...prev, confirm_password: e.target.value }));
+    setPassword((prev) => ({ ...prev, confirm_password: e.target.value.trim() }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,34 +64,37 @@ const PasswordInfoForm = () => {
     const passwordError = validatePassword(password.password);
     const confirmPasswordError =
       password.confirm_password !== password.password ? "Passwords do not match." : "";
-
+  
     if (passwordError || confirmPasswordError) {
       setErrors({ password: passwordError, confirm_password: confirmPasswordError });
       return;
     }
-
-    setFormData({ ...formData, password: password.password, confirmPassword: password.confirm_password });
-    
+  
+    // Create a local copy of the updated formData
+    const updatedFormData = {
+      ...formData,
+      password: password.password,
+      confirmPassword: password.confirm_password,
+    };
+  
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(updatedFormData), // Use the updated formData
       });
-
       if (response.ok) {
         toast.success("Registration Successful!");
         router.push("/login");
         resetForm();
       } else {
         const data = await response.json();
-        toast.error(data.message || " Registration failed. Try again.");
+        toast.error(data.message || "Registration failed. Try again.");
       }
     } catch (error) {
-      toast.error(" An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
     }
   };
-
   return (
     <>
       <CardHeader>
