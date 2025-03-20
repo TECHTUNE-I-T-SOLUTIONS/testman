@@ -58,6 +58,51 @@ This document outlines the recent improvements made to the registration process 
 | `1e6c684` | Added `StudentLayout` component with sidebar toggle functionality. |
 
 
+---
+
+
+Overview
+
+This update enhances the login page with improved UI components and a better user experience, while also fixing placeholder text issues in the PersonalInfoForm.
+
+Features & Fixes
+
+1. Refactored Login Page UI
+
+Updated the login page with modern UI components for a cleaner and more intuitive user experience.
+
+Improved layout and styling for better responsiveness and accessibility.
+
+2. Enhanced Password Visibility Toggle
+
+Users can now toggle password visibility while entering their credentials.
+
+Uses a more intuitive eye icon for better usability.
+
+Ensures secure handling of password input.
+
+3. Fixed Placeholder Text in PersonalInfoForm
+
+Corrected placeholder text inconsistencies for better clarity.
+
+Ensured placeholders provide meaningful guidance to users filling out personal information.
+
+How to Test
+
+Navigate to the login page and check the updated UI.
+
+Enter a password and test the visibility toggle.
+
+Open the PersonalInfoForm and verify the placeholder text correctness.
+
+Next Steps
+
+Further refine UI/UX based on user feedback.
+
+Implement additional security enhancements for authentication.
+
+Improve form validation for better user input handling.
+
 
 This documentation serves as a guide for understanding the recent updates and improvements made to the registration process and UI layout.
 

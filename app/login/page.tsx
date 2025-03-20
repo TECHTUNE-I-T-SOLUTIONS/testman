@@ -3,8 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -12,6 +17,7 @@ export default function Login() {
     email: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -50,71 +56,87 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-100 to-purple-300 p-6">
-      <ToastContainer />
-      <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8 border border-purple-400">
-        <h2 className="text-3xl font-bold text-purple-700 text-center mb-6">
-          🔐 Student Login
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex flex-col space-y-2">
-            <label className="text-purple-700 font-medium">Matric Number</label>
-            <input
-              type="text"
+    <main className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-background to-muted p-4">
+      <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Login</CardTitle>
+        <CardDescription>Enter your login credentials to save your CGPA</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="matricNumber">Matric Number</Label>
+            <Input
+              id="matricNumber"
               name="matricNumber"
-              placeholder="Enter Matric Number"
-              onChange={handleChange}
+              type="text"
+              placeholder="Enter your Matric Number"
               required
-              className="w-full px-4 text-gray-900 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
+              onChange={handleChange}
+              autoComplete="matricNumber"
             />
           </div>
-
-          <div className="flex flex-col space-y-2">
-            <label className="text-purple-700 font-medium">Email</label>
-            <input
-              type="email"
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
               name="email"
-              placeholder="Enter Email"
-              onChange={handleChange}
+              type="email"
+              placeholder="Enter your email address"
               required
-              className="w-full px-4 text-gray-900 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
+              onChange={handleChange}
+              autoComplete="email"
             />
           </div>
-
-          <div className="flex flex-col space-y-2">
-            <label className="text-purple-700 font-medium">Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter Password"
-              onChange={handleChange}
-              required
-              className="w-full px-4 text-gray-900 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-purple-700 text-white font-semibold py-3 rounded-md hover:bg-purple-800 transition duration-300"
-            disabled={loading}
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-
-          <div className="text-center mt-4">
-            <p className="text-black text-lg">
-              Don’t have an account?{" "}
-              <Link
-                href="/"
-                className="text-purple-700 font-semibold hover:underline"
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <div className="relative">
+              <Input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="********"
+                required
+                onChange={handleChange}
+                autoComplete="new-password"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 focus:outline-none"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                Sign Up
-              </Link>
-            </p>
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            </div>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+        <Button
+          type="submit"
+          className="w-full mt-4"
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? "Loading..." : "Login"}
+        </Button>
+      </CardContent>
+      <CardFooter className="w-full flex justify-center">
+          <p className="text-sm text-muted-foreground text-center">
+            New here create an account?{" "}
+            <Link
+              href="/"
+              className={cn(
+                "inline !p-0 !m-0",
+                buttonVariants({ variant: "link" })
+              )}
+            >
+              Signup
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
+    </main>
   );
 }

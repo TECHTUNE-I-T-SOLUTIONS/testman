@@ -57,7 +57,7 @@ const PersonalInfoForm = () => {
               onChange={(e) =>
                 setFormData({ ...formData, matricNumber: e.target.value })
               }
-              placeholder="Enter your email address"
+              placeholder="Enter your matric number"
               required
             />
           </div>
