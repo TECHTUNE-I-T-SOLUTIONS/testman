@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { usePathname } from "next/navigation";
-import Sidebar from "@/components/student/Sidebar";
+import AppSidebar from "@/components/student/AppSidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function StudentLayout({
   children,
@@ -10,20 +10,15 @@ export default function StudentLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isDashboard = pathname === "/student";
-
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+  const showSidebar = pathname.startsWith("/student");
 
   return (
-    <div className="flex">
-      {isDashboard && <Sidebar onToggle={setIsSidebarOpen} />}
-      <main
-        className={`transition-all duration-300 ${
-          isDashboard && isSidebarOpen ? "ml-64" : "ml-0"
-        } w-full min-h-screen bg-gray-50 p-6`}
-      >
+    <SidebarProvider>
+      {showSidebar && <AppSidebar />}
+      <main className="w-full">
         {children}
       </main>
-    </div>
+    </SidebarProvider>
   );
 }
