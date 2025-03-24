@@ -118,9 +118,7 @@ const AppSidebar = () => {
           </>
         )}
       </SidebarHeader>
-      
       <SidebarSeparator />
-      
       <SidebarContent className="px-2 py-4">
         <SidebarMenu>
           {navItems.map((item) => {
