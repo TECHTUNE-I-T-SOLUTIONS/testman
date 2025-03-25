@@ -153,7 +153,7 @@ const AdminSidebar = () => {
   const handleLogOut = async () => {
     setIsLoggingOut(true)
     try {
-      await signOut({ callbackUrl: "/dashboard/login" })
+      await signOut({ callbackUrl: "/auth/admin/login" })
     } catch (error) {
       console.error("Error during logout:", error)
     } finally {

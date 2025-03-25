@@ -57,7 +57,7 @@ const AppSidebar = () => {
     const fetchStudent = async () => {
       const studentData = await getStudentFromToken(); 
       if (!studentData) {
-        router.push("/login");
+        router.push("/auth/login");
       } else {
         setStudent(studentData);
       }
@@ -81,7 +81,7 @@ const AppSidebar = () => {
     setIsLoggingOut(true);
     try {
       await logoutStudent();
-      router.push("/login");
+      router.push("/auth/login");
     } catch (error) {
       console.error("Error during logout:", error);
     } finally {
