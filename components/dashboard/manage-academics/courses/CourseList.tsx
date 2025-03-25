@@ -14,16 +14,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import type { Level } from "@/types/types"
+import type { Course, Level } from "@/types/types"
 
-type Course = {
-  _id: string
-  name: string
-  code: string
-  facultyId?: string
-  departmentId?: { _id: string; name: string } | string
-  levelId?: { _id: string; name: string } | string
-}
 
 type Department = {
   _id: string
@@ -105,7 +97,7 @@ export default function CourseList({
 
                     {level.courses && level.courses.length > 0 ? (
                       <div className="space-y-2 pl-6">
-                        {level.courses.map((course) => (
+                        {level.courses.map((course: Course) => (
                           <div
                             key={course._id}
                             className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-md hover:bg-muted/50 transition-colors"
@@ -142,7 +134,7 @@ export default function CourseList({
                               <Button
                                 variant="destructive"
                                 size="sm"
-                                onClick={() => onDelete(course._id)}
+                                onClick={() => onDelete(course._id!)}
                                 disabled={deletingId === course._id}
                                 className="h-9"
                               >

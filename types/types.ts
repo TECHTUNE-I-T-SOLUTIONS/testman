@@ -38,12 +38,12 @@ export type LevelInput = {
 };
 
 export type Course = {
-  _id: string;
+  _id?: string;
   name: string;
   code: string;
-  facultyId: string;
-  departmentId: { _id: string; name: string };
-  levelId: { _id: string; name: string }; 
+  facultyId?: string
+  departmentId?: { _id: string; name: string } | string
+  levelId?: { _id: string; name: string } | string
 };
 
 export interface Option {

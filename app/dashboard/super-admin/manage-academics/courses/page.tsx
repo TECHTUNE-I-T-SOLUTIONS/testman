@@ -11,16 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import CourseForm from "@/components/dashboard/manage-academics/courses/CourseForm";
 import CourseList from "@/components/dashboard/manage-academics/courses/CourseList";
-import { Level } from "@/types/types";
+import { Course, Level } from "@/types/types";
 
-type Course = {
-  _id: string;
-  name: string;
-  code: string;
-  facultyId: string;
-  departmentId: { _id: string; name: string } | string;
-  levelId: { _id: string; name: string } | string;
-};
 
 type Department = {
   _id: string;
@@ -103,7 +95,7 @@ export default function CoursesPage() {
     }
   };
 
-  const handleAddOrUpdate = async (courseData: Course | Omit<Course, "_id">) => {
+  const handleAddOrUpdate = async (courseData: Course) => {
     setSaving(true);
     try {
       const formattedData = {

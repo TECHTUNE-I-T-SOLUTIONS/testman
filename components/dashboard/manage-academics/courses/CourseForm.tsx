@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Course } from "@/types/types";
 
 // Define the schema for form validation
 const courseSchema = z.object({
@@ -22,14 +23,6 @@ const courseSchema = z.object({
 
 type CourseFormValues = z.infer<typeof courseSchema>;
 
-type Course = {
-  _id?: string;
-  name: string;
-  code: string;
-  facultyId: string;
-  departmentId: { _id: string; name: string } | string;
-  levelId: { _id: string; name: string } | string;
-};
 
 interface Faculty {
   _id: string;
@@ -135,14 +128,14 @@ export default function CourseForm({
         setFilteredDepartments(depts);
         
         // Set department
-        form.setValue("departmentId", departmentId);
+        form.setValue("departmentId", departmentId!);
         
         // Filter levels for this department
         const lvls = levels.filter(l => l.departmentId === departmentId);
         setFilteredLevels(lvls);
         
         // Set level
-        form.setValue("levelId", levelId);
+        form.setValue("levelId", levelId!);
       }
       
       // Set other fields
