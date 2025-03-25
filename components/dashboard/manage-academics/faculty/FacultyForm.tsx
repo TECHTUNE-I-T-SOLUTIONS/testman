@@ -1,137 +1,147 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { Loader2 } from "lucide-react"
 
-type FacultyInput = { name: string; session: string };
-type Faculty = { id: string; name: string; session: string };
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+
+// Define the schema for form validation
+const facultySchema = z.object({
+  name: z.string().min(2, { message: "Faculty name must be at least 2 characters" }),
+  session: z.string().min(1, { message: "Please select a session" }),
+})
+
+type FacultyFormValues = z.infer<typeof facultySchema>
 
 interface FacultyFormProps {
-  onSave: (data: FacultyInput) => void;
-  onCancel?: () => void;
-  editingFaculty: Faculty | null;
+  onSave: (faculty: { name: string; session: string }) => Promise<void>
+  onCancel?: () => void
+  editingFaculty: { id: string; name: string; session: string } | null
+  saving?: boolean
 }
 
-export default function FacultyForm({
-  onSave,
-  onCancel,
-  editingFaculty,
-}: FacultyFormProps) {
-  const [name, setName] = useState(editingFaculty?.name || "");
-  const [session, setSession] = useState(editingFaculty?.session || "");
-  const [sessions, setSessions] = useState<{ _id: string; name: string }[]>([]);
+export default function FacultyForm({ onSave, onCancel, editingFaculty, saving = false }: FacultyFormProps) {
+  const [sessions, setSessions] = useState<{ _id: string; name: string }[]>([])
+  const [loadingSessions, setLoadingSessions] = useState(false)
 
+  // Initialize the form with react-hook-form
+  const form = useForm<FacultyFormValues>({
+    resolver: zodResolver(facultySchema),
+    defaultValues: {
+      name: editingFaculty?.name || "",
+      session: editingFaculty?.session || "",
+    },
+  })
+
+  // Update form values when editingFaculty changes
   useEffect(() => {
-    async function fetchSessions() {
+    if (editingFaculty) {
+      form.reset({
+        name: editingFaculty.name,
+        session: editingFaculty.session,
+      })
+    } else {
+      form.reset({
+        name: "",
+        session: "",
+      })
+    }
+  }, [editingFaculty, form])
+
+  // Fetch sessions for the dropdown
+  useEffect(() => {
+    const fetchSessions = async () => {
+      setLoadingSessions(true)
       try {
-        const res = await fetch("/api/session");
-        const data = await res.json();
-        console.log("Fetched sessions:", data);
-        if (Array.isArray(data)) {
-          setSessions(data);
-        } else {
-          console.error("Unexpected API response format:", data);
+        const response = await fetch("/api/session")
+        if (!response.ok) {
+          throw new Error("Failed to fetch sessions")
         }
+        const data = await response.json()
+        setSessions(data)
       } catch (error) {
-        console.error("Fetch error:", error);
+        console.error("Error fetching sessions:", error)
+      } finally {
+        setLoadingSessions(false)
       }
     }
 
-    fetchSessions();
-  }, []);
+    fetchSessions()
+  }, [])
 
-  useEffect(() => {
-    if (editingFaculty) {
-      console.log("Editing Faculty Prop:", editingFaculty); // Debugging
-      setName(editingFaculty.name);
-      setSession(editingFaculty.session);
-    } else {
-      setName("");
-      setSession("");
-    }
-  }, [editingFaculty]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave({ name, session });
-
-    // Reset form fields only if not in editing mode
-    if (!editingFaculty) {
-      setName("");
-      setSession("");
-    }
-  };
+  const onSubmit = async (data: FacultyFormValues) => {
+    await onSave(data)
+  }
 
   return (
-    <div className="bg-white shadow-lg rounded-xl p-6">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-        {editingFaculty ? "Edit Faculty" : "Add New Faculty"}
-      </h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Faculty Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full rounded-lg border text-gray-900 border-gray-300 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            required
-          />
-        </div>
-
-        {/* Dropdown for Academic Session */}
-        <div>
-          <label
-            htmlFor="session"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Academic Session
-          </label>
-          <select
-            id="session"
-            value={session}
-            onChange={(e) => setSession(e.target.value)}
-            className="mt-1 w-full rounded-lg border text-gray-900 border-gray-300 p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            required
-          >
-            <option value="" disabled>
-              Select a session
-            </option>
-            {sessions.length > 0 ? (
-              sessions.map((s) => (
-                <option key={s._id} value={s.name}>
-                  {s.name}
-                </option>
-              ))
-            ) : (
-              <option disabled>Loading sessions...</option>
-            )}
-          </select>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-white font-semibold hover:bg-indigo-700 transition-all"
-          >
-            {editingFaculty ? "Update Faculty" : "Add Faculty"}
-          </button>
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="rounded-lg bg-gray-300 px-4 py-2 text-gray-800 font-semibold hover:bg-gray-400 transition-all"
-            >
-              Cancel
-            </button>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Faculty Name</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., Faculty of Science" {...field} disabled={saving} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
+        />
+
+        <FormField
+          control={form.control}
+          name="session"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Academic Session</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={saving || loadingSessions}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={loadingSessions ? "Loading sessions..." : "Select a session"} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {sessions.map((session) => (
+                    <SelectItem key={session._id} value={session._id}>
+                      {session.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end space-x-2">
+          {onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel} disabled={saving}>
+              Cancel
+            </Button>
+          )}
+          <Button type="submit" disabled={saving}>
+            {saving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {editingFaculty ? "Updating..." : "Creating..."}
+              </>
+            ) : editingFaculty ? (
+              "Update Faculty"
+            ) : (
+              "Create Faculty"
+            )}
+          </Button>
         </div>
       </form>
-    </div>
-  );
+    </Form>
+  )
 }
+

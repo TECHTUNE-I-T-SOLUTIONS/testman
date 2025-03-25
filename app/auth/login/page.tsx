@@ -126,7 +126,7 @@ export default function Login() {
           <p className="text-sm text-muted-foreground text-center">
             New here create an account?{" "}
             <Link
-              href="/"
+              href="/auth/signup"
               className={cn(
                 "inline !p-0 !m-0",
                 buttonVariants({ variant: "link" })

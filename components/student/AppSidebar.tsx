@@ -15,9 +15,9 @@ import {
   useSidebar,
 } from "../ui/sidebar";
 import { Button } from "../ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback } from "../ui/avatar";
 import Link from "next/link";
-import { BookOpenCheck, FileIcon as FileUser, HomeIcon as House, LogOut, User, Loader2, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { BookOpenCheck, FileIcon as FileUser, HomeIcon as House, LogOut, User, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 // A custom trigger component that adapts to the sidebar state

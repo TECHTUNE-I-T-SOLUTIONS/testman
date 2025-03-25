@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import AppSidebar from "@/components/student/AppSidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export default function StudentLayout({
   children,

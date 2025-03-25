@@ -1,16 +1,36 @@
-"use client";
-import { useEffect, useState, useMemo } from "react";
+"use client"
 
-type Department = { _id: string; name: string; facultyId: string };
-type Faculty = { _id: string; name: string };
+import { Building, Pencil, Trash2, Loader2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
+import type { Faculty } from "@/types/types"
+
+type Department = {
+  _id: string
+  name: string
+  facultyId: string
+  facultyName?: string
+}
 
 interface DepartmentListProps {
-  departments: Department[];
-  onEdit: (department: Department) => void;
-  onDelete: (id: string) => void;
-  confirmDeleteId: string | null;
-  onConfirmDelete: (id: string) => void;
-  onCancelDelete: () => void;
+  departments: Department[]
+  onEdit: (department: Department) => void
+  onDelete: (id: string) => void
+  confirmDeleteId: string | null
+  onConfirmDelete: (id: string) => Promise<void>
+  onCancelDelete: () => void
+  deletingId: string | null
+  faculties: Faculty[]
 }
 
 export default function DepartmentList({
@@ -20,154 +40,100 @@ export default function DepartmentList({
   confirmDeleteId,
   onConfirmDelete,
   onCancelDelete,
+  deletingId,
+  faculties,
 }: DepartmentListProps) {
-  const [faculties, setFaculties] = useState<Faculty[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [expandedFaculty, setExpandedFaculty] = useState<string | null>(null);
+  // Function to get faculty name by ID
+  const getFacultyName = (facultyId: string): string => {
+    const faculty = faculties.find((f) => f._id === facultyId)
+    return faculty ? faculty.name : "Unknown Faculty"
+  }
 
-  useEffect(() => {
-    async function fetchFaculties() {
-      try {
-        const res = await fetch("/api/faculties");
-        const data = await res.json();
-        console.log("Fetched Faculties:", data);
-        setFaculties(data);
-      } catch (error) {
-        console.error("Error fetching faculties:", error);
-      }
-    }
-    fetchFaculties();
-  }, []);
-
-  const facultyLookup = useMemo(
-    () =>
-      faculties.reduce(
-        (acc, faculty) => ({ ...acc, [faculty._id]: faculty.name }),
-        {} as Record<string, string>
-      ),
-    [faculties]
-  );
-
-  const filteredDepartments = useMemo(
-    () =>
-      departments.filter((dept) =>
-        dept.name.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    [departments, searchQuery]
-  );
-
-  const departmentsByFaculty = useMemo(() => {
-    const grouped: Record<string, Department[]> = {};
-    filteredDepartments.forEach((dept) => {
-      if (!grouped[dept.facultyId]) {
-        grouped[dept.facultyId] = [];
-      }
-      grouped[dept.facultyId].push(dept);
-    });
-    return grouped;
-  }, [filteredDepartments]);
+  if (departments.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <Building className="h-12 w-12 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-medium">No departments found</h3>
+        <p className="text-muted-foreground mt-1 mb-4">Get started by creating your first department</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-        Faculties & Departments
-      </h2>
-
-      <input
-        type="text"
-        placeholder="🔍 Search department..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full p-2 mb-4 border text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      />
-
-      {faculties.length === 0 ? (
-        <p className="text-gray-600">No faculties found.</p>
-      ) : (
-        <div className="space-y-4">
-          {faculties.map((faculty) => (
-            <div
-              key={faculty._id}
-              className="bg-gray-100 p-4 rounded-lg shadow"
-            >
-              <div
-                className="flex justify-between items-center cursor-pointer p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
-                onClick={() =>
-                  setExpandedFaculty((prev) =>
-                    prev === faculty._id ? null : faculty._id
-                  )
-                }
-              >
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {faculty.name}{" "}
-                  <span className="text-sm text-gray-600">
-                    ({departmentsByFaculty[faculty._id]?.length || 0}{" "}
-                    departments)
-                  </span>
-                </h3>
-                <span className="text-gray-600">
-                  {expandedFaculty === faculty._id ? "▲" : "▼"}
-                </span>
-              </div>
-
-              {expandedFaculty === faculty._id && (
-                <ul className="mt-3 space-y-3">
-                  {departmentsByFaculty[faculty._id]?.length > 0 ? (
-                    departmentsByFaculty[faculty._id].map((dept) => (
-                      <li
-                        key={dept._id}
-                        className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition"
-                      >
-                        <p className="text-gray-900">
-                          {dept.name} (
-                          {facultyLookup[dept.facultyId] || "Unknown Faculty"})
-                        </p>
-
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => onEdit(dept)}
-                            className="px-4 py-1 bg-purple-500 text-white rounded-lg"
-                          >
-                            ✏️ Edit
-                          </button>
-
-                          {confirmDeleteId === dept._id ? (
-                            <div>
-                              <button
-                                onClick={() => onConfirmDelete(dept._id)}
-                                className="text-red-600 font-medium"
-                              >
-                                ✅ Confirm
-                              </button>
-                              <button
-                                onClick={onCancelDelete}
-                                className="text-gray-600 font-medium ml-2"
-                              >
-                                ❌ Cancel
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => onDelete(dept._id)}
-                              className="px-4 py-1 bg-red-500 text-white rounded-lg"
-                            >
-                              🗑️ Delete
-                            </button>
-                          )}
-                        </div>
-                      </li>
-                    ))
-                  ) : (
-                    <p className="text-gray-600 p-3">
-                      No departments available.
-                    </p>
-                  )}
-                </ul>
-              )}
+    <div className="space-y-4">
+      {departments.map((department) => (
+        <div
+          key={department._id}
+          className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+        >
+          <div className="space-y-1 mb-3 sm:mb-0">
+            <div className="flex items-center">
+              <Building className="h-4 w-4 text-primary mr-2" />
+              <h3 className="font-medium">{department.name}</h3>
             </div>
-          ))}
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">
+                Faculty: {department.facultyName || getFacultyName(department.facultyId)}
+              </Badge>
+            </div>
+          </div>
+          <div className="flex space-x-2 self-end sm:self-auto">
+            <Button variant="outline" size="sm" onClick={() => onEdit(department)} className="h-9">
+              <Pencil className="h-4 w-4 mr-1" />
+              Edit
+            </Button>
+
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => onDelete(department._id)}
+              disabled={deletingId === department._id}
+              className="h-9"
+            >
+              {deletingId === department._id ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Delete
+                </>
+              )}
+            </Button>
+          </div>
         </div>
-      )}
+      ))}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!confirmDeleteId} onOpenChange={(open) => !open && onCancelDelete()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the department. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={onCancelDelete}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => confirmDeleteId && onConfirmDelete(confirmDeleteId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingId ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
-  );
+  )
 }
+

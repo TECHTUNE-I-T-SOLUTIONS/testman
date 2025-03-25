@@ -1,162 +1,149 @@
-"use client";
+"use client"
 
-import { useState, useMemo, useEffect } from "react";
-import { Department } from "@/types/types";
+import { Layers, Pencil, Trash2, Loader2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Badge } from "@/components/ui/badge"
+
+interface Level {
+  _id: string
+  name: string
+  departmentId: string | { _id: string; name?: string }
+  departmentName?: string
+  courses: string[]
+}
+
+interface Department {
+  _id: string
+  name: string
+  facultyId: string
+}
 
 interface LevelListProps {
-  levels: Level[];
-  departments: Department[];
-  onDelete: (id: string) => void;
+  levels: Level[]
+  departments: Department[]
+  onEdit: (level: Level) => void
+  onDelete: (id: string) => void
+  confirmDeleteId: string | null
+  onConfirmDelete: (id: string) => Promise<void>
+  onCancelDelete: () => void
+  deletingId: string | null
+  getDepartmentName: (departmentId: string) => string
 }
-interface Level {
-  _id: string;
-  name: string;
-  courses?: string[];
-  departmentId: string | { _id: string };
-}
-
 
 export default function LevelList({
   levels,
-  departments,
+  onEdit,
   onDelete,
+  confirmDeleteId,
+  onConfirmDelete,
+  onCancelDelete,
+  deletingId,
+  getDepartmentName,
 }: LevelListProps) {
-  const [expandedDepartment, setExpandedDepartment] = useState<string | null>(
-    null
-  );
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-
-  useEffect(() => {
-    console.log("Fetched Levels:", levels);
-    console.log("Fetched Departments:", departments);
-  }, [levels, departments]);
-
-
-  const departmentLookup = useMemo(() => {
-    return departments.reduce(
-      (acc, department) => {
-        acc[department._id] = department.name;
-        return acc;
-      },
-      {} as Record<string, string>
-    );
-  }, [departments]);
-
-  const getDepartmentName = (departmentId: string) => {
-    return departmentLookup[departmentId] || "Unknown Department";
-  };
-
-  // Group levels by department
-  const levelsByDepartment = useMemo(() => {
-    if (!Array.isArray(levels) || !Array.isArray(departments)) {
-      return {};
-    }
-
-    const validDepartmentIds = new Set(departments.map((d) => d._id));
-    const grouped: Record<string, Level[]> = {};
-
-    levels.forEach((level) => {
-      const deptId =
-        typeof level.departmentId === "object"
-          ? level.departmentId._id
-          : level.departmentId;
-
-      if (validDepartmentIds.has(deptId)) {
-        if (!grouped[deptId]) {
-          grouped[deptId] = [];
-        }
-        grouped[deptId].push(level);
-      } else {
-        console.warn(
-          `Level ${level._id} has an invalid department ID: ${deptId}`
-        );
-      }
-    });
-
-    return grouped;
-  }, [levels, departments]);
+  if (levels.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <Layers className="h-12 w-12 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-medium">No levels found</h3>
+        <p className="text-muted-foreground mt-1 mb-4">Get started by creating your first academic level</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="mt-6 p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-        Levels by Department
-      </h2>
+    <div className="space-y-4">
+      {levels.map((level) => {
+        const departmentId = typeof level.departmentId === "object" ? level.departmentId._id : level.departmentId
 
-      {Object.keys(levelsByDepartment).length === 0 ? (
-        <p className="text-gray-500">No levels added yet.</p>
-      ) : (
-        <div className="space-y-4">
-          {Object.entries(levelsByDepartment).map(
-            ([departmentId, departmentLevels]) => (
-              <div
-                key={departmentId}
-                className="bg-gray-50 p-4 rounded-lg shadow-md"
-              >
-                <div
-                  className="flex justify-between items-center cursor-pointer p-3 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
-                  onClick={() =>
-                    setExpandedDepartment((prev) =>
-                      prev === departmentId ? null : departmentId
-                    )
-                  }
-                >
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {getDepartmentName(departmentId)}{" "}
-                    <span className="text-sm text-gray-600">
-                      ({departmentLevels.length} levels)
-                    </span>
-                  </h3>
+        const departmentName = level.departmentName || getDepartmentName(departmentId)
 
-                  <span className="text-gray-600">
-                    {expandedDepartment === departmentId ? "▲" : "▼"}
-                  </span>
-                </div>
-
-                {expandedDepartment === departmentId && (
-                  <ul className="mt-3 space-y-3">
-                    {departmentLevels.map((level) => (
-                      <li
-                        key={level._id}
-                        className="p-4 bg-white rounded-lg shadow-sm flex justify-between items-center hover:shadow-md transition"
-                      >
-                        <p className="font-bold text-gray-900">{level.name}</p>
-                        <div className="space-x-2">
-                          {confirmDeleteId === level._id ? (
-                            <div>
-                              <button
-                                onClick={() => {
-                                  onDelete(level._id);
-                                  setConfirmDeleteId(null);
-                                }}
-                                className="text-red-600 font-medium"
-                              >
-                                ✅ Confirm
-                              </button>
-                              <button
-                                onClick={() => setConfirmDeleteId(null)}
-                                className="text-gray-600 font-medium ml-2"
-                              >
-                                ❌ Cancel
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => setConfirmDeleteId(level._id)}
-                              className="px-3 py-1 bg-red-500 text-white rounded-md text-sm hover:bg-red-600 transition"
-                            >
-                              🗑️ Delete
-                            </button>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+        return (
+          <div
+            key={level._id}
+            className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+          >
+            <div className="space-y-1 mb-3 sm:mb-0">
+              <div className="flex items-center">
+                <Layers className="h-4 w-4 text-primary mr-2" />
+                <h3 className="font-medium">{level.name}</h3>
               </div>
-            )
-          )}
-        </div>
-      )}
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">
+                  Department: {departmentName}
+                </Badge>
+                <Badge variant="secondary" className="text-xs">
+                  {level.courses?.length || 0} Courses
+                </Badge>
+              </div>
+            </div>
+            <div className="flex space-x-2 self-end sm:self-auto">
+              <Button variant="outline" size="sm" onClick={() => onEdit(level)} className="h-9">
+                <Pencil className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
+
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => onDelete(level._id)}
+                disabled={deletingId === level._id}
+                className="h-9"
+              >
+                {deletingId === level._id ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )
+      })}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!confirmDeleteId} onOpenChange={(open) => !open && onCancelDelete()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the academic level. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={onCancelDelete}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => confirmDeleteId && onConfirmDelete(confirmDeleteId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingId ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
-  );
+  )
 }
+

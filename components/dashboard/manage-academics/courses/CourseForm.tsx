@@ -1,242 +1,380 @@
-import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
+"use client";
 
-type Faculty = { _id: string; name: string };
-type Department = { _id: string; name: string };
-type Level = { _id: string; name: string };
+import { useState, useEffect } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Loader2 } from 'lucide-react';
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+
+// Define the schema for form validation
+const courseSchema = z.object({
+  name: z.string().min(2, { message: "Course name must be at least 2 characters" }),
+  code: z.string().min(2, { message: "Course code must be at least 2 characters" }),
+  facultyId: z.string().min(1, { message: "Please select a faculty" }),
+  departmentId: z.string().min(1, { message: "Please select a department" }),
+  levelId: z.string().min(1, { message: "Please select a level" }),
+});
+
+type CourseFormValues = z.infer<typeof courseSchema>;
 
 type Course = {
   _id?: string;
   name: string;
   code: string;
   facultyId: string;
-  departmentId: { _id: string; name: string };
-  levelId: { _id: string; name: string };
+  departmentId: { _id: string; name: string } | string;
+  levelId: { _id: string; name: string } | string;
 };
 
-type Props = {
-  onSubmit: (data: Course | Omit<Course, "_id">) => Promise<void>;
+interface Faculty {
+  _id: string;
+  name: string;
+}
+
+interface Department {
+  _id: string;
+  name: string;
+  facultyId: string;
+}
+
+interface Level {
+  _id: string;
+  name: string;
+  departmentId: string;
+}
+
+interface CourseFormProps {
+  onSubmit: (data: Course) => Promise<void>;
   initialData?: Course;
-};
+  onCancel?: () => void;
+  saving?: boolean;
+}
 
-export default function CourseForm({ onSubmit, initialData }: Props) {
-  const [name, setName] = useState(initialData?.name || "");
-  const [code, setCode] = useState(initialData?.code || "");
-  const [selectedFacultyId, setSelectedFacultyId] = useState(
-    initialData?.facultyId || ""
-  );
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState(
-    initialData?.departmentId._id || ""
-  );
-  const [selectedLevelId, setSelectedLevelId] = useState(
-    initialData?.levelId._id || ""
-  );
-
+export default function CourseForm({ 
+  onSubmit, 
+  initialData, 
+  onCancel,
+  saving = false
+}: CourseFormProps) {
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [levels, setLevels] = useState<Level[]>([]);
+  const [filteredDepartments, setFilteredDepartments] = useState<Department[]>([]);
+  const [filteredLevels, setFilteredLevels] = useState<Level[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [loadingDepartments, setLoadingDepartments] = useState(false);
-  const [loadingLevels, setLoadingLevels] = useState(false);
-  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  // Initialize the form with react-hook-form
+  const form = useForm<CourseFormValues>({
+    resolver: zodResolver(courseSchema),
+    defaultValues: {
+      name: "",
+      code: "",
+      facultyId: "",
+      departmentId: "",
+      levelId: "",
+    },
+  });
 
+  // Fetch faculties, departments, and levels
   useEffect(() => {
-    fetch("/api/faculties")
-      .then((res) => res.json())
-      .then(setFaculties)
-      .catch(() => toast.error("Error fetching faculties."));
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch faculties
+        const facultiesRes = await fetch("/api/faculties");
+        if (!facultiesRes.ok) throw new Error("Failed to fetch faculties");
+        const facultiesData = await facultiesRes.json();
+        setFaculties(facultiesData);
+
+        // Fetch departments
+        const departmentsRes = await fetch("/api/departments");
+        if (!departmentsRes.ok) throw new Error("Failed to fetch departments");
+        const departmentsData = await departmentsRes.json();
+        setDepartments(departmentsData);
+
+        // Fetch levels
+        const levelsRes = await fetch("/api/levels");
+        if (!levelsRes.ok) throw new Error("Failed to fetch levels");
+        const levelsData = await levelsRes.json();
+        setLevels(levelsData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
+  // Update form values when initialData changes
   useEffect(() => {
-    if (selectedFacultyId) {
-      setLoadingDepartments(true);
-      fetch(`/api/departments?facultyId=${selectedFacultyId}`)
-        .then((res) => res.json())
-        .then(setDepartments)
-        .catch(() => toast.error("Error fetching departments."))
-        .finally(() => setLoadingDepartments(false));
-    } else {
-      setDepartments([]);
-      setSelectedDepartmentId("");
-      setLevels([]);
-      setSelectedLevelId("");
-    }
-  }, [selectedFacultyId]);
-
-  useEffect(() => {
-    if (selectedDepartmentId) {
-      setLoadingLevels(true);
-      fetch(`/api/levels?departmentId=${selectedDepartmentId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data.levels)) {
-            setLevels(data.levels);
-          } else {
-            setLevels([]);
-          }
-        })
-        .catch(() => toast.error("Error fetching levels."))
-        .finally(() => setLoadingLevels(false));
-    } else {
-      setLevels([]);
-      setSelectedLevelId("");
-    }
-  }, [selectedDepartmentId]);
-  
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoadingSubmit(true);
-
-    try {
-      const department = departments.find(
-        (d) => d._id === selectedDepartmentId
-      );
-      const level = levels.find((l) => l._id === selectedLevelId);
-
-      if (!department || !level) {
-        toast.error("Invalid department or level selection.");
-        return;
+    if (initialData) {
+      const departmentId = typeof initialData.departmentId === 'object' 
+        ? initialData.departmentId._id 
+        : initialData.departmentId;
+      
+      const levelId = typeof initialData.levelId === 'object' 
+        ? initialData.levelId._id 
+        : initialData.levelId;
+      
+      // Find the department to get its facultyId
+      const department = departments.find(d => d._id === departmentId);
+      
+      if (department) {
+        // Set faculty
+        form.setValue("facultyId", department.facultyId);
+        
+        // Filter departments for this faculty
+        const depts = departments.filter(d => d.facultyId === department.facultyId);
+        setFilteredDepartments(depts);
+        
+        // Set department
+        form.setValue("departmentId", departmentId);
+        
+        // Filter levels for this department
+        const lvls = levels.filter(l => l.departmentId === departmentId);
+        setFilteredLevels(lvls);
+        
+        // Set level
+        form.setValue("levelId", levelId);
       }
-
-      await onSubmit({
-        name,
-        code,
-        facultyId: selectedFacultyId,
-        departmentId: { _id: selectedDepartmentId, name: department.name },
-        levelId: { _id: selectedLevelId, name: level.name },
+      
+      // Set other fields
+      form.setValue("name", initialData.name);
+      form.setValue("code", initialData.code);
+    } else {
+      form.reset({
+        name: "",
+        code: "",
+        facultyId: "",
+        departmentId: "",
+        levelId: "",
       });
+      setFilteredDepartments([]);
+      setFilteredLevels([]);
+    }
+  }, [initialData, departments, levels, form]);
 
-      toast.success(
-        initialData
-          ? "Course updated successfully!"
-          : "Course added successfully!"
-      );
+  // Handle faculty change
+  const handleFacultyChange = (facultyId: string) => {
+    form.setValue("facultyId", facultyId);
+    form.setValue("departmentId", ""); // Reset department when faculty changes
+    form.setValue("levelId", ""); // Reset level when faculty changes
+    
+    if (facultyId) {
+      const depts = departments.filter(d => d.facultyId === facultyId);
+      setFilteredDepartments(depts);
+    } else {
+      setFilteredDepartments([]);
+    }
+    
+    setFilteredLevels([]);
+  };
 
-      setName("");
-      setCode("");
-      setSelectedFacultyId("");
-      setSelectedDepartmentId("");
-      setSelectedLevelId("");
-    } catch {
-      toast.error("Something went wrong. Please try again.");
-    } finally {
-      setLoadingSubmit(false);
+  // Handle department change
+  const handleDepartmentChange = (departmentId: string) => {
+    form.setValue("departmentId", departmentId);
+    form.setValue("levelId", ""); // Reset level when department changes
+    
+    if (departmentId) {
+      const lvls = levels.filter(l => l.departmentId === departmentId);
+      setFilteredLevels(lvls);
+    } else {
+      setFilteredLevels([]);
     }
   };
 
+  const handleFormSubmit = async (data: CourseFormValues) => {
+    const courseData: Course = {
+      ...data,
+    };
+    
+    if (initialData?._id) {
+      courseData._id = initialData._id;
+    }
+    
+    await onSubmit(courseData);
+  };
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6 bg-white p-6 shadow-md rounded-lg border border-gray-200"
-    >
-      <div>
-        <label className="block text-sm font-semibold text-gray-700">
-          Course Name
-        </label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full border border-gray-300 text-gray-900 rounded-md p-2 mt-1 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Enter course name"
-          required
-        />
-      </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Course Name</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="e.g., Introduction to Computer Science" 
+                    {...field} 
+                    disabled={saving || loading}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-      <div>
-        <label className="block text-sm font-semibold text-gray-700">
-          Course Code
-        </label>
-        <input
-          type="text"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          className="w-full border border-gray-300 text-gray-900 rounded-md p-2 mt-1 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Enter course code"
-          required
-        />
-      </div>
+          <FormField
+            control={form.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Course Code</FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="e.g., CSC101" 
+                    {...field} 
+                    disabled={saving || loading}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-      <div>
-        <label className="block text-sm font-semibold text-gray-700">
-          Faculty
-        </label>
-        <select
-          value={selectedFacultyId}
-          onChange={(e) => setSelectedFacultyId(e.target.value)}
-          className="w-full border border-gray-300 text-gray-900 rounded-md p-2 mt-1 focus:ring-blue-500 focus:border-blue-500"
-          required
-        >
-          <option value="">Select Faculty</option>
-          {faculties.map((faculty) => (
-            <option key={faculty._id} value={faculty._id}>
-              {faculty.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-semibold text-gray-700">
-          Department
-        </label>
-        <select
-          value={selectedDepartmentId}
-          onChange={(e) => setSelectedDepartmentId(e.target.value)}
-          className="w-full border border-gray-300 text-gray-900 rounded-md p-2 mt-1 focus:ring-blue-500 focus:border-blue-500"
-          required
-          disabled={!selectedFacultyId}
-        >
-          <option value="">Select Department</option>
-          {loadingDepartments ? (
-            <option>Loading...</option>
-          ) : (
-            departments.map((dept) => (
-              <option key={dept._id} value={dept._id}>
-                {dept.name}
-              </option>
-            ))
+        <FormField
+          control={form.control}
+          name="facultyId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Faculty</FormLabel>
+              <Select 
+                onValueChange={(value) => handleFacultyChange(value)}
+                value={field.value}
+                disabled={saving || loading || faculties.length === 0}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={
+                      loading 
+                        ? "Loading faculties..." 
+                        : faculties.length === 0 
+                          ? "No faculties available" 
+                          : "Select a faculty"
+                    } />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {faculties.map((faculty) => (
+                    <SelectItem key={faculty._id} value={faculty._id}>
+                      {faculty.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
           )}
-        </select>
-      </div>
+        />
 
-      <div>
-        <label className="block text-sm font-semibold text-gray-700">
-          Level
-        </label>
-        <select
-          value={selectedLevelId}
-          onChange={(e) => setSelectedLevelId(e.target.value)}
-          className="w-full border border-gray-300 text-gray-900 rounded-md p-2 mt-1 focus:ring-blue-500 focus:border-blue-500"
-          required
-          disabled={!selectedDepartmentId}
-        >
-          <option value="">Select Level</option>
-          {loadingLevels ? (
-            <option>Loading...</option>
-          ) : (
-            levels.map((level) => (
-              <option key={level._id} value={level._id}>
-                {level.name}
-              </option>
-            ))
+        <FormField
+          control={form.control}
+          name="departmentId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Department</FormLabel>
+              <Select 
+                onValueChange={(value) => handleDepartmentChange(value)}
+                value={field.value}
+                disabled={saving || loading || filteredDepartments.length === 0}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={
+                      loading 
+                        ? "Loading departments..." 
+                        : !form.getValues().facultyId 
+                          ? "Select a faculty first" 
+                          : filteredDepartments.length === 0 
+                            ? "No departments available" 
+                            : "Select a department"
+                    } />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {filteredDepartments.map((department) => (
+                    <SelectItem key={department._id} value={department._id}>
+                      {department.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
           )}
-        </select>
-      </div>
+        />
 
-      <button
-        type="submit"
-        className={`w-full bg-purple-600 text-white font-semibold px-4 py-2 rounded-md 
-          hover:bg-purple-700 transition-all ${loadingSubmit ? "opacity-50 cursor-not-allowed" : ""}`}
-        disabled={loadingSubmit}
-      >
-        {loadingSubmit
-          ? "Submitting..."
-          : initialData
-            ? "Update Course"
-            : "Add Course"}
-      </button>
-    </form>
+        <FormField
+          control={form.control}
+          name="levelId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Level</FormLabel>
+              <Select 
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={saving || loading || filteredLevels.length === 0}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={
+                      loading 
+                        ? "Loading levels..." 
+                        : !form.getValues().departmentId 
+                          ? "Select a department first" 
+                          : filteredLevels.length === 0 
+                            ? "No levels available" 
+                            : "Select a level"
+                    } />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {filteredLevels.map((level) => (
+                    <SelectItem key={level._id} value={level._id}>
+                      {level.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end space-x-2">
+          {onCancel && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onCancel}
+              disabled={saving || loading}
+            >
+              Cancel
+            </Button>
+          )}
+          <Button type="submit" disabled={saving || loading}>
+            {saving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {initialData?._id ? "Updating..." : "Creating..."}
+              </>
+            ) : (
+              initialData?._id ? "Update Course" : "Create Course"
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

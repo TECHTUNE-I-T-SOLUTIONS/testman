@@ -13,7 +13,7 @@ const SignupPage = ({ children }: { children: React.ReactNode }) => {
           <p className="text-sm text-muted-foreground text-center">
             Already have an account?{" "}
             <Link
-              href="/login"
+              href="/auth/login"
               className={cn(
                 "inline !p-0 !m-0",
                 buttonVariants({ variant: "link" })

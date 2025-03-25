@@ -1,50 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getStudentFromToken } from "@/utils/auth";
+import { Flame } from "lucide-react";
 
 export default function Dashboard() {
-  const [student, setStudent] = useState<{
-    name: string;
-    matricNumber: string;
-  } | null>(null);
-  const router = useRouter();
-
-  useEffect(() => {
-    const fetchStudent = async () => {
-      const studentData = await getStudentFromToken(); 
-      if (!studentData) {
-        router.push("/login");
-      } else {
-        setStudent(studentData);
-      }
-    };
-
-    fetchStudent();
-  }, [router]);
-
-  if (!student) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-purple-700 text-lg">
-        Loading...
-      </div>
-    );
-  }
-
-
+  const streakDays = 3;
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-100 to-purple-300 p-6">
-      <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-8 border border-purple-400">
-        <h1 className="text-3xl font-bold text-purple-700 text-center">
-          🎓 Welcome, {student.name}!
-        </h1>
-        <p className="text-gray-600 text-center mt-2">
-          Matric Number:{" "}
-          <span className="font-semibold">{student.matricNumber}</span>
-        </p>
-
-      
+    <div className="flex-1 space-y-6 p-6 md:p-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Student Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Track your progress and upcoming tests
+          </p>
+        </div>
+        <div className="flex items-center text-sm text-muted-foreground">
+          <Flame className="mr-1 h-4 w-4 text-amber-500" />
+          <span className="font-medium text-amber-500">
+            {streakDays} day streak!
+          </span>
+        </div>
       </div>
     </div>
   );

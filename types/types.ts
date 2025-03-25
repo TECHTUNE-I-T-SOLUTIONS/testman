@@ -16,6 +16,7 @@ export type Faculty = {
   name: string;
   departments: { _id: string; name: string }[];
   session: string;
+  sessionName?: string
 };
 
 export type FacultyInput = {

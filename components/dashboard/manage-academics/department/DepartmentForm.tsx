@@ -1,108 +1,141 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { Faculty, Department, DepartmentInput } from "@/types/types";
+import { useEffect } from "react"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { Loader2 } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import type { Faculty } from "@/types/types"
+
+// Define the schema for form validation
+const departmentSchema = z.object({
+  name: z.string().min(2, { message: "Department name must be at least 2 characters" }),
+  facultyId: z.string().min(1, { message: "Please select a faculty" }),
+})
+
+type DepartmentFormValues = z.infer<typeof departmentSchema>
+
+type Department = {
+  _id: string
+  name: string
+  facultyId: string
+}
 
 interface DepartmentFormProps {
-  onSave: (data: DepartmentInput) => void;
-  editingDepartment: Department | null;
-  faculties: Faculty[];
+  onSave: (department: { name: string; facultyId: string }) => Promise<void>
+  onCancel?: () => void
+  editingDepartment: Department | null
+  faculties: Faculty[]
+  saving?: boolean
 }
 
 export default function DepartmentForm({
   onSave,
+  onCancel,
   editingDepartment,
   faculties,
+  saving = false,
 }: DepartmentFormProps) {
-  const [name, setName] = useState(editingDepartment?.name || "");
-  const [selectedFacultyId, setSelectedFacultyId] = useState(
-    editingDepartment?.facultyId || ""
-  );
-  const [error, setError] = useState("");
+  // Initialize the form with react-hook-form
+  const form = useForm<DepartmentFormValues>({
+    resolver: zodResolver(departmentSchema),
+    defaultValues: {
+      name: editingDepartment?.name || "",
+      facultyId: editingDepartment?.facultyId || "",
+    },
+  })
 
+  // Update form values when editingDepartment changes
   useEffect(() => {
     if (editingDepartment) {
-      setName(editingDepartment.name);
-      setSelectedFacultyId(editingDepartment.facultyId);
+      form.reset({
+        name: editingDepartment.name,
+        facultyId: editingDepartment.facultyId,
+      })
+    } else {
+      form.reset({
+        name: "",
+        facultyId: "",
+      })
     }
-  }, [editingDepartment]);
+  }, [editingDepartment, form])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!name.trim() || !selectedFacultyId) {
-      setError("All fields are required.");
-      return;
-    }
-
-    console.log("Submitting Department:", {
-      name,
-      facultyId: selectedFacultyId,
-    });
-
-    onSave({ name, facultyId: selectedFacultyId });
-
-    setName("");
-    setSelectedFacultyId("");
-    setError("");
-  };
+  const onSubmit = async (data: DepartmentFormValues) => {
+    await onSave(data)
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-        {editingDepartment ? "Edit Department" : "Add Department"}
-      </h2>
-
-      {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-
-      <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Department Name
-        </label>
-        <input
-          type="text"
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter department name"
-          className="mt-1 block w-full p-2 text-gray-900 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Department Name</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., Computer Science" {...field} disabled={saving} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      {/* Faculty Dropdown */}
-      <div className="mt-4">
-        <label
-          htmlFor="faculty"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Select Faculty
-        </label>
-        <select
-          id="faculty"
-          value={selectedFacultyId}
-          onChange={(e) => setSelectedFacultyId(e.target.value)}
-          className="mt-1 block w-full p-2 border text-gray-900 border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          required
-        >
-          <option value="">-- Select Faculty --</option>
-          {faculties.map((faculty) => (
-            <option key={faculty._id} value={faculty._id}>
-              {faculty.name}
-            </option>
-          ))}
-        </select>
-      </div>
+        <FormField
+          control={form.control}
+          name="facultyId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Faculty</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={saving || faculties.length === 0}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={faculties.length === 0 ? "No faculties available" : "Select a faculty"} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {faculties.map((faculty) => (
+                    <SelectItem key={faculty._id} value={faculty._id}>
+                      {faculty.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <button
-        type="submit"
-        className="mt-4 w-full bg-indigo-600 text-white font-medium py-2 rounded-lg hover:bg-indigo-700 transition-all"
-      >
-        {editingDepartment ? "Update Department" : "Add Department"}
-      </button>
-    </form>
-  );
+        <div className="flex justify-end space-x-2">
+          {onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel} disabled={saving}>
+              Cancel
+            </Button>
+          )}
+          <Button type="submit" disabled={saving}>
+            {saving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {editingDepartment ? "Updating..." : "Creating..."}
+              </>
+            ) : editingDepartment ? (
+              "Update Department"
+            ) : (
+              "Create Department"
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  )
 }
+
