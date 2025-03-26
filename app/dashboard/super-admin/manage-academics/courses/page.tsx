@@ -53,8 +53,8 @@ export default function CoursesPage() {
       const departmentMap = new Map<string, Department>();
 
       courses.forEach((course) => {
-        const departmentId = typeof course.departmentId === 'object' ? course.departmentId : { _id: course.departmentId as string, name: "Unknown" };
-        const levelId = typeof course.levelId === 'object' ? course.levelId : { _id: course.levelId as string, name: "Unknown" };
+        const departmentId = typeof course.departmentId === 'object' ? course.departmentId : { _id: course.departmentId as string, name: course.name };
+        const levelId = typeof course.levelId === 'object' ? course.levelId : { _id: course.levelId as string, name: course.name  };
 
         if (!departmentMap.has(departmentId._id)) {
           departmentMap.set(departmentId._id, {

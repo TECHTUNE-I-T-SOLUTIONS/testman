@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import type { Faculty } from "@/types/types"
+import { toast } from "sonner"
 
 // Define the schema for form validation
 const levelSchema = z.object({
@@ -39,7 +40,6 @@ interface LevelFormProps {
   onCancel?: () => void
   faculties: Faculty[]
   departments: Department[]
-  fetchDepartments: (facultyId: string) => Promise<void>
   editingLevel: Level | null
   saving?: boolean
 }
@@ -49,7 +49,6 @@ export default function LevelForm({
   onCancel,
   faculties,
   departments,
-  fetchDepartments,
   editingLevel,
   saving = false,
 }: LevelFormProps) {
@@ -66,22 +65,50 @@ export default function LevelForm({
     },
   })
 
+  // Fetch departments for a specific faculty
+  const fetchDepartments = useCallback(async (facultyId: string) => {
+    try {
+      const url = `/api/departments?facultyId=${facultyId}`
+      const res = await fetch(url)
+
+      if (!res.ok) throw new Error(`Failed to fetch departments: ${res.status} (${res.statusText})`)
+
+      const data = await res.json()
+      if (!Array.isArray(data)) throw new Error("Invalid data format: Expected an array.")
+
+      setFilteredDepartments(data) // Update filteredDepartments directly
+    } catch (error) {
+      console.error("Error fetching departments:", error)
+      toast.error("Failed to load departments")
+      setFilteredDepartments([]) // Reset in case of error
+    }
+  }, [])
+
+  // Handle faculty change
+  const handleFacultyChange = async (facultyId: string) => {
+    setSelectedFaculty(facultyId)
+    form.setValue("facultyId", facultyId)
+    form.setValue("departmentId", "") // Reset department when faculty changes
+
+    if (facultyId) {
+      await fetchDepartments(facultyId)
+    } else {
+      setFilteredDepartments([])
+    }
+  }
+
   // Update form values when editingLevel changes
   useEffect(() => {
     if (editingLevel) {
       const departmentId =
         typeof editingLevel.departmentId === "object" ? editingLevel.departmentId._id : editingLevel.departmentId
 
-      // Find the department to get its facultyId
       const department = departments.find((d) => d._id === departmentId)
 
       if (department) {
         form.setValue("facultyId", department.facultyId)
         setSelectedFaculty(department.facultyId)
-
-        // Filter departments for this faculty
-        const depts = departments.filter((d) => d.facultyId === department.facultyId)
-        setFilteredDepartments(depts)
+        fetchDepartments(department.facultyId) // Ensure the correct departments are fetched
 
         form.setValue("departmentId", departmentId)
         form.setValue("name", editingLevel.name)
@@ -95,22 +122,7 @@ export default function LevelForm({
       setSelectedFaculty("")
       setFilteredDepartments([])
     }
-  }, [editingLevel, departments, form])
-
-  // Handle faculty change
-  const handleFacultyChange = async (facultyId: string) => {
-    setSelectedFaculty(facultyId)
-    form.setValue("facultyId", facultyId)
-    form.setValue("departmentId", "") // Reset department when faculty changes
-
-    if (facultyId) {
-      await fetchDepartments(facultyId)
-      const depts = departments.filter((d) => d.facultyId === facultyId)
-      setFilteredDepartments(depts)
-    } else {
-      setFilteredDepartments([])
-    }
-  }
+  }, [editingLevel, departments, form, fetchDepartments])
 
   const onSubmit = async (data: LevelFormValues) => {
     await onSave(
@@ -228,4 +240,3 @@ export default function LevelForm({
     </Form>
   )
 }
-

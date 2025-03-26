@@ -16,8 +16,7 @@ export async function GET(req: NextRequest) {
 
     if (!levels.length) {
       return NextResponse.json(
-        { message: "No levels found", levels: [] },
-        { status: 404 }
+        { message: "No levels found", levels: [] }
       );
     }
     return NextResponse.json({ levels }, { status: 200 });

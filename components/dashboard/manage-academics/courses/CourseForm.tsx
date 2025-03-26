@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Course } from "@/types/types";
+import { toast } from "sonner";
 
 // Define the schema for form validation
 const courseSchema = z.object({
@@ -55,13 +56,10 @@ export default function CourseForm({
   saving = false
 }: CourseFormProps) {
   const [faculties, setFaculties] = useState<Faculty[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [levels, setLevels] = useState<Level[]>([]);
   const [filteredDepartments, setFilteredDepartments] = useState<Department[]>([]);
   const [filteredLevels, setFilteredLevels] = useState<Level[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Initialize the form with react-hook-form
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseSchema),
     defaultValues: {
@@ -73,28 +71,20 @@ export default function CourseForm({
     },
   });
 
-  // Fetch faculties, departments, and levels
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch faculties
         const facultiesRes = await fetch("/api/faculties");
         if (!facultiesRes.ok) throw new Error("Failed to fetch faculties");
         const facultiesData = await facultiesRes.json();
         setFaculties(facultiesData);
 
-        // Fetch departments
         const departmentsRes = await fetch("/api/departments");
         if (!departmentsRes.ok) throw new Error("Failed to fetch departments");
-        const departmentsData = await departmentsRes.json();
-        setDepartments(departmentsData);
 
-        // Fetch levels
         const levelsRes = await fetch("/api/levels");
         if (!levelsRes.ok) throw new Error("Failed to fetch levels");
-        const levelsData = await levelsRes.json();
-        setLevels(levelsData);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -105,99 +95,69 @@ export default function CourseForm({
     fetchData();
   }, []);
 
-  // Update form values when initialData changes
-  useEffect(() => {
-    if (initialData) {
-      const departmentId = typeof initialData.departmentId === 'object' 
-        ? initialData.departmentId._id 
-        : initialData.departmentId;
-      
-      const levelId = typeof initialData.levelId === 'object' 
-        ? initialData.levelId._id 
-        : initialData.levelId;
-      
-      // Find the department to get its facultyId
-      const department = departments.find(d => d._id === departmentId);
-      
-      if (department) {
-        // Set faculty
-        form.setValue("facultyId", department.facultyId);
-        
-        // Filter departments for this faculty
-        const depts = departments.filter(d => d.facultyId === department.facultyId);
-        setFilteredDepartments(depts);
-        
-        // Set department
-        form.setValue("departmentId", departmentId!);
-        
-        // Filter levels for this department
-        const lvls = levels.filter(l => l.departmentId === departmentId);
-        setFilteredLevels(lvls);
-        
-        // Set level
-        form.setValue("levelId", levelId!);
-      }
-      
-      // Set other fields
-      form.setValue("name", initialData.name);
-      form.setValue("code", initialData.code);
-    } else {
-      form.reset({
-        name: "",
-        code: "",
-        facultyId: "",
-        departmentId: "",
-        levelId: "",
-      });
+  const fetchDepartments = useCallback(async (facultyId: string) => {
+    try {
+      const res = await fetch(`/api/departments?facultyId=${facultyId}`);
+      if (!res.ok) throw new Error(`Failed to fetch departments: ${res.status} (${res.statusText})`);
+      const data = await res.json();
+      if (!Array.isArray(data)) throw new Error("Invalid data format: Expected an array.");
+      setFilteredDepartments(data);
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+      toast.error("Failed to load departments");
       setFilteredDepartments([]);
+    }
+  }, []);
+
+  const fetchLevels = useCallback(async (departmentId: string) => {
+    try {
+      const res = await fetch(`/api/levels?departmentId=${departmentId}`);
+      if (!res.ok) throw new Error(`Failed to fetch levels: ${res.status} (${res.statusText})`);
+      
+      const data = await res.json();
+      console.log("Fetched Levels:", data); // Debugging log
+  
+      // Adjust depending on API response structure
+      const levelsArray = Array.isArray(data) ? data : data.levels;
+      
+      if (!Array.isArray(levelsArray)) throw new Error("Invalid data format: Expected an array.");
+      if (levelsArray.length === 0) {
+        toast.error("No levels found for the selected department");
+      }
+  
+      setFilteredLevels(levelsArray);
+    } catch (error) {
+      console.error("Error fetching levels:", error);
+      toast.error("Failed to load levels");
       setFilteredLevels([]);
     }
-  }, [initialData, departments, levels, form]);
-
-  // Handle faculty change
-  const handleFacultyChange = (facultyId: string) => {
+  }, []);
+  
+  const handleFacultyChange = async (facultyId: string) => {
     form.setValue("facultyId", facultyId);
-    form.setValue("departmentId", ""); // Reset department when faculty changes
-    form.setValue("levelId", ""); // Reset level when faculty changes
-    
+    form.setValue("departmentId", "");
+    form.setValue("levelId", "");
     if (facultyId) {
-      const depts = departments.filter(d => d.facultyId === facultyId);
-      setFilteredDepartments(depts);
+      await fetchDepartments(facultyId);
     } else {
       setFilteredDepartments([]);
     }
-    
     setFilteredLevels([]);
   };
 
-  // Handle department change
-  const handleDepartmentChange = (departmentId: string) => {
+  const handleDepartmentChange = async (departmentId: string) => {
     form.setValue("departmentId", departmentId);
-    form.setValue("levelId", ""); // Reset level when department changes
-    
+    form.setValue("levelId", "");
     if (departmentId) {
-      const lvls = levels.filter(l => l.departmentId === departmentId);
-      setFilteredLevels(lvls);
+      await fetchLevels(departmentId);
     } else {
       setFilteredLevels([]);
     }
-  };
-
-  const handleFormSubmit = async (data: CourseFormValues) => {
-    const courseData: Course = {
-      ...data,
-    };
-    
-    if (initialData?._id) {
-      courseData._id = initialData._id;
-    }
-    
-    await onSubmit(courseData);
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}

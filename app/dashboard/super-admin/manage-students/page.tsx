@@ -1,71 +1,101 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import DropdownFilter from "@/components/dashboard/manage-students/DropdownFilter";
-import StudentTable from "@/components/dashboard/manage-students/StudentTable";
-import Header from "@/components/dashboard/Header";
+import { useState, useEffect } from "react"
+import { Search, Users, GraduationCap, School, BookOpen, AlertCircle, RefreshCw } from "lucide-react"
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+import StudentTable from "@/components/dashboard/manage-students/StudentTable"
 
 // Updated Student Type
 export type Student = {
-  _id: string;
-  name: string;
-  email: string;
-  matricNumber: string;
-  faculty: { _id: string; name: string };
-  department: { _id: string; name: string };
-  level: { _id: string; name: string }; 
-  isActive: boolean;
-};
+  _id: string
+  name: string
+  email: string
+  matricNumber: string
+  faculty: { _id: string; name: string }
+  department: { _id: string; name: string }
+  level: { _id: string; name: string }
+  isActive: boolean
+}
 
 export default function ManageStudents() {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [students, setStudents] = useState<Student[]>([])
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
 
-  const [facultyFilter, setFacultyFilter] = useState<string>("");
-  const [departmentFilter, setDepartmentFilter] = useState<string>("");
-  const [levelFilter, setLevelFilter] = useState<string>("");
+  const [facultyFilter, setFacultyFilter] = useState<string>("")
+  const [departmentFilter, setDepartmentFilter] = useState<string>("")
+  const [levelFilter, setLevelFilter] = useState<string>("")
+  const [activeTab, setActiveTab] = useState("all")
 
   useEffect(() => {
     async function fetchStudents() {
+      setLoading(true)
+      setError(null)
       try {
-        const res = await fetch("/api/students");
-        const data: Student[] = await res.json();
-        setStudents(data);
-        setFilteredStudents(data);
+        const res = await fetch("/api/students")
+        if (!res.ok) throw new Error("Failed to fetch students")
+        const data: Student[] = await res.json()
+        setStudents(data)
+        setFilteredStudents(data)
       } catch (error) {
-        console.error("Failed to fetch students:", error);
+        console.error("Failed to fetch students:", error)
+        setError("Failed to load students. Please try again.")
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
 
-    fetchStudents();
-  }, []);
+    fetchStudents()
+  }, [])
 
   useEffect(() => {
-    let filtered = students;
+    let filtered = students
 
+    // Apply tab filter (active/inactive/all)
+    if (activeTab === "active") {
+      filtered = filtered.filter((student) => student.isActive)
+    } else if (activeTab === "inactive") {
+      filtered = filtered.filter((student) => !student.isActive)
+    }
+
+    // Apply faculty filter
     if (facultyFilter) {
-      filtered = filtered.filter(
-        (student) => student.faculty.name === facultyFilter
-      );
+      filtered = filtered.filter((student) => student.faculty?.name === facultyFilter)
     }
 
+    // Apply department filter
     if (departmentFilter) {
-      filtered = filtered.filter(
-        (student) => student.department.name === departmentFilter
-      );
+      filtered = filtered.filter((student) => student.department?.name === departmentFilter)
     }
 
+    // Apply level filter
     if (levelFilter) {
-      filtered = filtered.filter(
-        (student) => student.level.name === levelFilter
-      );
+      filtered = filtered.filter((student) => student.level?.name === levelFilter)
     }
 
-    setFilteredStudents(filtered);
-  }, [facultyFilter, departmentFilter, levelFilter, students]);
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (student) =>
+          student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.matricNumber.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    }
+
+    setFilteredStudents(filtered)
+  }, [facultyFilter, departmentFilter, levelFilter, students, searchTerm, activeTab])
 
   const handleActivate = async (id: string) => {
     try {
@@ -73,17 +103,13 @@ export default function ManageStudents() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, isActive: true }),
-      });
+      })
 
-      setStudents((prev) =>
-        prev.map((student) =>
-          student._id === id ? { ...student, isActive: true } : student
-        )
-      );
+      setStudents((prev) => prev.map((student) => (student._id === id ? { ...student, isActive: true } : student)))
     } catch (error) {
-      console.error("Failed to activate student:", error);
+      console.error("Failed to activate student:", error)
     }
-  };
+  }
 
   const handleDelete = async (id: string) => {
     try {
@@ -91,58 +117,212 @@ export default function ManageStudents() {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
-      });
+      })
 
-      setStudents((prev) => prev.filter((student) => student._id !== id));
+      setStudents((prev) => prev.filter((student) => student._id !== id))
     } catch (error) {
-      console.error("Failed to delete student:", error);
+      console.error("Failed to delete student:", error)
     }
-  };
+  }
 
-  if (loading) return <p>Loading...</p>;
+  const resetFilters = () => {
+    setFacultyFilter("")
+    setDepartmentFilter("")
+    setLevelFilter("")
+    setSearchTerm("")
+    setActiveTab("all")
+  }
 
-  const faculties = Array.from(
-    new Set(students.map((student) => student.faculty?.name))
-  ).filter(Boolean); 
+  // Extract unique values for filters
+  const faculties = Array.from(new Set(students.map((student) => student.faculty?.name))).filter(Boolean)
 
-  const departments = Array.from(
-    new Set(students.map((student) => student.department?.name))
-  ).filter(Boolean);
+  const departments = Array.from(new Set(students.map((student) => student.department?.name))).filter(Boolean)
 
-  const levels = Array.from(
-    new Set(students.map((student) => student.level?.name))
-  ).filter(Boolean);
+  const levels = Array.from(new Set(students.map((student) => student.level?.name))).filter(Boolean)
+
+  // Calculate stats
+  const stats = {
+    total: students.length,
+    active: students.filter((s) => s.isActive).length,
+    inactive: students.filter((s) => !s.isActive).length,
+  }
 
   return (
-    <div className="p-6 bg-purple-50 rounded-lg shadow-md">
-      <Header title="Manage Students" />
-
-      <div className="flex flex-wrap gap-6 mb-6">
-        <DropdownFilter
-          label="Faculties"
-          options={faculties}
-          value={facultyFilter}
-          onChange={setFacultyFilter}
-        />
-        <DropdownFilter
-          label="Departments"
-          options={departments}
-          value={departmentFilter}
-          onChange={setDepartmentFilter}
-        />
-        <DropdownFilter
-          label="Levels"
-          options={levels}
-          value={levelFilter}
-          onChange={setLevelFilter}
-        />
+    <div className="space-y-6 p-6 md:p-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+            <Users className="h-8 w-8 text-primary" />
+            Manage Students
+          </h1>
+          <p className="text-muted-foreground mt-1">View, filter, and manage student accounts</p>
+        </div>
+        <Button onClick={resetFilters} variant="outline" className="flex items-center gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Reset Filters
+        </Button>
       </div>
 
-      <StudentTable
-        students={filteredStudents}
-        onActivate={handleActivate}
-        onDelete={handleDelete}
-      />
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Students</CardTitle>
+            <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
+              Active
+            </Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.active}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Inactive Students</CardTitle>
+            <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-100">
+              Inactive
+            </Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.inactive}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content */}
+      {loading ? (
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-full max-w-md" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : error ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Student Management</CardTitle>
+            <CardDescription>
+              {filteredStudents.length} {filteredStudents.length === 1 ? "student" : "students"} found
+              {searchTerm && ` for "${searchTerm}"`}
+              {(facultyFilter || departmentFilter || levelFilter) && " with applied filters"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Filters and Search */}
+            <div className="flex flex-col space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name, email or matric number..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="active">Active</TabsTrigger>
+                    <TabsTrigger value="inactive">Inactive</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Select value={facultyFilter} onValueChange={setFacultyFilter}>
+                  <SelectTrigger>
+                    <div className="flex items-center gap-2">
+                      <School className="h-4 w-4 text-muted-foreground" />
+                      <SelectValue placeholder="Select Faculty" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Faculties</SelectItem>
+                    {faculties.map((faculty) => (
+                      <SelectItem key={faculty} value={faculty}>
+                        {faculty}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                  <SelectTrigger>
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-muted-foreground" />
+                      <SelectValue placeholder="Select Department" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Departments</SelectItem>
+                    {departments.map((department) => (
+                      <SelectItem key={department} value={department}>
+                        {department}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={levelFilter} onValueChange={setLevelFilter}>
+                  <SelectTrigger>
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                      <SelectValue placeholder="Select Level" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    {levels.map((level) => (
+                      <SelectItem key={level} value={level}>
+                        {level}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Student Table */}
+            {filteredStudents.length > 0 ? (
+              <StudentTable students={filteredStudents} onActivate={handleActivate} onDelete={handleDelete} />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium">No Students Found</h3>
+                <p className="text-muted-foreground max-w-md mt-2">
+                  {searchTerm || facultyFilter || departmentFilter || levelFilter
+                    ? "Try adjusting your search or filter criteria."
+                    : "No students are currently registered in the system."}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
-  );
+  )
 }
+

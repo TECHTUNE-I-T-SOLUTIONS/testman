@@ -1,48 +1,85 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
+import { Building, AlertCircle } from 'lucide-react'
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface Department {
-  _id: string;
-  name: string;
+  _id: string
+  name: string
 }
 
 interface Props {
-  onChange: (id: string) => void;
+  onChange: (id: string) => void
 }
 
 export default function DepartmentDropdown({ onChange }: Props) {
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch("/api/departments")
-      .then((res) => res.json())
-      .then((data) => setDepartments(data))
-      .catch(() => console.error("Failed to fetch departments"))
-      .finally(() => setLoading(false));
-  }, []);
+    const fetchDepartments = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const res = await fetch("/api/departments")
+        if (!res.ok) throw new Error("Failed to fetch departments")
+        const data = await res.json()
+        setDepartments(data)
+      } catch (error) {
+        console.error("Failed to fetch departments:", error)
+        setError("Failed to load departments. Please try again.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDepartments()
+  }, [])
+
+  if (loading) {
+    return <Skeleton className="h-10 w-full" />
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive" className="mb-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    )
+  }
+
+  if (departments.length === 0) {
+    return (
+      <Alert className="mb-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>No departments available. Please add departments first.</AlertDescription>
+      </Alert>
+    )
+  }
 
   return (
-    <div className="w-full">
-      <label className="block text-gray-700 font-medium mb-1">
-        🎓 Select Department:
-      </label>
-      <select
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full p-2 border border-purple-500 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-600 transition"
-      >
-        <option value="">📍 Choose a department</option>
-        {loading ? (
-          <option disabled>⏳ Loading...</option>
-        ) : (
-          departments.map((dept) => (
-            <option key={dept._id} value={dept._id}>
-              {dept.name}
-            </option>
-          ))
-        )}
-      </select>
-    </div>
-  );
+    <Select onValueChange={onChange}>
+      <SelectTrigger className="w-full">
+        <div className="flex items-center gap-2">
+          <Building className="h-4 w-4 text-muted-foreground" />
+          <SelectValue placeholder="Select a department" />
+        </div>
+      </SelectTrigger>
+      <SelectContent>
+        {departments.map((dept) => (
+          <SelectItem key={dept._id} value={dept._id}>
+            <div className="flex items-center gap-2">
+              <span>{dept.name}</span>
+            </div>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
 }

@@ -1,105 +1,191 @@
-import React from "react";
+"use client"
+
+import { useState } from "react"
+import { CheckCircle, Trash2, AlertCircle, MoreHorizontal, UserCheck } from "lucide-react"
+
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 type Student = {
-  _id: string;
-  name: string;
-  email: string;
-  matricNumber: string;
-  faculty: { _id: string; name: string };
-  department: { _id: string; name: string };
-  level: { _id: string; name: string };
-  isActive: boolean;
-};
+  _id: string
+  name: string
+  email: string
+  matricNumber: string
+  faculty: { _id: string; name: string }
+  department: { _id: string; name: string }
+  level: { _id: string; name: string }
+  isActive: boolean
+}
 
 type StudentTableProps = {
-  students: Student[];
-  onActivate: (id: string) => void;
-  onDelete: (id: string) => void;
-};
+  students: Student[]
+  onActivate: (id: string) => void
+  onDelete: (id: string) => void
+}
 
-const StudentTable: React.FC<StudentTableProps> = ({
-  students,
-  onActivate,
-  onDelete,
-}) => (
-  <div className="overflow-x-auto p-4">
-    <table className="w-full border border-gray-300 rounded-lg shadow-lg">
-      <thead className="bg-purple-700 text-white text-left">
-        <tr className="uppercase text-sm tracking-wider">
-          {[
-            "S/N",
-            "Name",
-            "Email",
-            "Reg. Number",
-            "Faculty",
-            "Department",
-            "Level",
-            "Status",
-            "Actions",
-          ].map((header) => (
-            <th key={header} className="px-4 py-3 border-b border-purple-500">
-              {header}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody className="bg-white divide-y divide-gray-200">
-        {students.map((student, index) => (
-          <tr
-            key={student._id}
-            className="hover:bg-purple-100 transition duration-300"
-          >
-            <td className="px-4 py-3 font-semibold text-purple-700">
-              {index + 1}
-            </td>
-            <td className="px-4 text-purple-600 py-3">{student.name}</td>
-            <td className="px-4 text-purple-600 py-3">{student.email}</td>
-            <td className="px-4 text-purple-600 py-3">
-              {student.matricNumber}
-            </td>
-            <td className="px-4 text-purple-600 py-3">
-              {student.faculty?.name || "N/A"}
-            </td>
-            <td className="px-4 text-purple-600 py-3">
-              {student.department?.name || "N/A"}
-            </td>
-            <td className="px-4 text-purple-600 py-3">
-              {student.level?.name || "N/A"}
-            </td>
-            <td className="px-4 text-purple-600 py-3 font-semibold">
-              {student.isActive ? (
-                <span className="text-green-600 bg-green-100 px-2 py-1 rounded">
-                  Active
-                </span>
-              ) : (
-                <span className="text-red-600 bg-red-100 px-2 py-1 rounded">
-                  Inactive
-                </span>
-              )}
-            </td>
-            <td className="px-4 py-3 flex gap-2">
-              {!student.isActive && (
-                <button
-                  onClick={() => onActivate(student._id)}
-                  className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
-                  title="Activate Student"
-                >
-                  Activate
-                </button>
-              )}
-              <button
-                onClick={() => onDelete(student._id)}
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
-                title="Delete Student"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
+export default function StudentTable({ students, onActivate, onDelete }: StudentTableProps) {
+  const [studentToDelete, setStudentToDelete] = useState<Student | null>(null)
+  const [studentToActivate, setStudentToActivate] = useState<Student | null>(null)
 
-export default StudentTable;
+  const handleDeleteConfirm = () => {
+    if (studentToDelete) {
+      onDelete(studentToDelete._id)
+      setStudentToDelete(null)
+    }
+  }
+
+  const handleActivateConfirm = () => {
+    if (studentToActivate) {
+      onActivate(studentToActivate._id)
+      setStudentToActivate(null)
+    }
+  }
+
+  // Get initials from name
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+  }
+
+  return (
+    <>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[50px]">S/N</TableHead>
+              <TableHead>Student</TableHead>
+              <TableHead className="hidden md:table-cell">Reg. Number</TableHead>
+              <TableHead className="hidden md:table-cell">Faculty</TableHead>
+              <TableHead className="hidden md:table-cell">Department</TableHead>
+              <TableHead className="hidden md:table-cell">Level</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {students.map((student, index) => (
+              <TableRow key={student._id}>
+                <TableCell className="font-medium">{index + 1}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8 border">
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {getInitials(student.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{student.name}</span>
+                      <span className="text-xs text-muted-foreground">{student.email}</span>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="hidden md:table-cell">{student.matricNumber}</TableCell>
+                <TableCell className="hidden md:table-cell">{student.faculty?.name || "N/A"}</TableCell>
+                <TableCell className="hidden md:table-cell">{student.department?.name || "N/A"}</TableCell>
+                <TableCell className="hidden md:table-cell">{student.level?.name || "N/A"}</TableCell>
+                <TableCell>
+                  {student.isActive ? (
+                    <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
+                      Active
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-100">
+                      Inactive
+                    </Badge>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {!student.isActive && (
+                        <DropdownMenuItem onClick={() => setStudentToActivate(student)}>
+                          <UserCheck className="mr-2 h-4 w-4" />
+                          <span>Activate</span>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem
+                        onClick={() => setStudentToDelete(student)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!studentToDelete} onOpenChange={(open) => !open && setStudentToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              Confirm Deletion
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {studentToDelete?.name}? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStudentToDelete(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Activate Confirmation Dialog */}
+      <Dialog open={!!studentToActivate} onOpenChange={(open) => !open && setStudentToActivate(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-primary" />
+              Confirm Activation
+            </DialogTitle>
+            <DialogDescription>Are you sure you want to activate {studentToActivate?.name}?</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStudentToActivate(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleActivateConfirm}>
+              <UserCheck className="mr-2 h-4 w-4" />
+              Activate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
+
