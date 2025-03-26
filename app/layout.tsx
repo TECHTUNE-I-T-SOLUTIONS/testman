@@ -24,7 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <main className="p-2">{children}</main>
+        <main>{children}</main>
         <Toaster />
       </body>
     </html>
