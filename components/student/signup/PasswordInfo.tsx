@@ -85,7 +85,7 @@ const PasswordInfoForm = () => {
       });
       if (response.ok) {
         toast.success("Registration Successful!");
-        router.push("/login");
+        router.push("/auth/login");
         resetForm();
       } else {
         const data = await response.json();

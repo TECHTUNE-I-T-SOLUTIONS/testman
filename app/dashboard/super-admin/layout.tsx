@@ -110,9 +110,9 @@ export default function AdminLayout({
 
   // Main layout with sidebar
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
         <AdminSidebar />
-        <SidebarInset className="flex-1 overflow-auto">
+        <SidebarInset className="">
           {children}
         </SidebarInset>
     </SidebarProvider>

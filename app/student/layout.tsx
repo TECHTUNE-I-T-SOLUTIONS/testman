@@ -10,15 +10,15 @@ export default function StudentLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  
+
   const showSidebar = pathname.startsWith("/student");
 
   return (
-    <SidebarProvider>
-      {showSidebar && <AppSidebar />}
-      <main className="w-full">
-        {children}
-      </main>
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex min-h-screen">
+        {showSidebar && <AppSidebar />}
+        <main className="flex-1 pt-16 md:pt-0">{children}</main>
+      </div>
     </SidebarProvider>
   );
 }

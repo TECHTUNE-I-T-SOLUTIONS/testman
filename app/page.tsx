@@ -236,7 +236,7 @@ const Page = () => {
               <div className="pt-2 border-t flex flex-col gap-2">
                 {isLoggedIn ? (
                   <Button className="w-full" asChild>
-                    <Link href="/dashboard">Go to Dashboard</Link>
+                    <Link href="/student">Go to Dashboard</Link>
                   </Button>
                 ) : (
                   <>
