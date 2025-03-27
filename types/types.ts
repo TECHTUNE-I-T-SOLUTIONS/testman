@@ -50,3 +50,10 @@ export interface Option {
   text: string;
   isCorrect: boolean;
 }
+
+export interface Question {
+  _id: string;
+  courseId: string;
+  questionText: string;
+  options: Option[];
+}

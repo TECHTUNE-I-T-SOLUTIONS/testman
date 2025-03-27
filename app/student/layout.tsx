@@ -15,9 +15,9 @@ export default function StudentLayout({
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen w-full">
         {showSidebar && <AppSidebar />}
-        <main className="flex-1 pt-16 md:pt-0">{children}</main>
+        <main className="flex-1 pt-16 md:pt-0 w-full">{children}</main>
       </div>
     </SidebarProvider>
   );
