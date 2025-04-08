@@ -1,6 +1,5 @@
 # Registration and UI Enhancements Documentation
 
-
 ## Overview
 This document outlines the recent improvements made to the registration process and overall UI enhancements within the project. The changes include refactoring layouts, implementing a multi-step registration form, enhancing form state management, improving validation, and adding a dashboard layout component.
 
