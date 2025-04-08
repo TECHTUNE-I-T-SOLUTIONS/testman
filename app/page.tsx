@@ -165,7 +165,7 @@ const Page = () => {
           <div className="hidden md:flex items-center gap-2">
             {isLoggedIn ? (
               <Button asChild>
-                <Link href="/dashboard">Go to Dashboard</Link>
+                <Link href="/student">Go to Dashboard</Link>
               </Button>
             ) : (
               <>

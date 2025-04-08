@@ -1,0 +1,9 @@
+# MONGODB_URI=mongodb://localhost:27017/exam-management
+MONGODB_URI = mongodb+srv://Damzy1:Damzy01!@cluster0.ueytv.mongodb.net/savemycgpa?retryWrites=true&w=majority&appName=Cluster0/savemycgpa
+MONGODB_DB=school-management
+NEXTAUTH_SECRET=d4d53d4982d0fc688c662f8b49496ac1bbe09571016b6be1bf42500dfb0c2044
+NEXTAUTH_URL=http://localhost:3000
+DEFAULT_ADMIN_EMAIL=yusufabdullahi2910@gmail.com
+DEFAULT_ADMIN_PASSWORD=Yusasive
+DEFAULT_ADMIN_MATRIC_NUMBER=20/56EB004
+JWT_SECRET=7ea56d76e45a80f5488ba48419d241ee004452d742ccedba9dca9cedeba0dd39
