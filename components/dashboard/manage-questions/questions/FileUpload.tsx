@@ -20,7 +20,7 @@ export default function FileUpload() {
       const response = await fetch("/api/questions/bulk-upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questions: jsonData }), 
+        body: JSON.stringify({ questions: jsonData }), // here's the update before body: JSON.stringify({jsonData)
       });
 
       if (!response.ok) return toast.error("Failed to upload questions");
