@@ -112,7 +112,7 @@ export default function AdminLayout({
   return (
     <SidebarProvider defaultOpen={true}>
         <AdminSidebar />
-        <SidebarInset className="w-full">
+        <SidebarInset className="p-2 ml-10 w-full">
           {children}
         </SidebarInset>
     </SidebarProvider>

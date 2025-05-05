@@ -12,6 +12,8 @@ export async function POST(req: Request) {
 
     const result = await db.collection(STUDENT_COLLECTION).insertOne({
       ...student,
+      status: "False", // default status
+      loggedIn: false,   // default login state
       isActive: false,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -59,15 +61,9 @@ export async function GET() {
             as: "level",
           },
         },
-        {
-          $unwind: { path: "$faculty", preserveNullAndEmptyArrays: true },
-        },
-        {
-          $unwind: { path: "$department", preserveNullAndEmptyArrays: true },
-        },
-        {
-          $unwind: { path: "$level", preserveNullAndEmptyArrays: true },
-        },
+        { $unwind: { path: "$faculty", preserveNullAndEmptyArrays: true } },
+        { $unwind: { path: "$department", preserveNullAndEmptyArrays: true } },
+        { $unwind: { path: "$level", preserveNullAndEmptyArrays: true } },
         {
           $project: {
             _id: 1,
@@ -75,6 +71,8 @@ export async function GET() {
             email: 1,
             matricNumber: 1,
             isActive: 1,
+            loggedIn: 1,
+            status: 1,
             faculty: { _id: "$faculty._id", name: "$faculty.name" },
             department: { _id: "$department._id", name: "$department.name" },
             level: { _id: "$level._id", name: "$level.name" },
@@ -82,7 +80,7 @@ export async function GET() {
         },
       ])
       .toArray();
-    console.log(students);
+
     return NextResponse.json(students, { status: 200 });
   } catch (error) {
     console.error("Error fetching students:", error);
@@ -103,7 +101,12 @@ export async function PUT(req: Request) {
       .collection(STUDENT_COLLECTION)
       .updateOne(
         { _id: new mongoose.Types.ObjectId(id) },
-        { $set: { ...updateData, updatedAt: new Date() } }
+        {
+          $set: {
+            ...updateData,
+            updatedAt: new Date(),
+          },
+        }
       );
 
     return NextResponse.json(

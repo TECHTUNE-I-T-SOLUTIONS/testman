@@ -9,6 +9,8 @@ export interface IStudent extends Document {
   level: mongoose.Types.ObjectId;
   password: string;
   createdAt: Date;
+  status: "Active" | "Inactive"; // I added status field here
+  loggedIn: "True" | "False"; // Added the loggedIn field here
 }
 
 const StudentSchema = new Schema<IStudent>(
@@ -24,6 +26,16 @@ const StudentSchema = new Schema<IStudent>(
     },
     level: { type: Schema.Types.ObjectId, ref: "Level", required: true },
     password: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ["Active", "Inactive"],
+      default: "Inactive",
+    },
+    loggedIn: {
+      type: String,
+      enum: ["True", "False"],
+      default: "False",
+    },
     createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true }

@@ -34,20 +34,33 @@ const authOptions: NextAuthOptions = {
           email: sanitizedEmail,
         });
 
-        let user = await User.findOne({
+        let user;
+        let userType: "super-admin" | "admin" | "sub-admin" | null = null;
+
+        // Check in User (Super Admins)
+        const foundUser = await User.findOne({
           matricNumber: sanitizedMatricNumber,
           email: sanitizedEmail,
         });
 
-        if (!user) {
-          user = await Admin.findOne({
+        if (foundUser) {
+          user = foundUser;
+          userType = foundUser.role === "super-admin" ? "super-admin" : "user";
+        } else {
+          // Check in Admin (Admin / Sub-Admin)
+          const foundAdmin = await Admin.findOne({
             matricNumber: sanitizedMatricNumber,
             email: sanitizedEmail,
           });
+
+          if (foundAdmin) {
+            user = foundAdmin;
+            userType = foundAdmin.role === "Admin" ? "admin" : "sub-admin";
+          }
         }
 
-        if (!user) {
-          throw new Error("User not found.");
+        if (!user || !userType) {
+          throw new Error("User not found or not authorized.");
         }
 
         console.log("User found:", user);
@@ -64,7 +77,7 @@ const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           matricNumber: user.matricNumber,
           email: user.email,
-          role: user.role,
+          role: userType,
           name: user.matricNumber,
         };
       },

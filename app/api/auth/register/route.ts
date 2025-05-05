@@ -16,6 +16,8 @@ export async function POST(req: Request) {
       level,
       password,
       confirmPassword,
+      status, // ✅ Get the status from request body
+      loggedIn, // get the login status from the request as well
     } = await req.json();
 
     if (password !== confirmPassword) {
@@ -34,6 +36,7 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const newStudent = new Student({
       name,
       email,
@@ -42,6 +45,8 @@ export async function POST(req: Request) {
       department,
       level,
       password: hashedPassword,
+      status: status || "Inactive", // ✅ Added status (fallback just in case)
+      loggedIn: loggedIn || "False" // Added another login state here
     });
 
     await newStudent.save();

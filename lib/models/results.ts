@@ -1,5 +1,18 @@
 import mongoose, { Schema, models } from "mongoose";
 
+const AnswerSchema = new Schema({
+  questionId: { type: Schema.Types.ObjectId, ref: "Question" },
+  question: String,
+  options: [
+    {
+      text: String,
+      isCorrect: Boolean,
+    },
+  ],
+  correctAnswer: String,
+  studentAnswer: String,
+  isCorrect: Boolean,
+});
 
 const ResultSchema = new Schema({
   studentId: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -11,15 +24,7 @@ const ResultSchema = new Schema({
   },
   score: { type: Number, required: true },
   totalMarks: { type: Number, required: true },
-  answers: [
-    {
-      questionId: { type: Schema.Types.ObjectId, ref: "Question" },
-      question: String,
-      correctAnswer: String,
-      studentAnswer: String,
-      isCorrect: Boolean,
-    },
-  ],
+  answers: [AnswerSchema],
   createdAt: { type: Date, default: Date.now },
 });
 

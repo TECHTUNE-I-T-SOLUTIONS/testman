@@ -1,0 +1,35 @@
+import { NextResponse } from "next/server";
+import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+import User from "@/lib/models/User";
+
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://Damzy1:Damzy01!@cluster0.ueytv.mongodb.net/savemycgpa?retryWrites=true&w=majority&appName=Cluster0/savemycgpa";
+
+export async function GET() {
+  try {
+    await mongoose.connect(MONGO_URI);
+
+    const hashedPassword = await bcrypt.hash("superadminshittu@146", 10);
+
+    const existingUser = await User.findOne({ email: "shittushittu@gmail.com" });
+    if (existingUser) {
+      return NextResponse.json({ message: "Super-admin already exists" }, { status: 400 });
+    }
+
+    const superAdmin = new User({
+      matricNumber: "21/77JH146",
+      email: "shittushittu@gmail.com",
+      password: hashedPassword,
+      role: "super-admin",
+    });
+
+    await superAdmin.save();
+
+    return NextResponse.json({ message: "✅ Super-admin created successfully" }, { status: 201 });
+  } catch (error) {
+    console.error("❌ Error creating super-admin:", error);
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+  } finally {
+    await mongoose.disconnect();
+  }
+}

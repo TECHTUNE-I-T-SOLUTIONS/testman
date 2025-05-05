@@ -1,64 +1,120 @@
 "use client";
 
-import { useState } from "react";
 import * as XLSX from "xlsx";
-import { toast } from "react-hot-toast";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
-export default function FileUpload() {
-  const [file, setFile] = useState<File | null>(null);
+interface Props {
+  selectedCourse: string;
+}
 
-  const handleFileUpload = async () => {
-    if (!file) return toast.error("Please select an Excel file");
+interface Option {
+  text: string;
+  isCorrect: boolean;
+}
+
+interface ParsedQuestion {
+  questionText: string;
+  options: Option[];
+}
+
+export default function FileUpload({ selectedCourse }: Props) {
+  const [previewQuestions, setPreviewQuestions] = useState<ParsedQuestion[]>([]);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = async (e) => {
-      const data = new Uint8Array(e.target?.result as ArrayBuffer);
+    reader.onload = (event) => {
+      const data = new Uint8Array(event.target?.result as ArrayBuffer);
       const workbook = XLSX.read(data, { type: "array" });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-      const response = await fetch("/api/questions/bulk-upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ questions: jsonData }), // before body: JSON.stringify({jsonData)
-      });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      if (!response.ok) return toast.error("Failed to upload questions");
-      toast.success("Questions uploaded successfully!");
-      setFile(null); 
+      const formatted = jsonData.map((item: any) => ({
+        questionText: item["Question"] || "",
+        options: [
+          { text: item["Option A"] || "", isCorrect: item["Answer"] === "A" },
+          { text: item["Option B"] || "", isCorrect: item["Answer"] === "B" },
+          { text: item["Option C"] || "", isCorrect: item["Answer"] === "C" },
+          { text: item["Option D"] || "", isCorrect: item["Answer"] === "D" },
+        ].filter(opt => opt.text),
+      }));
+
+      setPreviewQuestions(formatted);
     };
-
     reader.readAsArrayBuffer(file);
   };
 
+  const uploadToBackend = async () => {
+    if (!selectedCourse) return toast.error("Please select a course");
+
+    const questionsPayload = previewQuestions.map((q) => ({
+      courseId: selectedCourse,
+      questionText: q.questionText,
+      options: q.options,
+    }));
+
+    try {
+      const res = await fetch("/api/questions/bulk-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questions: questionsPayload }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Upload failed");
+
+      toast.success("Bulk upload successful!");
+      setPreviewQuestions([]);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload");
+    }
+  };
+
   return (
-    <div className="p-4 bg-white rounded-md shadow-lg w-full max-w-md mx-auto">
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Upload Questions (Excel)
+    <div className="mt-6 p-4 bg-white rounded-md shadow-lg w-full max-w-md mx-auto">
+      <label className="block mb-2 text-sm font-medium text-gray-700">
+        Upload Excel File:
       </label>
-      <div className="relative w-full">
-        <input
-          type="file"
-          accept=".xlsx"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        />
-        <div className="flex items-center justify-between p-3 border border-gray-300 rounded-md bg-gray-100">
-          <span className="text-sm text-gray-600">
-            {file ? file.name : "Choose a file..."}
-          </span>
-          <button className="text-purple-600 font-medium hover:underline">
-            Browse
-          </button>
+      <input
+        type="file"
+        accept=".xlsx, .xls"
+        onChange={handleFileChange}
+        className="mb-4"
+      />
+
+      {previewQuestions.length > 0 && (
+        <div className="mb-4 border p-4 bg-gray-50 rounded">
+          <h4 className="font-semibold mb-2">Preview:</h4>
+          <ul className="list-disc pl-5 text-sm max-h-64 overflow-y-auto">
+            {previewQuestions.map((q, idx) => (
+              <li key={idx}>
+                <p><strong>Q:</strong> {q.questionText}</p>
+                <ul className="list-circle pl-4">
+                  {q.options.map((opt, i) => (
+                    <li key={i} className={opt.isCorrect ? "text-green-600" : ""}>
+                      {opt.text} {opt.isCorrect && "(Correct)"}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
-      <button
-        onClick={handleFileUpload}
-        className="mt-4 w-full rounded-md bg-purple-600 px-4 py-2 text-white font-semibold shadow-md hover:bg-purple-700 transition duration-200"
-        disabled={!file}
-      >
-        Upload Excel
-      </button>
+      )}
+
+      {previewQuestions.length > 0 && (
+        <button
+          onClick={uploadToBackend}
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition duration-300"
+        >
+          Upload Excel Questions
+        </button>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, FileText, Filter, Download, BarChart2, AlertCircle, GraduationCap, BookOpen } from 'lucide-react'
+import { Search, FileText, Filter, Download, BarChart2, AlertCircle, GraduationCap } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
-import DepartmentDropdown from "@/components/dashboard/manage-questions/results/DepartmentDropdown"
 import ResultTable from "@/components/dashboard/manage-questions/results/ResultTable"
 
 interface Result {
@@ -25,7 +24,6 @@ interface Result {
 }
 
 export default function ResultPage() {
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("")
   const [results, setResults] = useState<Result[]>([])
   const [filteredResults, setFilteredResults] = useState<Result[]>([])
   const [searchTerm, setSearchTerm] = useState("")
@@ -35,13 +33,11 @@ export default function ResultPage() {
   const [activeTab, setActiveTab] = useState("results")
 
   useEffect(() => {
-    if (!selectedDepartment) return
-
     const fetchResults = async () => {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch(`/api/results?department=${selectedDepartment}`)
+        const res = await fetch(`/api/results`)
         if (!res.ok) throw new Error("Failed to fetch results")
         const data: Result[] = await res.json()
         setResults(data)
@@ -55,15 +51,12 @@ export default function ResultPage() {
     }
 
     fetchResults()
-  }, [selectedDepartment])
+  }, [])
 
-  // Apply filters when search term or grade filter changes
   useEffect(() => {
     if (!results.length) return
-
     let filtered = [...results]
 
-    // Apply search filter
     if (searchTerm) {
       filtered = filtered.filter(
         result =>
@@ -72,7 +65,6 @@ export default function ResultPage() {
       )
     }
 
-    // Apply grade filter
     if (gradeFilter !== "all") {
       filtered = filtered.filter(result => result.grade === gradeFilter)
     }
@@ -80,14 +72,13 @@ export default function ResultPage() {
     setFilteredResults(filtered)
   }, [searchTerm, gradeFilter, results])
 
-  // Calculate statistics
   const stats = {
     totalStudents: results.length,
-    averageScore: results.length 
-      ? (results.reduce((sum, result) => sum + (result.score / result.totalMarks) * 100, 0) / results.length).toFixed(1) 
+    averageScore: results.length
+      ? (results.reduce((sum, result) => sum + (result.score / result.totalMarks) * 100, 0) / results.length).toFixed(1)
       : "0",
-    passRate: results.length 
-      ? ((results.filter(r => ["A", "B", "C", "D"].includes(r.grade)).length / results.length) * 100).toFixed(1) 
+    passRate: results.length
+      ? ((results.filter(r => ["A", "B", "C", "D"].includes(r.grade)).length / results.length) * 100).toFixed(1)
       : "0",
     gradeDistribution: {
       A: results.filter(r => r.grade === "A").length,
@@ -95,11 +86,10 @@ export default function ResultPage() {
       C: results.filter(r => r.grade === "C").length,
       D: results.filter(r => r.grade === "D").length,
       F: results.filter(r => r.grade === "F").length,
-    }
+    },
   }
 
   const handleExportResults = () => {
-    // Implementation for exporting results would go here
     alert("Export functionality would be implemented here")
   }
 
@@ -119,27 +109,7 @@ export default function ResultPage() {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Department Selection</CardTitle>
-          <CardDescription>Select a department to view student results</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DepartmentDropdown onChange={setSelectedDepartment} />
-        </CardContent>
-      </Card>
-
-      {!selectedDepartment ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium">No Department Selected</h3>
-            <p className="text-muted-foreground text-center max-w-md mt-2">
-              Please select a department from the dropdown above to view student examination results.
-            </p>
-          </CardContent>
-        </Card>
-      ) : loading ? (
+      {loading ? (
         <Card>
           <CardHeader>
             <Skeleton className="h-8 w-64" />

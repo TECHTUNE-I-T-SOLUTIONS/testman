@@ -128,7 +128,7 @@ export default function QuestionsPage() {
       )}
 
       <div className="mt-6">
-        <FileUpload />
+        <FileUpload selectedCourse={selectedCourse} />
       </div>
 
       {loading ? (
