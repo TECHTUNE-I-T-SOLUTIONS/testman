@@ -62,8 +62,8 @@ const InstitutionalInfoForm = () => {
   return (
     <>
       <CardHeader>
-        <CardTitle>Institutional Details</CardTitle>
-        <CardDescription>Enter your Institutional Information</CardDescription>
+        <CardTitle className="text-center">Institutional Details</CardTitle>
+        <CardDescription className="text-center">Enter your Institutional Information</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

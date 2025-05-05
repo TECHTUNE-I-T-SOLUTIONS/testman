@@ -15,8 +15,8 @@ const PersonalInfoForm = () => {
   return (
     <>
       <CardHeader>
-        <CardTitle>Personal Information</CardTitle>
-        <CardDescription>Enter your personal information</CardDescription>
+        <CardTitle className="text-center">Personal Information</CardTitle>
+        <CardDescription className="text-center">Enter your personal information</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -29,7 +29,7 @@ const PersonalInfoForm = () => {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              placeholder="Enter your fullname"
+              placeholder="Enter your full name"
               required
               autoComplete="fullname"
             />

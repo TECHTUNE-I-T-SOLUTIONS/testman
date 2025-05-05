@@ -36,22 +36,23 @@ export async function POST(
 
     questions.forEach((q) => {
       const correctOption = q.options.find((opt: Option) => opt.isCorrect);
-      const correctAnswer = correctOption
-        ? correctOption.text
-        : "No correct answer set";
+      const correctAnswer = correctOption ? correctOption.text : "No correct answer set";
       const studentAnswer = answers[q._id];
-
       const isCorrect = studentAnswer === correctAnswer;
       if (isCorrect) score += 1;
 
       detailedResults.push({
         questionId: q._id,
         question: q.questionText,
+        options: q.options, // Include full options
         correctAnswer,
         studentAnswer,
         isCorrect,
       });
     });
+
+
+    
     const studentDoc = await Student.findById(student.id);
 
     await Result.create({
@@ -60,8 +61,9 @@ export async function POST(
       departmentId: studentDoc.department,
       score,
       totalMarks: questions.length,
-      detailedResults,
+      answers: detailedResults, // renamed from detailedResults
     });
+
 
     return NextResponse.json({
       message: "Exam submitted successfully!",

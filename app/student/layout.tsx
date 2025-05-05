@@ -13,11 +13,24 @@ export default function StudentLayout({
 
   const showSidebar = pathname.startsWith("/student");
 
+// this section is for showing ads
+//   useEffect(() => {
+//   const checkAdsStatus = async () => {
+//     const res = await fetch("/api/ads");
+//     const data = await res.json();
+//     if (data.status === "on") {
+//       // Show ads
+//     }
+//   };
+//   checkAdsStatus();
+// }, []);
+
+
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full">
         {showSidebar && <AppSidebar />}
-        <main className="flex-1 pt-16 md:pt-0 w-full">{children}</main>
+        <main className="flex-1 pt-4 ml-8 md:pt-0 w-full">{children}</main>
       </div>
     </SidebarProvider>
   );

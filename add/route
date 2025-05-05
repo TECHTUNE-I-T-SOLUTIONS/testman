@@ -1,0 +1,33 @@
+import { connectdb } from "@/lib/connectdb";
+import Student from "@/lib/models/student";
+
+async function addNewFieldsToExistingStudents() {
+  await connectdb();
+
+  const result = await Student.updateMany(
+    {
+      $or: [
+        { status: { $exists: false } },
+        { loggedIn: { $exists: false } }
+      ]
+    },
+    {
+      $set: {
+        status: "Inactive",
+        loggedIn: "False"
+      }
+    }
+  );
+
+  console.log("Updated students:", result.modifiedCount);
+}
+
+addNewFieldsToExistingStudents()
+  .then(() => {
+    console.log("Update completed.");
+    process.exit();
+  })
+  .catch((err) => {
+    console.error("Error updating students:", err);
+    process.exit(1);
+  });

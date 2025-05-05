@@ -75,7 +75,10 @@ const PasswordInfoForm = () => {
       ...formData,
       password: password.password,
       confirmPassword: password.confirm_password,
+      status: "Inactive", // 👈 Added the status here
+      loggedIn: "False", // Added another column here for consistency
     };
+
   
     try {
       const response = await fetch("/api/auth/register", {
@@ -99,8 +102,13 @@ const PasswordInfoForm = () => {
   return (
     <>
       <CardHeader>
-        <CardTitle>Password Information</CardTitle>
-        <CardDescription>Create a strong password for your account.</CardDescription>
+        <CardTitle className="text-center">Password Information</CardTitle>
+        <CardDescription className="text-center">
+          Create a strong password for your account.<br />
+          <span className="text-sm text-muted-foreground">
+            Note: After signing up, your account will be <strong>inactive</strong> by default. Please contact the admin or purchase premium access to activate your account.
+          </span>
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4" >

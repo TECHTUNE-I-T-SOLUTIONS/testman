@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import CountUp from "react-countup";
+import { useInView } from "react-intersection-observer";
 // Add import for User icon
 import {
   BookOpen,
@@ -28,6 +32,7 @@ import { getStudentFromToken } from "@/utils/auth";
 const Page = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { ref, inView } = useInView({ triggerOnce: true });  
 
   // Check if user is logged in (this would be replaced with your actual auth logic)
   useEffect(() => {
@@ -39,6 +44,47 @@ const Page = () => {
     }
     getToken();
   }, []);
+
+  useEffect(() => {
+    // Optional: Use tsParticles or particles.js if you prefer
+    const canvas = document.getElementById("particle-canvas") as HTMLCanvasElement;
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      let particles: any[] = [];
+
+      const createParticles = () => {
+        particles = Array.from({ length: 30 }, () => ({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 2 + 1,
+          speedX: Math.random() - 0.5,
+          speedY: Math.random() - 0.5,
+        }));
+      };
+
+      const animate = () => {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const p of particles) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255,255,255,0.3)";
+          ctx.fill();
+          p.x += p.speedX;
+          p.y += p.speedY;
+          if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
+          if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+        }
+        requestAnimationFrame(animate);
+      };
+
+      canvas.width = window.innerWidth;
+      canvas.height = 400;
+      createParticles();
+      animate();
+    }
+  }, []);
+
 
   const features = [
     {
@@ -122,40 +168,45 @@ const Page = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col md:ps-10">
+    <div className="min-h-screen flex flex-col">
       {/* Navbar */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pl-4 pr-4">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
-            <GraduationCap className="h-6 w-6 text-primary" />
+            <Image
+              src="/Operation-save-my-CGPA-07.svg"
+              alt="Operation Save My CGPA Logo"
+              width={30}
+              height={30}
+              className="h-15 w-15"
+            />
             <span className="text-xl font-bold tracking-tight">
               Operation Save My CGPA
             </span>
           </div>
-
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-6 ml-2 mr-2">
             <Link
               href="#features"
-              className="text-sm font-medium hover:text-primary transition-colors"
+              className="text-sm font-medium hover:text-primary hover:text-gray-600 transition-colors"
             >
               Features
             </Link>
             <Link
               href="#about"
-              className="text-sm font-medium hover:text-primary transition-colors"
+              className="text-sm font-medium hover:text-primary hover:text-gray-600 transition-colors"
             >
               About
             </Link>
             <Link
               href="#faculties"
-              className="text-sm font-medium hover:text-primary transition-colors"
+              className="text-sm font-medium hover:text-primary hover:text-gray-600 transition-colors"
             >
               Faculties
             </Link>
             <Link
               href="#testimonials"
-              className="text-sm font-medium hover:text-primary transition-colors"
+              className="text-sm font-medium hover:text-primary hover:text-gray-600 transition-colors"
             >
               Testimonials
             </Link>
@@ -196,7 +247,7 @@ const Page = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t">
+          <div className="ml-4 mr-4 md:hidden border-t">
             <div className="container py-4 space-y-4">
               <nav className="flex flex-col space-y-3">
                 <Link
@@ -241,10 +292,10 @@ const Page = () => {
                 ) : (
                   <>
                     <Button variant="outline" className="w-full" asChild>
-                      <Link href="/login">Login</Link>
+                      <Link href="/auth/login">Login</Link>
                     </Button>
                     <Button className="w-full" asChild>
-                      <Link href="/signup">Sign Up</Link>
+                      <Link href="/auth/signup">Sign Up</Link>
                     </Button>
                   </>
                 )}
@@ -256,30 +307,85 @@ const Page = () => {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-background to-muted/50 py-20 md:py-32">
+        <section className="relative overflow-hidden bg-gradient-to-b from-background to-muted/50 py-6 md:py-6 p-8">
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="container relative">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6">
-                <Badge className="px-3 py-1 text-sm" variant="secondary">
-                  University of Ilorin & Beyond
-                </Badge>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+              <motion.div
+                className="text-center space-y-6"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1 }}
+                ref={ref}
+              >
+                {/* Icon + Badge */}
+                <motion.div
+                  className="flex flex-col items-center"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                >
+                  <motion.div
+                    whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                  <Image
+                    src="/Operation-save-my-CGPA-07.svg"
+                    alt="Operation Save My CGPA Logo"
+                    width={40}
+                    height={40}
+                    className="h-32 w-32 text-primary transition-transform duration-300"
+                  />
+                    {/*<GraduationCap className="h-20 w-20 text-primary transition-transform duration-300" />*/}
+                  </motion.div>
+                  <Badge className="px-3 py-1 text-lg" variant="secondary">
+                    University of Ilorin & Beyond
+                  </Badge>
+                </motion.div>
+
+                {/* Heading */}
+                <motion.h1
+                  className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
                   Boost Your Academic Performance
-                </h1>
-                <p className="text-xl text-muted-foreground">
-                  Daily learning, quizzes, and resources designed to help you
-                  excel in your studies and save your CGPA.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                </motion.h1>
+
+                {/* Description */}
+                <motion.p
+                  className="text-xl text-muted-foreground"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  Daily learning, quizzes, and resources designed to help you excel in
+                  your studies and save your CGPA.
+                </motion.p>
+
+                {/* Buttons */}
+                <motion.div
+                  className="flex flex-col sm:flex-row gap-3 pt-4 justify-center items-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
                   <Button size="lg" asChild>
                     <Link href="/auth/signup">Get Started</Link>
                   </Button>
                   <Button size="lg" variant="outline" asChild>
                     <Link href="#features">Learn More</Link>
                   </Button>
-                </div>
-                <div className="flex items-center gap-4 pt-4">
+                </motion.div>
+
+                {/* Avatar Group + Counter */}
+                <motion.div
+                  className="flex items-center gap-4 pt-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                >
                   <div className="flex -space-x-2">
                     {[1, 2, 3, 4].map((i) => (
                       <Avatar key={i} className="border-2 border-background">
@@ -291,11 +397,13 @@ const Page = () => {
                     ))}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">200+</span>{" "}
+                    <span className="font-medium text-foreground">
+                      {inView && <CountUp end={200} duration={2} />}+
+                    </span>{" "}
                     students already improving their grades
                   </div>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
               <div className="relative lg:h-[600px] rounded-lg overflow-hidden border shadow-xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-100 to-background"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -333,38 +441,49 @@ const Page = () => {
 
         {/* Stats Section */}
         <section className="py-12 bg-muted/30">
-          <div className="container">
+          <div className="container" ref={ref}>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+              {/* Active Students */}
               <div className="flex flex-col items-center text-center p-4">
                 <Users className="h-8 w-8 text-primary mb-2" />
-                <div className="text-3xl font-bold">100+</div>
+                <div className="text-3xl font-bold">
+                  {inView && <CountUp end={100} duration={2} />}+
+                </div>
                 <p className="text-sm text-muted-foreground">Active Students</p>
               </div>
+
+              {/* Courses Covered */}
               <div className="flex flex-col items-center text-center p-4">
                 <BookOpen className="h-8 w-8 text-primary mb-2" />
-                <div className="text-3xl font-bold">30+</div>
+                <div className="text-3xl font-bold">
+                  {inView && <CountUp end={30} duration={2} />}+
+                </div>
                 <p className="text-sm text-muted-foreground">Courses Covered</p>
               </div>
+
+              {/* Grade Improvement */}
               <div className="flex flex-col items-center text-center p-4">
                 <Award className="h-8 w-8 text-primary mb-2" />
-                <div className="text-3xl font-bold">85%</div>
-                <p className="text-sm text-muted-foreground">
-                  Grade Improvement
-                </p>
+                <div className="text-3xl font-bold">
+                  {inView && <CountUp end={85} duration={2} />}%
+                </div>
+                <p className="text-sm text-muted-foreground">Grade Improvement</p>
               </div>
+
+              {/* Quizzes Completed */}
               <div className="flex flex-col items-center text-center p-4">
                 <CheckCircle className="h-8 w-8 text-primary mb-2" />
-                <div className="text-3xl font-bold">500+</div>
-                <p className="text-sm text-muted-foreground">
-                  Quizzes Completed
-                </p>
+                <div className="text-3xl font-bold">
+                  {inView && <CountUp end={500} duration={2.5} />}+
+                </div>
+                <p className="text-sm text-muted-foreground">Quizzes Completed</p>
               </div>
             </div>
           </div>
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-20">
+        <section id="features" className="p-4 py-20">
           <div className="container">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <Badge className="mb-4">Features</Badge>
@@ -377,13 +496,13 @@ const Page = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="p-2 text-center grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {features.map((feature, index) => (
                 <Card
                   key={index}
                   className="overflow-hidden border border-muted transition-all hover:shadow-md"
                 >
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 flex flex-col items-center text-center">
                     <div className="rounded-full bg-primary/10 w-16 h-16 flex items-center justify-center mb-4">
                       {feature.icon}
                     </div>
@@ -401,7 +520,7 @@ const Page = () => {
         </section>
 
         {/* About Section */}
-        <section id="about" className="py-20 bg-muted/30">
+        <section id="about" className="p-6 py-20 bg-muted/30">
           <div className="container">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
@@ -433,20 +552,21 @@ const Page = () => {
                 </div>
               </div>
               <div className="space-y-6 pl-6 md:pl-10">
-                <Badge>About Us</Badge>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-                  Our Mission to Improve Academic Performance
-                </h2>
-                <p className="text-lg text-muted-foreground">
-                  Operation Save My CGPA was created by students who understand
-                  the challenges of university education. We&apos;re dedicated to
-                  providing tools that make learning more effective, engaging,
-                  and accessible.
-                </p>
-
+                <div className="text-center p-4">
+                  <Badge>About Us</Badge>
+                  <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+                    Our Mission is to Improve Academic Performance
+                  </h2>
+                  <p className="text-lg text-muted-foreground">
+                    Operation Save My CGPA was created by students who understand
+                    the challenges of university education. We&apos;re dedicated to
+                    providing tools that make learning more effective, engaging,
+                    and accessible.
+                  </p>
+                </div>
                 <div className="space-y-4 pt-4">
                   <div className="flex gap-3">
-                    <div className="rounded-full bg-primary/10 p-2 h-fit">
+                    <div className="mt-2 rounded-full bg-primary/10 p-2 h-fit">
                       <CheckCircle className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -458,7 +578,7 @@ const Page = () => {
                     </div>
                   </div>
                   <div className="flex gap-3">
-                    <div className="rounded-full bg-primary/10 p-2 h-fit">
+                    <div className="mt-2 rounded-full bg-primary/10 p-2 h-fit">
                       <CheckCircle className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -470,29 +590,29 @@ const Page = () => {
                     </div>
                   </div>
                   <div className="flex gap-3">
-                    <div className="rounded-full bg-primary/10 p-2 h-fit">
+                    <div className="mt-2 rounded-full bg-primary/10 p-2 h-fit">
                       <CheckCircle className="h-5 w-5 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-semibold">Community Support</h3>
                       <p className="text-muted-foreground">
-                        Connect with peers and mentors for collaborative
-                        learning.
+                        Connect with peers and mentors for collaborative learning.
                       </p>
                     </div>
                   </div>
                 </div>
-
-                <Button size="lg" className="mt-4" asChild>
-                  <Link href="/about">Learn More About Us</Link>
-                </Button>
+                <div className="text-center">
+                  <Button size="lg" className="mt-4" asChild>
+                    <Link href="/about">Learn More About Us</Link>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Faculties Section */}
-        <section id="faculties" className="py-20">
+        <section id="faculties" className="p-6 py-20">
           <div className="container">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <Badge className="mb-4">Faculties</Badge>
@@ -521,7 +641,7 @@ const Page = () => {
         </section>
 
         {/* How It Works Section */}
-        <section className="py-20 bg-muted/30">
+        <section className="p-8 py-20 bg-muted/30">
           <div className="container">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <Badge className="mb-4">How It Works</Badge>
@@ -591,7 +711,7 @@ const Page = () => {
         </section>
 
         {/* Testimonials Section */}
-        <section id="testimonials" className="py-20">
+        <section id="testimonials" className="p-4 py-20">
           <div className="container">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <Badge className="mb-4">Testimonials</Badge>
@@ -604,7 +724,7 @@ const Page = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="mr-4 ml-4 grid grid-cols-1 md:grid-cols-3 gap-8">
               {testimonials.map((testimonial, index) => (
                 <Card
                   key={index}
@@ -641,46 +761,86 @@ const Page = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-primary text-primary-foreground">
-          <div className="container">
-            <div className="text-center max-w-3xl mx-auto">
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.0, ease: "easeOut" }}
+          viewport={{ once: true }}
+          className="relative p-6 mr-8 ml-8 py-14 bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 text-primary-foreground rounded-lg shadow-xl overflow-hidden"
+        >
+          {/* Floating particles */}
+          <canvas
+            id="particle-canvas"
+            className="absolute top-0 left-0 w-full h-full z-0"
+          />
+
+          {/* Animated background shapes */}
+          <div className="absolute w-40 h-40 bg-pink-500 opacity-20 rounded-full -top-10 -left-10 animate-pulse blur-2xl z-0" />
+          <div className="absolute w-32 h-32 bg-blue-400 opacity-20 rounded-full -bottom-10 right-10 animate-ping blur-xl z-0" />
+
+          <div className="relative z-10 container">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+              viewport={{ once: true }}
+              className="text-center max-w-3xl mx-auto"
+            >
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
                 Ready to Boost Your Academic Performance?
               </h2>
               <p className="text-xl opacity-90 mb-8">
-                Join thousands of students who are already improving their
-                grades with Operation Save My CGPA.
+                Join thousands of students who are already improving their grades with Operation Save My CGPA.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" variant="secondary" asChild>
+
+              {/* Buttons with hover effects */}
+              <motion.div
+                className="flex flex-col sm:flex-row gap-4 justify-center"
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="hover:scale-110 hover:shadow-xl transition-transform duration-300"
+                  asChild
+                >
                   <Link href="/auth/signup">Sign Up Now</Link>
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="bg-transparent border-primary-foreground hover:bg-primary-foreground hover:text-primary"
+                  className="bg-transparent border-primary-foreground hover:bg-primary-foreground hover:text-primary hover:scale-110 hover:shadow-xl transition-transform duration-300"
                   asChild
                 >
                   <Link href="/about">Learn More</Link>
                 </Button>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
-        </section>
+        </motion.section>
       </main>
 
       {/* Footer */}
-      <footer className="bg-muted py-12">
+      <footer className="p-8 bg-muted py-12">
         <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <GraduationCap className="h-6 w-6 text-primary" />
+              <div className="flex justify-center text-center gap-2">
+                <Image
+                  src="/Operation-save-my-CGPA-07.svg"
+                  alt="Operation Save My CGPA Logo"
+                  width={30}
+                  height={30}
+                  className="h-15 w-15 text-primary"
+                />
                 <span className="text-xl font-bold">
                   Operation Save My CGPA
                 </span>
               </div>
-              <p className="text-muted-foreground">
+              <p className="text-center text-muted-foreground">
                 Empowering students to achieve academic excellence through daily
                 learning and comprehensive resources.
               </p>
@@ -793,8 +953,8 @@ const Page = () => {
             </div>
           </div>
 
-          <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm text-muted-foreground">
+          <div className="border-t mt-12 pt-8 p-4 flex flex-col md:flex-row justify-between bg-amber-100 rounded-lg items-center">
+            <p className="text-sm md:text-md sm:text-sm text-muted-foreground">
               © {new Date().getFullYear()} Operation Save My CGPA. All rights
               reserved.
             </p>
