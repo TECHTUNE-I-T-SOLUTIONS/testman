@@ -4,6 +4,14 @@ import Course from "@/lib/models/course";
 import Exam from "@/lib/models/exams";
 import { connectdb } from "@/lib/connectdb";
 
+type Answer = {
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  studentAnswer: string;
+  isCorrect: boolean;
+};
+
 export async function GET(req: Request) {
   await connectdb();
   const { searchParams } = new URL(req.url);
@@ -67,7 +75,7 @@ export async function GET(req: Request) {
         score: result.score,
         totalQuestions: result.totalMarks,
         createdAt: result.createdAt,
-        answers: result.answers.map((ans) => ({
+        answers: result.answers.map((ans: Answer) => ({
           question: ans.question,
           options: ans.options,
           correctAnswer: ans.correctAnswer,
@@ -121,7 +129,7 @@ const results = await Result.find()
       totalMarks: result.totalMarks,
       grade,
       createdAt: result.createdAt,
-      answers: result.answers.map((ans) => ({
+      answers: result.answers.map((ans: Answer) => ({
         question: ans.question,
         options: ans.options,
         correctAnswer: ans.correctAnswer,

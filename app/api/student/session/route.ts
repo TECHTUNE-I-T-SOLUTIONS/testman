@@ -1,7 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server"; 
 import { connectdb } from "@/lib/connectdb";
 import Student from "@/lib/models/student";
 import jwt from "jsonwebtoken";
+
+// Define expected JWT payload
+interface JwtPayload {
+  id: string;
+  // Add more fields if needed from your JWT payload
+}
 
 // GET: Get currently logged-in student (from cookie/token)
 export async function GET(req: Request) {
@@ -12,8 +18,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
     const student = await Student.findById(decoded.id).select("-password");
+
     if (!student) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
@@ -32,6 +39,7 @@ export async function GET(req: Request) {
       { status: 200 }
     );
   } catch (error) {
+    console.error("GET student session error:", error);
     return NextResponse.json(
       { error: "Failed to retrieve student session" },
       { status: 500 }
@@ -50,8 +58,8 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
 
-    if (loggedIn) student.loggedIn = loggedIn;
-    if (status) student.status = status;
+    if (loggedIn !== undefined) student.loggedIn = loggedIn;
+    if (status !== undefined) student.status = status;
 
     await student.save();
     return NextResponse.json(
@@ -59,6 +67,7 @@ export async function PUT(req: Request) {
       { status: 200 }
     );
   } catch (error) {
+    console.error("PUT student session error:", error);
     return NextResponse.json(
       { error: "Failed to update student session info" },
       { status: 500 }

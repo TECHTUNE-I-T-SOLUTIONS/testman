@@ -34,6 +34,14 @@ const Page = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { ref, inView } = useInView({ triggerOnce: true });  
 
+  type Particle = {
+    x: number;
+    y: number;
+    radius: number;
+    speedX: number;
+    speedY: number;
+  };
+
   // Check if user is logged in (this would be replaced with your actual auth logic)
   useEffect(() => {
     // Example: Check localStorage or session for auth token
@@ -46,11 +54,10 @@ const Page = () => {
   }, []);
 
   useEffect(() => {
-    // Optional: Use tsParticles or particles.js if you prefer
     const canvas = document.getElementById("particle-canvas") as HTMLCanvasElement;
     if (canvas) {
       const ctx = canvas.getContext("2d");
-      let particles: any[] = [];
+      let particles: Particle[] = [];
 
       const createParticles = () => {
         particles = Array.from({ length: 30 }, () => ({
@@ -84,6 +91,7 @@ const Page = () => {
       animate();
     }
   }, []);
+
 
 
   const features = [

@@ -2,7 +2,12 @@
 import { useState, useEffect } from "react";
 
 interface Course {
-  id: number;
+  id: number | string;
+  name: string;
+}
+
+interface RawCourse {
+  _id: string;
   name: string;
 }
 
@@ -13,13 +18,19 @@ export default function Profile() {
   useEffect(() => {
     fetch("/api/courses")
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: RawCourse[]) => {
         if (Array.isArray(data)) {
-          setCourses(data);
+          const cleanedCourses = data.map((course) => ({
+            id: course._id,
+            name: course.name,
+          }));
+          setCourses(cleanedCourses);
         }
       })
       .catch((error) => console.error("Error fetching courses:", error));
   }, []);
+
+
 
   const handleChangePassword = async () => {
     if (!newPassword) return alert("Enter new password");

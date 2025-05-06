@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { Clock, AlertCircle, CheckCircle, HelpCircle, ArrowLeft, Send, Loader2 } from "lucide-react"
 
@@ -129,18 +129,6 @@ export default function AttemptExam() {
     }
   }, [timeLeft])
 
-  // Auto-submit when time expires
-  useEffect(() => {
-    if (timeLeft === 0) {
-      toast({
-        title: "Time's up!",
-        description: "Your exam is being submitted automatically.",
-        variant: "destructive",
-      })
-
-      handleSubmit(true)
-    }
-  }, [timeLeft])
 
   // Handle option selection
   const handleOptionChange = (questionId: string, selectedOption: string) => {
@@ -166,46 +154,57 @@ export default function AttemptExam() {
   }
 
   // Submit exam
-  const handleSubmit = async (isAutoSubmit = false) => {
-    if (!exam || submitting) return
+  const handleSubmit = useCallback(async (isAutoSubmit = false) => {
+    if (!exam || submitting) return;
 
     if (!isAutoSubmit && !showConfirmSubmit) {
-      setShowConfirmSubmit(true)
-      return
+      setShowConfirmSubmit(true);
+      return;
     }
 
     try {
-      setSubmitting(true)
+      setSubmitting(true);
       const res = await fetch(`/api/exams/${examId}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answers }),
-      })
+      });
 
-      if (!res.ok) throw new Error("Failed to submit exam")
+      if (!res.ok) throw new Error("Failed to submit exam");
 
       toast({
         title: "Success!",
         description: "Your exam has been submitted successfully.",
         variant: "default",
-      })
+      });
 
-      // Clear exam data from localStorage
-      localStorage.removeItem(`exam_start_${examId}`)
-
-      // Redirect to results page
-      router.push("/student/results")
+      localStorage.removeItem(`exam_start_${examId}`);
+      router.push("/student/results");
     } catch (error) {
-      console.error("Error submitting exam:", error)
+      console.error("Error submitting exam:", error);
       toast({
         title: "Submission failed",
         description: "There was an error submitting your exam. Please try again.",
         variant: "destructive",
-      })
-      setSubmitting(false)
-      setShowConfirmSubmit(false)
+      });
+      setSubmitting(false);
+      setShowConfirmSubmit(false);
     }
-  }
+  }, [exam, submitting, showConfirmSubmit, toast, examId, answers, router]);
+
+  // Auto-submit when time expires
+  useEffect(() => {
+    if (timeLeft === 0) {
+      toast({
+        title: "Time's up!",
+        description: "Your exam is being submitted automatically.",
+        variant: "destructive",
+      });
+
+      handleSubmit(true);
+    }
+  }, [timeLeft, toast, handleSubmit]);
+
 
   // Cancel submission confirmation
   const cancelSubmit = () => {

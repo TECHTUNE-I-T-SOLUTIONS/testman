@@ -36,7 +36,7 @@ const AppSidebar = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
-  const { state } = useSidebar()
+  const { state, setOpenMobile } = useSidebar()
   const isCollapsed = state === "collapsed"
   const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -60,14 +60,6 @@ const AppSidebar = () => {
 
   // Mobile trigger that's visible on small screens
   const MobileSidebarTrigger = () => {
-    const { setOpenMobile } = useSidebar()
-
-    useEffect(() => {
-      if ((showInactiveModal || showLogoutConfirm) && window.innerWidth < 768) {
-        setOpenMobile(false)
-      }
-    }, [showInactiveModal, showLogoutConfirm, setOpenMobile])
-    
     return (
       <Button
         variant="ghost"
@@ -82,6 +74,7 @@ const AppSidebar = () => {
   }
 
 
+
   const [student, setStudent] = useState<{
     name: string;
     matricNumber: string;
@@ -92,11 +85,21 @@ const AppSidebar = () => {
 
   useEffect(() => {
     const fetchStudent = async () => {
-      const studentData = await getStudentFromToken()
+      const studentData = await getStudentFromToken() as {
+        name: string;
+        matricNumber: string;
+        id: string;
+        status?: "Active" | "Inactive";
+      };
       if (!studentData) {
         router.push("/auth/login")
       } else {
-        setStudent(studentData)
+        setStudent({
+          name: studentData.name,
+          matricNumber: studentData.matricNumber,
+          loggedIn: "true", // Or however you determine this
+          status: studentData.status ?? "Active", // Adjust if status can be missing
+        })
       }
       if (studentData.status === "Inactive") {
         setShowInactiveModal(true);
@@ -105,6 +108,13 @@ const AppSidebar = () => {
 
     fetchStudent()
   }, [router])
+
+  useEffect(() => {
+    if ((showInactiveModal || showLogoutConfirm) && window.innerWidth < 768) {
+      setOpenMobile(false);
+    }
+  }, [showInactiveModal, showLogoutConfirm, setOpenMobile]);
+
 
   const navItems = [
     { label: "Home", path: "/student", icon: <House className="h-5 w-5" /> },
@@ -264,7 +274,7 @@ const AppSidebar = () => {
                 onClick={() => {
                   const adminPhone = "2348083191228";
                   const message = encodeURIComponent(
-                    `Hello Admin,\n\nMy name is ${studentName}. I'm trying to access my account on Operation Save my CGPA, but it shows that my account is inactive.\n\nKindly help me restore access to the full resources.\n\nThank you!`
+                    `Hello Admin,\n\nMy name is ${student?.name?.split(" ")[0]} I'm trying to access my account on Operation Save my CGPA, but it shows that my account is inactive.\n\nKindly help me restore access to the full resources.\n\nThank you!`
                   );
                   window.open(`https://wa.me/${adminPhone}?text=${message}`, "_blank");
                 }}

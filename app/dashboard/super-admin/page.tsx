@@ -2,16 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  BarChart3,
   Users,
   BookOpen,
   GraduationCap,
   Calendar,
   Clock,
-  ArrowUpRight,
   Activity,
   CheckCircle2,
   AlertCircle,
@@ -22,7 +19,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -31,22 +27,46 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
+interface Student {
+  _id: string;
+  name: string;
+  email: string;
+  averageScore?: number;
+}
+
+interface ActivityItem {
+  id: number;
+  action: string;
+  time: string;
+  status: "success" | "info" | "warning" | string;
+}
+
+
 export default function AdminDashboardPage() {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState("");
   const [showNeedingHelp, setShowNeedingHelp] = useState(false);
-  const [needingHelpStudents, setNeedingHelpStudents] = useState([]);
+  const [needingHelpStudents, setNeedingHelpStudents] = useState<Student[]>([]);
 
-  const [dashboardStats, setDashboardStats] = useState({
+  const [dashboardStats, setDashboardStats] = useState<{
+    totalStudents: number;
+    totalCourses: number;
+    activeExams: number;
+    completedExams: number;
+    studentProgress: number;
+    recentActivities: ActivityItem[];
+    needingHelpCount: number;
+  }>({
     totalStudents: 0,
     totalCourses: 0,
     activeExams: 0,
     completedExams: 0,
     studentProgress: 0,
     recentActivities: [],
+    needingHelpCount: 0,
   });
+
 
   const [loading, setLoading] = useState(true);
 
@@ -292,12 +312,12 @@ export default function AdminDashboardPage() {
                 <CardDescription>These students may require academic support.</CardDescription>
               </CardHeader>
                 <CardContent>
-                  {needingHelpStudents.length === 0 ? (
+                  {needingHelpStudents?.length === 0 ? (
                     <p className="text-muted-foreground">No students currently flagged as needing help.</p>
                   ) : (
                     <div className="max-h-64 overflow-y-auto pr-2">
                       <ul className="space-y-3">
-                        {needingHelpStudents.map((student: any) => (
+                        {needingHelpStudents.map((student: Student) => (
                           <li key={student._id} className="flex items-center justify-between bg-muted p-3 rounded-md">
                             <div>
                               <p className="font-medium">{student.name}</p>

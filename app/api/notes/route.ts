@@ -8,14 +8,21 @@ import { Readable } from "stream";
 
 // Needed to convert Web Request to Node Request
 function toNodeRequest(request: Request): IncomingMessage {
-  const readable = Readable.fromWeb(request.body as ReadableStream<Uint8Array>);
+  if (!request.body) {
+    throw new Error("Request body is null – cannot convert to Node readable stream.");
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const readable = Readable.fromWeb(request.body as any);
   const nodeRequest = Object.assign(readable, {
     headers: Object.fromEntries(request.headers.entries()),
     method: request.method,
     url: request.url,
   }) as unknown as IncomingMessage;
+
   return nodeRequest;
 }
+
 
 // Helper to wrap formidable in a Promise
 function parseForm(req: IncomingMessage): Promise<{ fields: formidable.Fields; files: formidable.Files }> {

@@ -3,15 +3,17 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Upload, FileSearch, View } from "lucide-react";
-import CourseDropdown from "@/components/dashboard/manage-questions/questions/CourseDropdown"; // Reuse this
+import CourseDropdown from "@/components/dashboard/manage-questions/questions/CourseDropdown";
 import Header from "@/components/dashboard/Header";
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 interface Course {
   _id: string;
   title: string;
   department: string;
   faculty: string;
 }
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 interface Note {
   _id: string;
@@ -22,20 +24,12 @@ interface Note {
 }
 
 export default function ManageNotesPage() {
-  const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [notes, setNotes] = useState<Note[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState<string>("");
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [search, setSearch] = useState<string>("");
-
-  useEffect(() => {
-    fetch("/api/courses")
-      .then((res) => res.json())
-      .then((data) => setCourses(data))
-      .catch(() => toast.error("Failed to load courses"));
-  }, []);
 
   useEffect(() => {
     if (selectedCourse) {
@@ -96,8 +90,10 @@ export default function ManageNotesPage() {
         setFile(null);
         setTitle("");
         setPreviewUrl("");
-      } catch (err: any) {
-        toast.error(err.message || "Upload failed");
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Upload failed";
+        toast.error(errorMessage);
       }
     };
 

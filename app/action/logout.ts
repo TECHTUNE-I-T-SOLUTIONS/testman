@@ -6,8 +6,8 @@ import { connectdb } from "@/lib/connectdb";
 import Student from "@/lib/models/student";
 
 export async function logoutStudent() {
-  const cookieStore = cookies();
-  const token = cookieStore.get("token")?.value;
+  const cookieStore = await cookies(); // <-- Await here
+  const token = (await cookieStore).get("token")?.value;
 
   if (!token) return;
 
@@ -30,6 +30,5 @@ export async function logoutStudent() {
     console.error("❌ Logout error:", error);
   }
 
-  // Clear the cookie regardless
-  cookieStore.delete("token");
+  (await cookieStore).delete("token");
 }

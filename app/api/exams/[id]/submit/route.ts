@@ -9,10 +9,12 @@ import Student from "@/lib/models/student";
 interface DetailedResult {
   questionId: string;
   question: string;
+  options: Option[]; // I added this line
   correctAnswer: string;
   studentAnswer: string;
   isCorrect: boolean;
 }
+
 
 export async function POST(
   req: Request,

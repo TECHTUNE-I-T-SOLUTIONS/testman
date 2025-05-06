@@ -5,6 +5,7 @@ import { Trophy, ArrowUpRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { getStudentFromToken } from "@/utils/auth"; // ✅ Your token utility
+import { useCallback } from "react";
 
 interface Leader {
   name: string;
@@ -21,11 +22,10 @@ export default function Leaderboard() {
   const [showModal, setShowModal] = useState(false);
   const [fullLeaders, setFullLeaders] = useState<Leader[]>([]);
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async () => {
     try {
       const res = await fetch("/api/leaderboard");
       const data: Leader[] = await res.json();
-
       const topThree = data.slice(0, 3);
       setLeaders(topThree);
 
@@ -37,27 +37,19 @@ export default function Leaderboard() {
       setPrevTopScore(currentTopScore);
 
       const student = await getStudentFromToken();
-
       if (student?.id) {
         try {
           const resultsRes = await fetch(`/api/results/highestScore/${student.id}`);
-          if (!resultsRes.ok) {
-            setUserScore(0);
-          } else {
-            const results = await resultsRes.json();
-            setUserScore(results.highestScore || 0);
-          }
-        } catch (err) {
-          console.error("Failed to fetch highest score:", err);
+          const results = await resultsRes.ok ? await resultsRes.json() : { highestScore: 0 };
+          setUserScore(results.highestScore || 0);
+        } catch {
           setUserScore(0);
         }
 
         const fullLeaderboard = await fetch("/api/leaderboard/full");
         const allScores: Leader[] = await fullLeaderboard.json();
         setFullLeaders(allScores.slice(0, 10));
-        const rankIndex = allScores.findIndex(
-          (entry) => entry.name === student.name
-        );
+        const rankIndex = allScores.findIndex(entry => entry.name === student.name);
         setUserRank(rankIndex !== -1 ? rankIndex + 1 : null);
       } else {
         setUserScore(0);
@@ -68,16 +60,17 @@ export default function Leaderboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [prevTopScore]);
 
   useEffect(() => {
     fetchLeaderboard();
-  }, [prevTopScore]);
+  }, [fetchLeaderboard]);
 
   useEffect(() => {
     const interval = setInterval(fetchLeaderboard, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchLeaderboard]);
+
 
 
   const openModal = () => setShowModal(true);

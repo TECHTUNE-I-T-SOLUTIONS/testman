@@ -2,17 +2,40 @@ import { connectdb } from "@/lib/connectdb";
 import Result from "@/lib/models/results";
 import Exam from "@/lib/models/exams";
 import Course from "@/lib/models/course";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { Types } from "mongoose";
 
-export async function GET(
-  req: Request,
-  { params }: { params: { resultId: string } }
-) {
+type Params = {
+  params: {
+    resultId: string;
+  };
+};
+
+type Answer = {
+  questionId: string;
+  selectedOption: string;
+  correct: boolean;
+};
+
+type ResultWithExamAndCourse = {
+  _id: Types.ObjectId;
+  score: number;
+  totalMarks: number;
+  createdAt: Date;
+  answers: Answer[];
+  examId?: {
+    title?: string;
+    courseId?: {
+      name?: string;
+    };
+  };
+};
+
+export async function GET(req: NextRequest, { params }: Params) {
   await connectdb();
-  const { resultId } = params;
 
   try {
-    const result = await Result.findById(resultId)
+    const rawResult = await Result.findById(params.resultId)
       .populate({
         path: "examId",
         model: Exam,
@@ -25,9 +48,18 @@ export async function GET(
       })
       .lean();
 
-    if (!result) {
+    if (
+      !rawResult ||
+      typeof rawResult !== "object" ||
+      !("score" in rawResult) ||
+      !("totalMarks" in rawResult) ||
+      !("createdAt" in rawResult) ||
+      !("answers" in rawResult)
+    ) {
       return NextResponse.json({ message: "Result not found" }, { status: 404 });
     }
+
+    const result = rawResult as unknown as ResultWithExamAndCourse;
 
     return NextResponse.json({
       _id: result._id,
