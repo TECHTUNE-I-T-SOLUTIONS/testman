@@ -18,6 +18,16 @@ interface ParsedQuestion {
   options: Option[];
 }
 
+type ExcelRow = {
+  Question?: string;
+  "Option A"?: string;
+  "Option B"?: string;
+  "Option C"?: string;
+  "Option D"?: string;
+  Answer?: string;
+};
+
+
 export default function FileUpload({ selectedCourse }: Props) {
   const [previewQuestions, setPreviewQuestions] = useState<ParsedQuestion[]>([]);
 
@@ -34,7 +44,7 @@ export default function FileUpload({ selectedCourse }: Props) {
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      const formatted = jsonData.map((item: any) => ({
+      const formatted = (jsonData as ExcelRow[]).map((item) => ({
         questionText: item["Question"] || "",
         options: [
           { text: item["Option A"] || "", isCorrect: item["Answer"] === "A" },
@@ -70,8 +80,12 @@ export default function FileUpload({ selectedCourse }: Props) {
 
       toast.success("Bulk upload successful!");
       setPreviewQuestions([]);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to upload");
+    } catch (err) {
+      if (err instanceof Error) {
+        toast.error(err.message || "Failed to upload");
+      } else {
+        toast.error("Failed to upload due to unknown error");
+      }
     }
   };
 

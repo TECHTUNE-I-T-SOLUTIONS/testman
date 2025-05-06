@@ -13,6 +13,15 @@ interface Option {
   isCorrect: boolean;
 }
 
+interface ExcelRow {
+  Question: string;
+  "Option A": string;
+  "Option B": string;
+  "Option C": string;
+  "Option D": string;
+  Answer: "A" | "B" | "C" | "D";
+}
+
 interface ParsedQuestion {
   questionText: string;
   options: Option[];
@@ -32,9 +41,9 @@ export default function FileUpload({ selectedCourse }: Props) {
 
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      const jsonData = XLSX.utils.sheet_to_json<ExcelRow>(worksheet);
 
-      const formatted = jsonData.map((item: any) => ({
+      const formatted = jsonData.map((item) => ({
         questionText: item["Question"] || "",
         options: [
           { text: item["Option A"] || "", isCorrect: item["Answer"] === "A" },
@@ -43,6 +52,7 @@ export default function FileUpload({ selectedCourse }: Props) {
           { text: item["Option D"] || "", isCorrect: item["Answer"] === "D" },
         ].filter(opt => opt.text),
       }));
+
 
       setPreviewQuestions(formatted);
     };
@@ -70,8 +80,9 @@ export default function FileUpload({ selectedCourse }: Props) {
 
       toast.success("Bulk upload successful!");
       setPreviewQuestions([]);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to upload");
+    } catch (err) {
+      const error = err as Error;
+      toast.error(error.message || "Failed to upload");
     }
   };
 

@@ -38,27 +38,34 @@ const InstitutionalInfoForm = () => {
       .then((data) => setFaculties(Array.isArray(data) ? data : []))
       .catch(() => setErrors("Failed to load faculties."));
   }, []);
+  
   useEffect(() => {
     if (!selectedFaculty) return;
     setDepartments([]);
     setLevels([]);
     setFormData({ ...formData, faculty: selectedFaculty });
+
     fetch(`/api/departments?facultyId=${selectedFaculty}`)
       .then((res) => res.json())
-      .then((data) => setDepartments(Array.isArray(data) ? data : [])) // Ensure it's an array
+      .then((data) => setDepartments(Array.isArray(data) ? data : []))
       .catch(() => setErrors("Failed to load departments."));
-  }, [selectedFaculty]);
+  }, [selectedFaculty, setFormData]);
+
+
   useEffect(() => {
     if (!selectedDepartment) return;
     setLevels([]);
     setFormData({ ...formData, department: selectedDepartment });
+
     fetch(`/api/levels?departmentId=${selectedDepartment}`)
       .then((res) => res.json())
       .then((data) => {
-        setLevels(Array.isArray(data?.levels) ? data.levels : []); // Ensure it's an array
+        setLevels(Array.isArray(data?.levels) ? data.levels : []);
       })
       .catch(() => setErrors("Failed to load levels."));
-  }, [selectedDepartment]);
+  }, [selectedDepartment, setFormData]);
+
+
   return (
     <>
       <CardHeader>

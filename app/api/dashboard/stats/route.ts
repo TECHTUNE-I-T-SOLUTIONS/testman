@@ -6,6 +6,21 @@ import Exam from "@/lib/models/exams";
 import Result from "@/lib/models/results";
 import Note from "@/lib/models/note";
 import Question from "@/lib/models/question";
+import { Types } from "mongoose";
+
+interface StudentLean {
+  _id: Types.ObjectId | string;
+  name?: string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+}
+
+interface ActivityItem {
+  action: string;
+  time: string;
+  status: "success" | "info" | "warning" | string;
+}
+
 
 export async function GET() {
   try {
@@ -45,26 +60,31 @@ export async function GET() {
     });
 
     const needingHelpIds = Array.from(studentScoresMap.entries())
-      .filter(([_, scores]) => {
+      .filter(([, scores]) => {
+        if (!Array.isArray(scores) || scores.length === 0) return false;
         const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
         return avg < averageScore;
       })
       .map(([id]) => id);
 
-    const needingHelpDetailsRaw = await Student.find({ _id: { $in: needingHelpIds } }).lean();
+
+
+    const needingHelpDetailsRaw = await Student.find({ _id: { $in: needingHelpIds } }).lean<StudentLean[]>();
 
     const needingHelpDetails = needingHelpDetailsRaw.map((student) => {
       const scores = studentScoresMap.get(student._id.toString()) || [];
       const avgScore = scores.length > 0
-        ? scores.reduce((a, b) => a + b, 0) / scores.length
+        ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length
         : 0;
+
       return {
         ...student,
         averageScore: avgScore,
       };
     });
 
-    const activityPool = [];
+
+    const activityPool: ActivityItem[] = [];
 
     // Exams
     exams.forEach((exam) => {

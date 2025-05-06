@@ -13,7 +13,6 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
   useSidebar,
-  SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
 } from "@/components/ui/sidebar"
@@ -88,7 +87,6 @@ const AdminSidebar = () => {
   const { data: session } = useSession()
 
   const adminEmail = session?.user?.email ?? "admin@example.com"
-  const adminName = session?.user?.name ?? "Admin User"
   const adminRole = session?.user?.role ?? "Admin"
   const adminMatric = session?.user?.matricNumber ?? "ADMIN-2023-001"
   const isSuperAdmin = adminRole === "super-admin"
@@ -143,7 +141,7 @@ const AdminSidebar = () => {
       ],
     },
     { label: "Profile", path: "/dashboard/super-admin/profile", icon: <Settings className="h-5 w-5" /> },
-  ].filter(Boolean)
+  ].filter((item): item is Exclude<typeof item, false> => item !== false)
 
   const toggleDropdown = (label: string) => {
     setOpenDropdowns((prev) => ({ ...prev, [label]: !prev[label] }))
@@ -271,6 +269,10 @@ const AdminSidebar = () => {
         </UISidebarContent>
 
         <SidebarFooter className="border-t p-4 flex flex-col gap-2">
+          <div className="text-sm text-muted-foreground">
+            ID: {adminMatric}
+          </div>          
+
           <Button
             variant="outline"
             className="w-full text-sm"

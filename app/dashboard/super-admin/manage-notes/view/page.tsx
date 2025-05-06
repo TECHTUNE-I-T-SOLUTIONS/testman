@@ -3,15 +3,8 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { Trash, Edit, Search, FileText } from "lucide-react";
-import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import CourseDropdown from "@/components/dashboard/manage-questions/questions/CourseDropdown";
-
-interface Course {
-  _id: string;
-  name: string;
-  code: string;
-}
 
 interface Note {
   _id: string;
@@ -26,11 +19,11 @@ interface Note {
 }
 
 export default function ViewNotesPage() {
-  const [courses, setCourses] = useState<Course[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [filteredNotes, setFilteredNotes] = useState<Note[]>([]);
   const [search, setSearch] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
+
 
   const [modalOpen, setModalOpen] = useState(false);
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
@@ -39,15 +32,10 @@ export default function ViewNotesPage() {
   const [newFileUrl, setNewFileUrl] = useState("");
   const [newFileType, setNewFileType] = useState("");
 
-  const router = useRouter();
 
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const courseRes = await fetch("/api/courses");
-        const courseData = await courseRes.json();
-        setCourses(courseData);
-
         const noteRes = await fetch("/api/notes");
         const noteData = await noteRes.json();
         setNotes(noteData);

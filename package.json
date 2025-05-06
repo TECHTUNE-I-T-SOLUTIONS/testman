@@ -65,6 +65,7 @@
     "@eslint/eslintrc": "^3",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
+    "@types/formidable": "^3.4.5",
     "@types/jsonwebtoken": "^9.0.8",
     "@types/lodash.debounce": "^4.0.9",
     "@types/node": "^20",
