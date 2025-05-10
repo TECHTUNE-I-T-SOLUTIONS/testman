@@ -1,13 +1,13 @@
-// ✅ app/api/leaderboard/full/route.ts
+// ✅ app/api/leaderboard/full/route.ts 
 import { NextResponse } from "next/server";
 import { connectdb } from "@/lib/connectdb";
-import Result from "@/lib/models/results";
+import NewResult from "@/lib/models/newresult";
 
 export async function GET() {
   try {
     await connectdb();
 
-    const fullScores = await Result.aggregate([
+    const fullScores = await NewResult.aggregate([
       {
         $group: {
           _id: "$studentId",
@@ -15,9 +15,10 @@ export async function GET() {
         }
       },
       { $sort: { totalScore: -1 } },
+      { $limit: 10 }, // ✅ Limit to top 10 scorers
       {
         $lookup: {
-          from: "students",
+          from: "students", // Ensure this matches your students collection name
           localField: "_id",
           foreignField: "_id",
           as: "student"

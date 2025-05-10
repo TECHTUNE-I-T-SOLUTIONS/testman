@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Search, FileText, Filter, Download, BarChart2, AlertCircle, GraduationCap } from 'lucide-react'
+import { Result } from "@/types/result"
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -12,16 +13,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import ResultTable from "@/components/dashboard/manage-questions/results/ResultTable"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 
-interface Result {
-  _id: string
-  studentId: { _id: string; name: string }
-  examId: { _id: string; title: string }
-  score: number
-  totalMarks: number
-  grade: string
-  answers?: { questionId: { questionText: string }; isCorrect: boolean }[]
-}
+
+// interface Result {
+//   _id: string
+//   studentId: { _id: string; name: string }
+//   examId: { _id: string; title: string }
+//   score: number
+//   totalMarks: number
+//   grade: string
+//   answers?: { questionId: { questionText: string }; isCorrect: boolean }[]
+// }
 
 export default function ResultPage() {
   const [results, setResults] = useState<Result[]>([])
@@ -90,7 +94,32 @@ export default function ResultPage() {
   }
 
   const handleExportResults = () => {
-    alert("Export functionality would be implemented here")
+    const doc = new jsPDF()
+    
+    doc.setFontSize(16)
+    doc.text("Student Examination Results", 14, 20)
+
+    const tableColumn = ["Student", "Exam", "Score", "Total Marks", "Grade"]
+    const tableRows: string[][] = []
+
+    filteredResults.forEach((result) => {
+      tableRows.push([
+        result.studentId.name,
+        result.examId.title,
+        result.score.toString(),
+        result.totalMarks.toString(),
+        result.grade,
+      ])
+    })
+
+    autoTable(doc, {
+      startY: 30,
+      head: [tableColumn],
+      body: tableRows,
+      theme: "grid",
+    })
+
+    doc.save("student-results.pdf")
   }
 
   return (

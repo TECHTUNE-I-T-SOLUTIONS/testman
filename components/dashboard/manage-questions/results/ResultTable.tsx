@@ -1,20 +1,29 @@
 import { useState } from "react";
 import ResultDetailsModal from "./ResultDetailsModal";
+import { Result } from "@/types/result"
 
-interface Answer {
-  questionId: { questionText: string };
-  isCorrect: boolean;
-}
+// interface Option {
+//   text: string;
+//   isCorrect: boolean;
+// }
 
-interface Result {
-  _id: string;
-  studentId: { _id: string; name: string };
-  examId: { _id: string; title: string };
-  score: number;
-  grade: string;
-  totalMarks: number;
-  answers?: Answer[];
-}
+// interface Answer {
+//   questionId: string; // or `{ _id: string }` if you're populating
+//   question: string;
+//   options: Option[];
+//   correctAnswer: string;
+//   studentAnswer: string;
+//   isCorrect: boolean;
+// }
+
+// interface Result {
+//   _id: string;
+//   studentId: { _id: string; name: string };
+//   examId: { _id: string; title: string };
+//   score: number;
+//   totalMarks: number;
+//   answers?: Answer[];
+// }
 
 export default function ResultTable({ results }: { results: Result[] }) {
   const [selectedResult, setSelectedResult] = useState<Result | null>(null);

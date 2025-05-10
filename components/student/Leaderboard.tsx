@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Trophy, ArrowUpRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { getStudentFromToken } from "@/utils/auth"; // ✅ Your token utility
-import { useCallback } from "react";
+import { getStudentFromToken } from "@/utils/auth";
 
 interface Leader {
   name: string;
@@ -23,9 +22,30 @@ export default function Leaderboard() {
   const [fullLeaders, setFullLeaders] = useState<Leader[]>([]);
 
   const fetchLeaderboard = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await fetch("/api/leaderboard");
-      const data: Leader[] = await res.json();
+      const student = await getStudentFromToken();
+      if (!student?.matricNumber) throw new Error("Student not found in token");
+
+      const encodedMatric = encodeURIComponent(student.matricNumber);
+      const studentRes = await fetch(`/api/students/${encodedMatric}`);
+      if (!studentRes.ok) throw new Error("Failed to fetch student details");
+      const studentData = await studentRes.json();
+
+      const facultyId = studentData?.faculty?._id || studentData?.faculty;
+      if (!facultyId) throw new Error("Faculty ID not found");
+
+      // Fetch leaderboard
+      const leaderboardRes = await fetch(`/api/leaderboard?facultyId=${facultyId}`);
+      if (!leaderboardRes.ok) throw new Error("Failed to fetch leaderboard");
+
+      const dataRaw = await leaderboardRes.json();
+      const data: Leader[] = Array.isArray(dataRaw)
+        ? dataRaw
+        : dataRaw && typeof dataRaw === "object"
+        ? [dataRaw]
+        : [];
+
       const topThree = data.slice(0, 3);
       setLeaders(topThree);
 
@@ -36,27 +56,24 @@ export default function Leaderboard() {
       }
       setPrevTopScore(currentTopScore);
 
-      const student = await getStudentFromToken();
-      if (student?.id) {
-        try {
-          const resultsRes = await fetch(`/api/results/highestScore/${student.id}`);
-          const results = await resultsRes.ok ? await resultsRes.json() : { highestScore: 0 };
-          setUserScore(results.highestScore || 0);
-        } catch {
-          setUserScore(0);
-        }
+      // Fetch user's score
+      const resultsRes = await fetch(`/api/results/highestScore/${student.id}`);
+      const resultsData = resultsRes.ok ? await resultsRes.json() : null;
+      const score = resultsData?.highestScore ?? 0;
+      setUserScore(score);
 
-        const fullLeaderboard = await fetch("/api/leaderboard/full");
-        const allScores: Leader[] = await fullLeaderboard.json();
-        setFullLeaders(allScores.slice(0, 10));
-        const rankIndex = allScores.findIndex(entry => entry.name === student.name);
-        setUserRank(rankIndex !== -1 ? rankIndex + 1 : null);
-      } else {
-        setUserScore(0);
-        setUserRank(null);
-      }
+      // Full leaderboard for modal
+      setFullLeaders(data.slice(0, 10));
+
+      // Calculate user rank
+      const userIndex = data.findIndex((entry) => entry.name === student.name);
+      setUserRank(userIndex >= 0 ? userIndex + 1 : null);
     } catch (err) {
-      console.error(err);
+      console.error("Error loading leaderboard:", err);
+      setLeaders([]);
+      setFullLeaders([]);
+      setUserScore(0);
+      setUserRank(null);
     } finally {
       setLoading(false);
     }
@@ -64,14 +81,9 @@ export default function Leaderboard() {
 
   useEffect(() => {
     fetchLeaderboard();
-  }, [fetchLeaderboard]);
-
-  useEffect(() => {
     const interval = setInterval(fetchLeaderboard, 30000);
     return () => clearInterval(interval);
   }, [fetchLeaderboard]);
-
-
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
@@ -93,7 +105,7 @@ export default function Leaderboard() {
 
       {loading ? (
         <p className="text-muted-foreground text-sm">Loading leaderboard...</p>
-      ) : (
+      ) : leaders.length > 0 ? (
         <div className="space-y-3 animate-fade-in">
           {leaders.map((leader, index) => (
             <div
@@ -113,7 +125,12 @@ export default function Leaderboard() {
             </div>
           ))}
         </div>
+      ) : (
+        <p className="text-sm text-gray-500 text-center">
+          No leaderboard data available.
+        </p>
       )}
+
       <div className="mt-6 text-center">
         <button
           onClick={openModal}
@@ -143,22 +160,28 @@ export default function Leaderboard() {
             >
               ✖
             </button>
-            <h3 className="text-lg font-bold mb-4 text-center text-blue-800">🏆 Full Leaderboard</h3>
+            <h3 className="text-lg font-bold mb-4 text-center text-blue-800">
+              🏆 Full Leaderboard
+            </h3>
             <ul className="space-y-2 max-h-60 overflow-y-auto pr-1">
-              {fullLeaders.map((leader, index) => (
-                <li
-                  key={leader.name}
-                  className={cn(
-                    "flex justify-between px-4 py-2 rounded-md",
-                    index === 0 && "bg-yellow-100 font-bold",
-                    index === 1 && "bg-gray-100",
-                    index === 2 && "bg-orange-100"
-                  )}
-                >
-                  <span>{index + 1}. {leader.name}</span>
-                  <span>{leader.totalScore} pts</span>
-                </li>
-              ))}
+              {fullLeaders.length > 0 ? (
+                fullLeaders.map((leader, index) => (
+                  <li
+                    key={leader.name}
+                    className={cn(
+                      "flex justify-between px-4 py-2 rounded-md",
+                      index === 0 && "bg-yellow-100 font-bold",
+                      index === 1 && "bg-gray-100",
+                      index === 2 && "bg-orange-100"
+                    )}
+                  >
+                    <span>{index + 1}. {leader.name}</span>
+                    <span>{leader.totalScore} pts</span>
+                  </li>
+                ))
+              ) : (
+                <li className="text-center text-gray-500">No data to show.</li>
+              )}
             </ul>
             <div className="mt-4 text-sm text-center text-gray-700">
               Your Rank: {userRank ? `#${userRank}` : "Not ranked yet"} <br />

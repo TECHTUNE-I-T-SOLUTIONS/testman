@@ -1,15 +1,20 @@
 import { NextResponse } from "next/server";
-import Result from "@/lib/models/results";
+import NewResult from "@/lib/models/newresult";
 import Course from "@/lib/models/course";
 import Exam from "@/lib/models/exams";
 import { connectdb } from "@/lib/connectdb";
+import Question from "@/lib/models/question"; // ✅ Now it registers the schema
+import Student from "@/lib/models/student";
 
 type Answer = {
-  question: string;
-  options: string[];
-  correctAnswer: string;
-  studentAnswer: string;
+  questionId: {
+    questionText?: string;
+  };
   isCorrect: boolean;
+  question?: string;
+  options?: string[];
+  correctAnswer?: string;
+  studentAnswer?: string;
 };
 
 export async function GET(req: Request) {
@@ -25,10 +30,10 @@ export async function GET(req: Request) {
   try {
     // CASE 1: Fetch by Department
     if (departmentId && !studentId) {
-      const results = await Result.find()
+      const results = await NewResult.find({ departmentId })
         .populate({
           path: "studentId",
-          match: { department: departmentId },
+          model: Student,
           select: "name department",
         })
         .populate({
@@ -39,17 +44,16 @@ export async function GET(req: Request) {
         .limit(limit)
         .lean();
 
-      const filteredResults = results.filter((result) => result.studentId);
-      return NextResponse.json(filteredResults, { status: 200 });
+      return NextResponse.json(results, { status: 200 });
     }
 
     // CASE 2: Fetch by Student
     if (studentId) {
-      const results = await Result.find({ studentId })
+      const results = await NewResult.find({ studentId })
         .populate({
           path: "examId",
           model: Exam,
-          select: "title courseId questions",
+          select: "title courseId",
           populate: {
             path: "courseId",
             model: Course,
@@ -58,13 +62,18 @@ export async function GET(req: Request) {
         })
         .populate({
           path: "studentId",
+          model: Student,
           select: "name",
+        })
+        .populate({
+          path: "answers.questionId",
+          select: "questionText",
         })
         .skip(skip)
         .limit(limit)
         .lean();
 
-      const totalResults = await Result.countDocuments({ studentId });
+      const totalResults = await NewResult.countDocuments({ studentId });
       const totalPages = Math.ceil(totalResults / limit);
 
       const data = results.map((result) => ({
@@ -75,11 +84,10 @@ export async function GET(req: Request) {
         score: result.score,
         totalQuestions: result.totalMarks,
         createdAt: result.createdAt,
-        answers: result.answers.map((ans: Answer) => ({
-          question: ans.question,
-          options: ans.options,
-          correctAnswer: ans.correctAnswer,
-          studentAnswer: ans.studentAnswer,
+        answers: (result.answers as Answer[]).map((ans) => ({
+          questionId: {
+            questionText: ans.questionId?.questionText || "Unknown Question",
+          },
           isCorrect: ans.isCorrect,
         })),
       }));
@@ -87,61 +95,66 @@ export async function GET(req: Request) {
       return NextResponse.json({ results: data, totalPages }, { status: 200 });
     }
 
-// CASE 3: Fetch All
-const results = await Result.find()
-  .populate({
-    path: "studentId",
-    select: "name department",
-  })
-  .populate({
-    path: "examId",
-    model: Exam,
-    select: "title courseId questions",
-    populate: {
-      path: "courseId",
-      model: Course,
-      select: "name",
-    },
-  })
-  .skip(skip)
-  .limit(limit)
-  .lean();
+    // CASE 3: Fetch All
+    const results = await NewResult.find()
+      .populate({
+        path: "studentId",
+        model: Student,
+        select: "name department",
+      })
+      .populate({
+        path: "examId",
+        model: Exam,
+        select: "title courseId",
+        populate: {
+          path: "courseId",
+          model: Course,
+          select: "name",
+        },
+      })
+      .populate({
+        path: "answers.questionId",
+        model: Question,
+        select: "questionText",
+      })
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
-  const data = results.map((result) => {
-    const percentage = (result.score / result.totalMarks) * 100;
-    let grade = "F";
-    if (percentage >= 70) grade = "A";
-    else if (percentage >= 60) grade = "B";
-    else if (percentage >= 50) grade = "C";
-    else if (percentage >= 40) grade = "D";
+    const data = results.map((result) => {
+      const percentage = (result.score / result.totalMarks) * 100;
+      let grade = "F";
+      if (percentage >= 70) grade = "A";
+      else if (percentage >= 60) grade = "B";
+      else if (percentage >= 50) grade = "C";
+      else if (percentage >= 40) grade = "D";
 
-    return {
-      _id: result._id,
-      studentId: {
-        _id: result.studentId?._id || "",
-        name: result.studentId?.name || "Unknown Student",
-      },
-      examId: {
-        _id: result.examId?._id || "",
-        title: result.examId?.title || "Unknown Exam",
-      },
-      score: result.score,
-      totalMarks: result.totalMarks,
-      grade,
-      createdAt: result.createdAt,
-      answers: result.answers.map((ans: Answer) => ({
-        question: ans.question,
-        options: ans.options,
-        correctAnswer: ans.correctAnswer,
-        studentAnswer: ans.studentAnswer,
-        isCorrect: ans.isCorrect,
-      })),
-    };
-  });
+      return {
+        _id: result._id,
+        studentId: {
+          _id: result.studentId?._id || "",
+          name: result.studentId?.name || "Unknown Student",
+        },
+        examId: {
+          _id: result.examId?._id || "",
+          title: result.examId?.title || "Unknown Exam",
+        },
+        score: result.score,
+        totalMarks: result.totalMarks,
+        grade,
+        createdAt: result.createdAt,
+        answers: (result.answers as Answer[]).map((ans) => ({
+          questionId: ans.questionId,
+          question: ans.question,
+          options: ans.options,
+          correctAnswer: ans.correctAnswer,
+          studentAnswer: ans.studentAnswer,
+          isCorrect: ans.isCorrect,
+        })),
+      };
+    });
 
-  return NextResponse.json(data, { status: 200 });
-
-
+    return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error("Error fetching results:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

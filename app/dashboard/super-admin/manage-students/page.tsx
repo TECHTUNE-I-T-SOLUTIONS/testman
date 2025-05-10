@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Users, GraduationCap, School, BookOpen, AlertCircle, RefreshCw } from "lucide-react"
+import { Search, Users, AlertCircle, RefreshCw } from "lucide-react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -16,15 +16,16 @@ import StudentTable from "@/components/dashboard/manage-students/StudentTable"
 
 // Updated Student Type
 export type Student = {
-  _id: string
-  name: string
-  email: string
-  matricNumber: string
-  faculty: { _id: string; name: string }
-  department: { _id: string; name: string }
-  level: { _id: string; name: string }
-  isActive: boolean
-}
+  _id: string;
+  name: string;
+  email: string;
+  matricNumber: string;
+  faculty: { _id: string; name: string };
+  department: { _id: string; name: string };
+  level: { _id: string; name: string };
+  isActive: boolean; // Changed from string to boolean
+};
+
 
 export default function ManageStudents() {
   const [students, setStudents] = useState<Student[]>([])
@@ -45,7 +46,17 @@ export default function ManageStudents() {
       try {
         const res = await fetch("/api/students")
         if (!res.ok) throw new Error("Failed to fetch students")
-        const data: Student[] = await res.json()
+        const rawData: Student[] = await res.json()
+
+        const data = rawData.map(student => ({
+          ...student,
+          isActive:
+            student.isActive === true
+            // student.isActive === "true" ||
+            // student.isActive === 1
+            // student.isActive === "1"
+        }));
+
         setStudents(data)
         setFilteredStudents(data)
       } catch (error) {
@@ -59,14 +70,15 @@ export default function ManageStudents() {
     fetchStudents()
   }, [])
 
+
   useEffect(() => {
-    let filtered = students
+    let filtered = students;
 
     // Apply tab filter (active/inactive/all)
     if (activeTab === "active") {
-      filtered = filtered.filter((student) => student.isActive)
+      filtered = filtered.filter((student) => student.isActive === true);
     } else if (activeTab === "inactive") {
-      filtered = filtered.filter((student) => !student.isActive)
+      filtered = filtered.filter((student) => student.isActive === false);
     }
 
     // Apply faculty filter
@@ -94,22 +106,28 @@ export default function ManageStudents() {
       )
     }
 
-    setFilteredStudents(filtered)
-  }, [facultyFilter, departmentFilter, levelFilter, students, searchTerm, activeTab])
+    setFilteredStudents(filtered);
+  }, [facultyFilter, departmentFilter, levelFilter, students, searchTerm, activeTab]);
 
-  const handleActivate = async (id: string) => {
+  // Toggle isActive Status
+  const handleActivate = async (id: string, newStatus: boolean) => {
     try {
       await fetch("/api/students", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, isActive: true }),
+        body: JSON.stringify({ id, isActive: newStatus }),
       })
 
-      setStudents((prev) => prev.map((student) => (student._id === id ? { ...student, isActive: true } : student)))
+      setStudents((prev) =>
+        prev.map((student) =>
+          student._id === id ? { ...student, isActive: newStatus } : student
+        )
+      )
     } catch (error) {
-      console.error("Failed to activate student:", error)
+      console.error("Failed to update student status:", error)
     }
   }
+
 
   const handleDelete = async (id: string) => {
     try {
@@ -143,21 +161,29 @@ export default function ManageStudents() {
   // Calculate stats
   const stats = {
     total: students.length,
-    active: students.filter((s) => s.isActive).length,
-    inactive: students.filter((s) => !s.isActive).length,
+    active: students.filter((s) => s.isActive === true).length,
+    inactive: students.filter((s) => s.isActive === false).length,
   }
+
 
   return (
     <div className="space-y-6 p-6 md:p-8">
+      {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Users className="h-8 w-8 text-primary" />
             Manage Students
           </h1>
-          <p className="text-muted-foreground mt-1">View, filter, and manage student accounts</p>
+          <p className="text-muted-foreground mt-1">
+            View, filter, and manage student accounts
+          </p>
         </div>
-        <Button onClick={resetFilters} variant="outline" className="flex items-center gap-2">
+        <Button
+          onClick={resetFilters}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
           <RefreshCw className="h-4 w-4" />
           Reset Filters
         </Button>
@@ -165,6 +191,7 @@ export default function ManageStudents() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
+        {/* Total Students */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Students</CardTitle>
@@ -174,10 +201,15 @@ export default function ManageStudents() {
             <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
+
+        {/* Active Students */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Students</CardTitle>
-            <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
+            <Badge
+              variant="outline"
+              className="bg-green-100 text-green-800 hover:bg-green-100"
+            >
               Active
             </Badge>
           </CardHeader>
@@ -185,10 +217,15 @@ export default function ManageStudents() {
             <div className="text-2xl font-bold">{stats.active}</div>
           </CardContent>
         </Card>
+
+        {/* Inactive Students */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Inactive Students</CardTitle>
-            <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-100">
+            <Badge
+              variant="outline"
+              className="bg-red-100 text-red-800 hover:bg-red-100"
+            >
               Inactive
             </Badge>
           </CardHeader>
@@ -197,7 +234,7 @@ export default function ManageStudents() {
           </CardContent>
         </Card>
       </div>
-
+      
       {/* Main Content */}
       {loading ? (
         <Card>
@@ -229,10 +266,10 @@ export default function ManageStudents() {
               {(facultyFilter || departmentFilter || levelFilter) && " with applied filters"}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Filters and Search */}
-            <div className="flex flex-col space-y-4">
-              <div className="flex flex-col sm:flex-row gap-4">
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                {/* Filters and Search */}              
                 <div className="relative flex-1">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -241,88 +278,79 @@ export default function ManageStudents() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-8"
                   />
-                </div>
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
-                  <TabsList className="grid w-full grid-cols-3">
+                </div>              
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList>
                     <TabsTrigger value="all">All</TabsTrigger>
                     <TabsTrigger value="active">Active</TabsTrigger>
                     <TabsTrigger value="inactive">Inactive</TabsTrigger>
                   </TabsList>
                 </Tabs>
+
+                <div className="space-y-4 md:space-y-0 md:flex md:gap-4">
+                  <Select value={facultyFilter} onValueChange={setFacultyFilter}>
+                    <SelectTrigger className="w-full md:w-[150px]">
+                      <SelectValue placeholder="Faculty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {faculties.map((faculty) => (
+                        <SelectItem key={faculty} value={faculty}>
+                          {faculty}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                    <SelectTrigger className="w-full md:w-[150px]">
+                      <SelectValue placeholder="Department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {departments.map((department) => (
+                        <SelectItem key={department} value={department}>
+                          {department}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={levelFilter} onValueChange={setLevelFilter}>
+                    <SelectTrigger className="w-full md:w-[150px]">
+                      <SelectValue placeholder="Level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {levels.map((level) => (
+                        <SelectItem key={level} value={level}>
+                          {level}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Select value={facultyFilter} onValueChange={setFacultyFilter}>
-                  <SelectTrigger>
-                    <div className="flex items-center gap-2">
-                      <School className="h-4 w-4 text-muted-foreground" />
-                      <SelectValue placeholder="Select Faculty" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Faculties</SelectItem>
-                    {faculties.map((faculty) => (
-                      <SelectItem key={faculty} value={faculty}>
-                        {faculty}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-                  <SelectTrigger>
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="h-4 w-4 text-muted-foreground" />
-                      <SelectValue placeholder="Select Department" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Departments</SelectItem>
-                    {departments.map((department) => (
-                      <SelectItem key={department} value={department}>
-                        {department}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select value={levelFilter} onValueChange={setLevelFilter}>
-                  <SelectTrigger>
-                    <div className="flex items-center gap-2">
-                      <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                      <SelectValue placeholder="Select Level" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Levels</SelectItem>
-                    {levels.map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {level}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Student Table */}
+              {filteredStudents.length > 0 ? (
+                <StudentTable
+                  students={filteredStudents}
+                  onActivate={handleActivate} // uses boolean now
+                  onDelete={handleDelete}
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium">No Students Found</h3>
+                  <p className="text-muted-foreground max-w-md mt-2">
+                    {searchTerm || facultyFilter || departmentFilter || levelFilter
+                      ? "Try adjusting your search or filter criteria."
+                      : "No students are currently registered in the system."}
+                  </p>
+                </div>
+              )}
             </div>
-
-            {/* Student Table */}
-            {filteredStudents.length > 0 ? (
-              <StudentTable students={filteredStudents} onActivate={handleActivate} onDelete={handleDelete} />
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium">No Students Found</h3>
-                <p className="text-muted-foreground max-w-md mt-2">
-                  {searchTerm || facultyFilter || departmentFilter || levelFilter
-                    ? "Try adjusting your search or filter criteria."
-                    : "No students are currently registered in the system."}
-                </p>
-              </div>
-            )}
           </CardContent>
         </Card>
       )}
     </div>
   )
 }
-

@@ -340,6 +340,13 @@ export default function Results() {
                             style={{ width: `${formattedPercentage}%` }}
                           ></div>
                         </div>
+                        <div className="mt-2">
+                          <Link href={`/student/results/${result._id}`}>
+                            <button className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                              View Details
+                            </button>
+                          </Link>
+                        </div>              
                       </div>
                     </CardContent>
                   </Card>
@@ -430,3 +437,4 @@ function Calendar(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
+                                           

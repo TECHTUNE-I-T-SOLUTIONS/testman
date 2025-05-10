@@ -43,14 +43,15 @@ export async function POST(req: Request) {
         name: student.name,
         matricNumber: student.matricNumber,
         email: student.email,
-        status: student.status,
+        isActive: student.isActive, // 🔁 Replaced 'status' with 'isActive'
         loggedIn: student.loggedIn,
       },
       process.env.JWT_SECRET!,
       { expiresIn: "3d" }
     );
 
-    // ✅ Set session cookie
+
+    // ✅ Set session cookie and return response
     const response = NextResponse.json({
       message: "Login successful",
       student: {
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
         name: student.name,
         matricNumber: student.matricNumber,
         email: student.email,
-        status: student.status,
+        isActive: student.isActive, // 🔁 Replaced 'status' with 'isActive'
         loggedIn: student.loggedIn,
       },
     });
