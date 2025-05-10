@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { FC } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -28,8 +29,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getStudentFromToken } from "@/utils/auth";
+import EvidenceVideos from '@/components/EvidenceVideos';
+import CookieNotice from '@/components/CookieNotice';
 
-const Page = () => {
+const Page: FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { ref, inView } = useInView({ triggerOnce: true });  
@@ -714,12 +717,28 @@ const Page = () => {
               <Button size="lg" asChild>
                 <Link href="/auth/signup">Get Started Now</Link>
               </Button>
+            </div>            
+          </div>
+        </section>
+
+        {/*Guide Section*/}
+        <section id="Evidence" className="p-4 pt-2 py-20">
+          <div className="container">
+            <div className="text-center mx-auto mb-16">
+              <Badge className="mb-4">Short Guides</Badge>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                A peek into our Platform
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                A guide into our platform
+              </p>
+              <EvidenceVideos />              
             </div>
           </div>
         </section>
 
         {/* Testimonials Section */}
-        <section id="testimonials" className="p-4 py-20">
+        <section id="testimonials" className="p-4 py-5">
           <div className="container">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <Badge className="mb-4">Testimonials</Badge>
@@ -1053,6 +1072,7 @@ const Page = () => {
               </Link>
             </div>
           </div>
+          <CookieNotice />
         </div>
       </footer>
     </div>
