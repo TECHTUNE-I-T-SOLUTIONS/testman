@@ -127,7 +127,7 @@ export default function ViewNotesPage() {
       {/* Search & Course Dropdown */}
       <div className="grid md:grid-cols-2 gap-4 mb-4">
         <CourseDropdown selectedCourse={selectedCourse} setSelectedCourse={setSelectedCourse} />
-        <div className="flex items-center border rounded px-2">
+        <div className="flex items-center border h-12 rounded mt-4 px-2">
           <Search className="text-gray-400 mr-2" />
           <input
             type="text"

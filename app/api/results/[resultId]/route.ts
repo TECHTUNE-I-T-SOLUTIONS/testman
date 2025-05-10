@@ -1,41 +1,28 @@
 import { connectdb } from "@/lib/connectdb";
-import Result from "@/lib/models/results";
+import NewResult from "@/lib/models/newresult";
 import Exam from "@/lib/models/exams";
 import Course from "@/lib/models/course";
 import { NextResponse, type NextRequest } from "next/server";
-import { Types } from "mongoose";
-
-type Params = {
-  params: {
-    resultId: string;
-  };
-};
 
 type Answer = {
   questionId: string;
-  selectedOption: string;
-  correct: boolean;
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  studentAnswer: string;
+  isCorrect: boolean;
 };
 
-type ResultWithExamAndCourse = {
-  _id: Types.ObjectId;
-  score: number;
-  totalMarks: number;
-  createdAt: Date;
-  answers: Answer[];
-  examId?: {
-    title?: string;
-    courseId?: {
-      name?: string;
-    };
-  };
-};
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { resultId: string } } // ✅ destructure here
+) {
+  const { resultId } = params; // ✅ now it's safe to use
 
-export async function GET(req: NextRequest, { params }: Params) {
   await connectdb();
 
   try {
-    const rawResult = await Result.findById(params.resultId)
+    const rawResult = await NewResult.findById(resultId)
       .populate({
         path: "examId",
         model: Exam,
@@ -45,6 +32,10 @@ export async function GET(req: NextRequest, { params }: Params) {
           model: Course,
           select: "name",
         },
+      })
+      .populate({
+        path: "studentId",
+        select: "name",
       })
       .lean();
 
@@ -59,22 +50,25 @@ export async function GET(req: NextRequest, { params }: Params) {
       return NextResponse.json({ message: "Result not found" }, { status: 404 });
     }
 
-    const result = rawResult as unknown as ResultWithExamAndCourse;
-
     return NextResponse.json({
-      _id: result._id,
-      course: result.examId?.courseId?.name || "N/A",
-      examTitle: result.examId?.title || "Unknown Exam",
-      score: result.score,
-      totalQuestions: result.totalMarks,
-      createdAt: result.createdAt,
-      answers: result.answers,
+      _id: rawResult._id,
+      course: rawResult.examId?.courseId?.name || "N/A",
+      examTitle: rawResult.examId?.title || "Unknown Exam",
+      studentName: rawResult.studentId?.name || "Unknown Student",
+      score: rawResult.score,
+      totalQuestions: rawResult.totalMarks,
+      createdAt: rawResult.createdAt,
+      answers: (rawResult.answers as Answer[]).map((ans) => ({
+        questionId: ans.questionId,
+        question: ans.question,
+        options: ans.options,
+        correctAnswer: ans.correctAnswer,
+        studentAnswer: ans.studentAnswer,
+        isCorrect: ans.isCorrect,
+      })),
     });
   } catch (error) {
     console.error(error);
-    return NextResponse.json(
-      { message: "Failed to fetch result" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Failed to fetch result" }, { status: 500 });
   }
 }

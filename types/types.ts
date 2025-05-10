@@ -57,3 +57,14 @@ export interface Question {
   questionText: string;
   options: Option[];
 }
+
+export interface Student {
+  name: string;
+  email: string;
+  matricNumber: string;
+  faculty: { _id: string; name: string };
+  department: { _id: string; name: string };
+  level: { _id: string; name: string };
+  isActive: boolean; // converted from "True"/"False" to boolean
+}
+

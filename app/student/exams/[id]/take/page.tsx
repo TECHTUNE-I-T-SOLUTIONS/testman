@@ -153,6 +153,10 @@ export default function AttemptExam() {
     setCurrentQuestionIndex(index)
   }
 
+  // const filteredAnswers = Object.fromEntries(
+  //   Object.entries(answers).filter(([_, val]) => val !== null && val !== undefined && val.trim() !== "")
+  // );  
+
   // Submit exam
   const handleSubmit = useCallback(async (isAutoSubmit = false) => {
     if (!exam || submitting) return;

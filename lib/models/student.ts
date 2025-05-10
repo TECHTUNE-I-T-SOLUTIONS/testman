@@ -9,9 +9,11 @@ export interface IStudent extends Document {
   level: mongoose.Types.ObjectId;
   password: string;
   createdAt: Date;
-  status: "Active" | "Inactive"; // I added status field here
-  loggedIn: "True" | "False"; // Added the loggedIn field here
+  status: "Active" | "Inactive";
+  loggedIn: "True" | "False";
+  isActive: boolean; // ✅ now a boolean
 }
+
 
 const StudentSchema = new Schema<IStudent>(
   {
@@ -19,11 +21,7 @@ const StudentSchema = new Schema<IStudent>(
     email: { type: String, required: true, unique: true },
     matricNumber: { type: String, required: true, unique: true },
     faculty: { type: Schema.Types.ObjectId, ref: "Faculty", required: true },
-    department: {
-      type: Schema.Types.ObjectId,
-      ref: "Department",
-      required: true,
-    },
+    department: { type: Schema.Types.ObjectId, ref: "Department", required: true },
     level: { type: Schema.Types.ObjectId, ref: "Level", required: true },
     password: { type: String, required: true },
     status: {
@@ -35,6 +33,10 @@ const StudentSchema = new Schema<IStudent>(
       type: String,
       enum: ["True", "False"],
       default: "False",
+    },
+    isActive: {
+      type: Boolean,
+      default: false
     },
     createdAt: { type: Date, default: Date.now },
   },

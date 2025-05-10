@@ -1,5 +1,7 @@
 interface Answer {
   questionId: { questionText: string };
+  studentAnswer: string;
+  correctAnswer: string;
   isCorrect: boolean;
 }
 
@@ -34,15 +36,18 @@ export default function ResultDetailsModal({ result, onClose }: Props) {
         <ul className="list-disc pl-5 text-sm text-gray-600">
           {result.answers?.map((answer, index) => (
             <li key={index}>
-              <span className="font-medium">
-                {answer.questionId.questionText}
-              </span>{" "}
-              -{" "}
-              <b
-                className={answer.isCorrect ? "text-green-600" : "text-red-600"}
-              >
-                {answer.isCorrect ? "Correct" : " Wrong"}
-              </b>
+              <p className="font-medium text-gray-800">{answer.questionId.questionText}</p>
+              <p>
+                Student&apos;s Answer:{" "}
+                <span className={answer.isCorrect ? "text-green-600 font-semibold" : "text-red-600 font-semibold"}>
+                  {answer.studentAnswer}
+                </span>
+                {" "}
+                {answer.isCorrect ? "✔️" : "❌"}
+              </p>
+              <p>
+                Correct Answer: <span className="text-blue-600">{answer.correctAnswer}</span>
+              </p>
             </li>
           ))}
         </ul>

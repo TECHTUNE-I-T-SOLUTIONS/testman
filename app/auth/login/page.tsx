@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -58,6 +59,16 @@ export default function Login() {
   return (
     <main className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-background to-muted p-4">
       <Card className="w-full max-w-md">
+      {/* Back Button */}
+      <div className="mb-4">
+        <Link
+          href="/"
+          className="flex items-center center p-2 justify-center mb-4 bg-gray-700 w-auto rounded-xl text-blue-100 hover:text-purple-900 hover:bg-gray-400 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 mr-1" />
+          <span className="font-medium">Back to Home</span>
+        </Link>
+      </div>      
       <CardHeader>
         <CardTitle>Login</CardTitle>
         <CardDescription>Enter your login credentials to save your CGPA</CardDescription>

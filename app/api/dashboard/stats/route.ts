@@ -3,7 +3,7 @@ import { connectdb } from "@/lib/connectdb";
 import Student from "@/lib/models/student";
 import Course from "@/lib/models/course";
 import Exam from "@/lib/models/exams";
-import Result from "@/lib/models/results";
+import NewResult from "@/lib/models/newresult"; // ✅ updated import
 import Note from "@/lib/models/note";
 import Question from "@/lib/models/question";
 import { Types } from "mongoose";
@@ -21,16 +21,15 @@ interface ActivityItem {
   status: "success" | "info" | "warning" | string;
 }
 
-
 export async function GET() {
   try {
     await connectdb();
 
-    const [students, courses, exams, results, notes, questions] = await Promise.all([
+    const [students, courses, exams, newResults, notes, questions] = await Promise.all([
       Student.find({}),
       Course.find({}),
-      Exam.find({}).lean(), // use .lean() for better performance
-      Result.find({}).lean(),
+      Exam.find({}).lean(),
+      NewResult.find({}).lean(), // ✅ use NewResult
       Note.find({}).lean(),
       Question.find({}).populate("courseId").lean(),
     ]);
@@ -47,16 +46,16 @@ export async function GET() {
       return startTime >= tenHoursAgo && startTime <= now;
     });
 
-    const totalScores = results.reduce((sum, r) => sum + (r.score || 0), 0);
-    const averageScore = results.length > 0 ? totalScores / results.length : 0;
+    const totalScores = newResults.reduce((sum, r) => sum + (r.score || 0), 0);
+    const averageScore = newResults.length > 0 ? totalScores / newResults.length : 0;
 
-    const studentScoresMap = new Map();
-    results.forEach((r) => {
+    const studentScoresMap = new Map<string, number[]>();
+    newResults.forEach((r) => {
       const id = r.studentId.toString();
       if (!studentScoresMap.has(id)) {
         studentScoresMap.set(id, []);
       }
-      studentScoresMap.get(id).push(r.score);
+      studentScoresMap.get(id)!.push(r.score);
     });
 
     const needingHelpIds = Array.from(studentScoresMap.entries())
@@ -66,8 +65,6 @@ export async function GET() {
         return avg < averageScore;
       })
       .map(([id]) => id);
-
-
 
     const needingHelpDetailsRaw = await Student.find({ _id: { $in: needingHelpIds } }).lean<StudentLean[]>();
 
@@ -83,10 +80,8 @@ export async function GET() {
       };
     });
 
-
     const activityPool: ActivityItem[] = [];
 
-    // Exams
     exams.forEach((exam) => {
       activityPool.push({
         action: `Exam "${exam.title}" ${exam.createdAt === exam.updatedAt ? "created" : "updated"}`,
@@ -95,7 +90,6 @@ export async function GET() {
       });
     });
 
-    // Notes
     notes.forEach((note) => {
       activityPool.push({
         action: `New note "${note.title}" added`,
@@ -104,7 +98,6 @@ export async function GET() {
       });
     });
 
-    // Questions
     questions.forEach((question) => {
       const courseTitle = question.courseId?.name || "Unknown Course";
       activityPool.push({
@@ -114,7 +107,6 @@ export async function GET() {
       });
     });
 
-    // Students
     students.forEach((student) => {
       activityPool.push({
         action: `New student "${student.name ?? "Unknown"}" registered`,

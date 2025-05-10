@@ -14,7 +14,7 @@ const AnswerSchema = new Schema({
   isCorrect: Boolean,
 });
 
-const ResultSchema = new Schema({
+const NewResultSchema = new Schema({
   studentId: { type: Schema.Types.ObjectId, ref: "Student", required: true },
   examId: { type: Schema.Types.ObjectId, ref: "Exam", required: true },
   departmentId: {
@@ -28,5 +28,6 @@ const ResultSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const Result = models.Result || mongoose.model("Result", ResultSchema);
-export default Result;
+const NewResult =
+  models.NewResult || mongoose.model("NewResult", NewResultSchema);
+export default NewResult;

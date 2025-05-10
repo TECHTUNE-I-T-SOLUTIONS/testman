@@ -1,36 +1,47 @@
-// /app/api/leaderboard/route.ts (for App Router)
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose"; // ✅ Import mongoose
 import { connectdb } from "@/lib/connectdb";
-import Result from "@/lib/models/results";
+import NewResult from "@/lib/models/newresult";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     await connectdb();
 
-    const topScores = await Result.aggregate([
+    const url = new URL(req.url || "");
+    const facultyId = url.searchParams.get("facultyId");
+
+    if (!facultyId) {
+      return NextResponse.json({ error: "Missing facultyId" }, { status: 400 });
+    }
+
+    const topScores = await NewResult.aggregate([
+      {
+        $lookup: {
+          from: "students",
+          localField: "studentId",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      { $unwind: "$student" },
+      {
+        $match: {
+          "student.faculty": new mongoose.Types.ObjectId(facultyId)
+        }
+      },
       {
         $group: {
-          _id: "$studentId",
-          totalScore: { $sum: "$score" }
+          _id: "$student._id",
+          totalScore: { $sum: "$score" },
+          name: { $first: "$student.name" }
         }
       },
       { $sort: { totalScore: -1 } },
       { $limit: 10 },
       {
-        $lookup: {
-          from: "students",
-          localField: "_id",
-          foreignField: "_id",
-          as: "student"
-        }
-      },
-      {
-        $unwind: "$student"
-      },
-      {
         $project: {
           _id: 0,
-          name: "$student.name",
+          name: 1,
           totalScore: 1
         }
       }

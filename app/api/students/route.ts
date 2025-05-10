@@ -12,9 +12,9 @@ export async function POST(req: Request) {
 
     const result = await db.collection(STUDENT_COLLECTION).insertOne({
       ...student,
-      status: "False", // default status
-      loggedIn: false,   // default login state
-      isActive: false,
+      status: false, // default status
+      loggedIn: false, // stored as boolean
+      isActive: false, // stored as boolean
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -70,7 +70,7 @@ export async function GET() {
             name: 1,
             email: 1,
             matricNumber: 1,
-            isActive: 1,
+            isActive: 1, // Already stored as string
             loggedIn: 1,
             status: 1,
             faculty: { _id: "$faculty._id", name: "$faculty.name" },
@@ -91,32 +91,45 @@ export async function GET() {
   }
 }
 
+// PUT: Update student's isActive status
 export async function PUT(req: Request) {
   try {
-    const { id, ...updateData } = await req.json();
+    const { id, isActive } = await req.json(); // Accept isActive from client
     const db = await connectdb();
     if (!db) throw new Error("Database connection failed");
 
-    await db
+    const student = await db
       .collection(STUDENT_COLLECTION)
-      .updateOne(
-        { _id: new mongoose.Types.ObjectId(id) },
-        {
-          $set: {
-            ...updateData,
-            updatedAt: new Date(),
-          },
-        }
+      .findOne({ _id: new mongoose.Types.ObjectId(id) });
+
+    if (!student) {
+      return NextResponse.json(
+        { error: "Student not found" },
+        { status: 404 }
       );
+    }
+
+    // Convert isActive to boolean
+    const isActiveBool = isActive === true || isActive === "True";
+
+    await db.collection(STUDENT_COLLECTION).updateOne(
+      { _id: new mongoose.Types.ObjectId(id) },
+      {
+        $set: {
+          isActive: isActiveBool,
+          updatedAt: new Date(),
+        },
+      }
+    );
 
     return NextResponse.json(
-      { message: "Student updated successfully" },
+      { message: "Student status updated successfully" },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error updating student:", error);
+    console.error("Error updating student status:", error);
     return NextResponse.json(
-      { error: "Failed to update student" },
+      { error: "Failed to update student status" },
       { status: 500 }
     );
   }

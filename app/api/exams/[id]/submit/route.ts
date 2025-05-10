@@ -1,20 +1,20 @@
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 import Question from "@/lib/models/question";
-import Result from "@/lib/models/results";
+import NewResult from "@/lib/models/newresult"; // your new result model
+import Student from "@/lib/models/student";
 import { getStudentFromToken } from "@/utils/auth";
 import { connectdb } from "@/lib/connectdb";
 import { Option } from "@/types/types";
-import Student from "@/lib/models/student";
 
 interface DetailedResult {
   questionId: string;
   question: string;
-  options: Option[]; // I added this line
+  options: Option[];
   correctAnswer: string;
   studentAnswer: string;
   isCorrect: boolean;
 }
-
 
 export async function POST(
   req: Request,
@@ -23,49 +23,58 @@ export async function POST(
   await connectdb();
   const resolvedParams = await params;
   const { id: examId } = resolvedParams;
+
   const student = await getStudentFromToken();
-  if (!student)
+  if (!student) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
 
   try {
-    const { answers } = await req.json();
+    const { answers }: { answers: Record<string, string> } = await req.json();
+
+    // Filter out blank answers
+    const cleanedAnswers = Object.fromEntries(
+      Object.entries(answers).filter(
+        ([, val]) => typeof val === "string" && val.trim() !== ""
+      )
+    );
+
+    const questionIds = Object.keys(cleanedAnswers).map(
+      (id) => new mongoose.Types.ObjectId(id)
+    );
+
+    const questions = await Question.find({ _id: { $in: questionIds } });
+
     let score = 0;
     const detailedResults: DetailedResult[] = [];
 
-    const questions = await Question.find({
-      _id: { $in: Object.keys(answers) },
-    });
-
-    questions.forEach((q) => {
+    for (const q of questions) {
       const correctOption = q.options.find((opt: Option) => opt.isCorrect);
-      const correctAnswer = correctOption ? correctOption.text : "No correct answer set";
-      const studentAnswer = answers[q._id];
+      const correctAnswer = correctOption ? correctOption.text : "";
+      const studentAnswer = cleanedAnswers[q._id.toString()];
       const isCorrect = studentAnswer === correctAnswer;
-      if (isCorrect) score += 1;
+      if (isCorrect) score++;
 
       detailedResults.push({
-        questionId: q._id,
+        questionId: q._id.toString(),
         question: q.questionText,
-        options: q.options, // Include full options
+        options: q.options,
         correctAnswer,
         studentAnswer,
         isCorrect,
       });
-    });
+    }
 
-
-    
     const studentDoc = await Student.findById(student.id);
 
-    await Result.create({
+    await NewResult.create({
       studentId: student.id,
       examId,
       departmentId: studentDoc.department,
       score,
       totalMarks: questions.length,
-      answers: detailedResults, // renamed from detailedResults
+      answers: detailedResults,
     });
-
 
     return NextResponse.json({
       message: "Exam submitted successfully!",
