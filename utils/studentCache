@@ -1,9 +1,0 @@
-import type { Student } from "@/types/student";
-
-let cachedStudent: Student | null = null;
-
-export const getCachedStudent = (): Student | null => cachedStudent;
-
-export const setCachedStudent = (student: Student): void => {
-  cachedStudent = student;
-};
