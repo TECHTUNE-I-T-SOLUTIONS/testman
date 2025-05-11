@@ -7,9 +7,12 @@ interface Option {
 
 interface Question {
   _id: string;
+  courseId: string;
   questionText: string;
   options: Option[];
+  createdAt: string; // 👈 Add this
 }
+
 
 interface Props {
   questions: Question[];
@@ -40,9 +43,14 @@ export default function QuestionsList({ questions, deleteQuestion }: Props) {
                 onClick={() => toggleQuestion(question._id)}
                 className="w-full text-left text-lg font-medium text-purple-600 hover:underline flex justify-between items-center"
               >
-                <span>
-                  Question {index + 1}: {question.questionText}
-                </span>
+                <div>
+                  <div>
+                    Question {index + 1}: {question.questionText}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Created on: {new Date(question.createdAt).toLocaleString()}
+                  </div>
+                </div>
                 <span className="text-gray-500">
                   {selectedQuestion === question._id ? "▲" : "▼"}
                 </span>

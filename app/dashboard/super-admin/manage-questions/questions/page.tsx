@@ -18,7 +18,9 @@ interface Question {
   courseId: string;
   questionText: string;
   options: Option[];
+  createdAt: string; // 👈 I added this for sorting
 }
+
 
 export default function QuestionsPage() {
   const [selectedCourse, setSelectedCourse] = useState<string>("");
@@ -29,11 +31,12 @@ export default function QuestionsPage() {
   ]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
 
   useEffect(() => {
     if (selectedCourse) {
       setLoading(true);
-      fetch(`/api/questions?courseId=${selectedCourse}`)
+      fetch(`/api/questions?courseId=${selectedCourse}&sort=${sortOrder}`)
         .then((res) => res.json())
         .then((data: Question[]) => {
           setQuestions(data);
@@ -44,7 +47,8 @@ export default function QuestionsPage() {
           setLoading(false);
         });
     }
-  }, [selectedCourse]);
+  }, [selectedCourse, sortOrder]);
+
 
   const addQuestion = async () => {
     if (!selectedCourse || !questionText.trim() || options.length < 2) {
@@ -130,6 +134,19 @@ export default function QuestionsPage() {
       <div className="mt-6">
         <FileUpload selectedCourse={selectedCourse} />
       </div>
+
+      <div className="mt-4">
+        <label className="mr-2 text-gray-700">Sort by date:</label>
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value as "desc" | "asc")}
+          className="border rounded px-2 py-1"
+        >
+          <option value="desc">Newest First</option>
+          <option value="asc">Oldest First</option>
+        </select>
+      </div>
+
 
       {loading ? (
         <p className="mt-4 text-gray-500">Loading questions...</p>

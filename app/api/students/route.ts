@@ -94,31 +94,51 @@ export async function GET() {
 // PUT: Update student's isActive status
 export async function PUT(req: Request) {
   try {
-    const { id, isActive } = await req.json(); // Accept isActive from client
+    const body = await req.json();
     const db = await connectdb();
     if (!db) throw new Error("Database connection failed");
+
+    // Bulk activate all
+    if (body.activateAll) {
+      await db.collection(STUDENT_COLLECTION).updateMany({}, {
+        $set: { isActive: true, updatedAt: new Date() },
+      });
+      const updated = await db.collection(STUDENT_COLLECTION).find({}).toArray();
+      return NextResponse.json(updated, { status: 200 });
+    }
+
+    // Bulk deactivate all
+    if (body.deactivateAll) {
+      await db.collection(STUDENT_COLLECTION).updateMany({}, {
+        $set: { isActive: false, updatedAt: new Date() },
+      });
+      const updated = await db.collection(STUDENT_COLLECTION).find({}).toArray();
+      return NextResponse.json(updated, { status: 200 });
+    }
+
+    // Single student update fallback
+    const { id, isActive } = body;
+    if (!id) {
+      return NextResponse.json(
+        { error: "Student ID is required for individual update" },
+        { status: 400 }
+      );
+    }
 
     const student = await db
       .collection(STUDENT_COLLECTION)
       .findOne({ _id: new mongoose.Types.ObjectId(id) });
 
     if (!student) {
-      return NextResponse.json(
-        { error: "Student not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
 
-    // Convert isActive to boolean
     const isActiveBool = isActive === true || isActive === "True";
 
     await db.collection(STUDENT_COLLECTION).updateOne(
       { _id: new mongoose.Types.ObjectId(id) },
       {
-        $set: {
-          isActive: isActiveBool,
-          updatedAt: new Date(),
-        },
+        $set: { isActive: isActiveBool, updatedAt: new Date() },
       }
     );
 
