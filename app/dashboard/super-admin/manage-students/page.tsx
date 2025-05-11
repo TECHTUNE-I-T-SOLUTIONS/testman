@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Search, Users, AlertCircle, RefreshCw } from "lucide-react"
-
+import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -128,6 +128,55 @@ export default function ManageStudents() {
     }
   }
 
+  const handleActivateAll = async () => {
+    const allActive = students.every((s) => s.isActive);
+    if (allActive) {
+      toast.info("All students are already active");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/students", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activateAll: true }),
+      });
+
+      if (!res.ok) throw new Error("Failed to activate all students");
+
+      const updatedStudents = await res.json();
+      setStudents(updatedStudents);
+      toast.success("All students activated successfully");
+    } catch (err) {
+      console.error("Error activating all students:", err);
+      toast.error("Failed to activate all students");
+    }
+  };
+
+  const handleDeactivateAll = async () => {
+    const allInactive = students.every((s) => !s.isActive);
+    if (allInactive) {
+      toast.info("All students are already inactive");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/students", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deactivateAll: true }),
+      });
+
+      if (!res.ok) throw new Error("Failed to deactivate all students");
+
+      const updatedStudents = await res.json();
+      setStudents(updatedStudents);
+      toast.success("All students deactivated successfully");
+    } catch (err) {
+      console.error("Error deactivating all students:", err);
+      toast.error("Failed to deactivate all students");
+    }
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -179,15 +228,26 @@ export default function ManageStudents() {
             View, filter, and manage student accounts
           </p>
         </div>
-        <Button
-          onClick={resetFilters}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Reset Filters
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={resetFilters} variant="outline" className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Reset Filters
+          </Button>
+          <Button
+            onClick={handleActivateAll}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            Activate All
+          </Button>
+          <Button
+            onClick={handleDeactivateAll}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            Deactivate All
+          </Button>
+        </div>
       </div>
+
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">

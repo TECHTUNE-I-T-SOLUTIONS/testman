@@ -25,19 +25,21 @@ type Student = {
   faculty: { _id: string; name: string }
   department: { _id: string; name: string }
   level: { _id: string; name: string }
-  isActive: boolean // ✅ now a boolean
+  isActive: boolean
 }
 
 type StudentTableProps = {
   students: Student[]
-  onActivate: (id: string, newStatus: boolean) => void // FIXED: use boolean
+  onActivate: (id: string, newStatus: boolean) => void
   onDelete: (id: string) => void
 }
 
+const ITEMS_PER_PAGE = 10
 
 export default function StudentTable({ students, onActivate, onDelete }: StudentTableProps) {
   const [studentToDelete, setStudentToDelete] = useState<Student | null>(null)
   const [studentToActivate, setStudentToActivate] = useState<Student | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const handleDeleteConfirm = () => {
     if (studentToDelete) {
@@ -48,19 +50,22 @@ export default function StudentTable({ students, onActivate, onDelete }: Student
 
   const handleActivateConfirm = () => {
     if (studentToActivate) {
-      const newStatus = !studentToActivate.isActive // FIXED: flip boolean
+      const newStatus = !studentToActivate.isActive
       onActivate(studentToActivate._id, newStatus)
       setStudentToActivate(null)
     }
   }
 
-  const getInitials = (name: string) => {
-    return name
+  const getInitials = (name: string) =>
+    name
       .split(" ")
       .map((part) => part[0])
       .join("")
       .toUpperCase()
-  }
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const paginatedStudents = students.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(students.length / ITEMS_PER_PAGE)
 
   return (
     <>
@@ -79,12 +84,11 @@ export default function StudentTable({ students, onActivate, onDelete }: Student
             </TableRow>
           </TableHeader>
           <TableBody>
-            {students.map((student, index) => {
+            {paginatedStudents.map((student, index) => {
               const isActive = student.isActive
-
               return (
                 <TableRow key={student._id}>
-                  <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableCell className="font-medium">{startIndex + index + 1}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8 border">
@@ -118,7 +122,6 @@ export default function StudentTable({ students, onActivate, onDelete }: Student
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Open menu</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -152,7 +155,28 @@ export default function StudentTable({ students, onActivate, onDelete }: Student
         </Table>
       </div>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Pagination controls */}
+      <div className="flex justify-between items-center mt-4">
+        <Button
+          variant="outline"
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage((prev) => prev - 1)}
+        >
+          Previous
+        </Button>
+        <span className="text-sm text-muted-foreground">
+          Page {currentPage} of {totalPages}
+        </span>
+        <Button
+          variant="outline"
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage((prev) => prev + 1)}
+        >
+          Next
+        </Button>
+      </div>
+
+      {/* Delete Dialog */}
       <Dialog open={!!studentToDelete} onOpenChange={(open) => !open && setStudentToDelete(null)}>
         <DialogContent>
           <DialogHeader>
@@ -176,7 +200,7 @@ export default function StudentTable({ students, onActivate, onDelete }: Student
         </DialogContent>
       </Dialog>
 
-      {/* Activate/Deactivate Confirmation Dialog */}
+      {/* Activate/Deactivate Dialog */}
       <Dialog open={!!studentToActivate} onOpenChange={(open) => !open && setStudentToActivate(null)}>
         <DialogContent>
           <DialogHeader>

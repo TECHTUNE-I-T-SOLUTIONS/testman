@@ -35,7 +35,7 @@ const authOptions: NextAuthOptions = {
         });
 
         let user;
-        let userType: "super-admin" | "admin" | "sub-admin" | "user" | null = null;
+        let userType: "super-admin" | "Admin" | "Sub-Admin" | "user" | null = null;
 
         const foundUser = await User.findOne({
           matricNumber: sanitizedMatricNumber,
@@ -53,7 +53,7 @@ const authOptions: NextAuthOptions = {
 
           if (foundAdmin) {
             user = foundAdmin;
-            userType = foundAdmin.role === "Admin" ? "admin" : "sub-admin";
+            userType = foundAdmin.role === "Admin" ? "Admin" : "Sub-Admin";
           }
         }
 

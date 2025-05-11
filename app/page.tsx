@@ -385,8 +385,9 @@ const Page: FC = () => {
                   <Button size="lg" asChild>
                     <Link href="/auth/signup">Get Started</Link>
                   </Button>
+                  or
                   <Button size="lg" variant="outline" asChild>
-                    <Link href="#features">Learn More</Link>
+                    <Link href="/auth/login">Sign in</Link>
                   </Button>
                 </motion.div>
 
@@ -836,13 +837,14 @@ const Page: FC = () => {
                 >
                   <Link href="/auth/signup">Sign Up Now</Link>
                 </Button>
+
                 <Button
                   size="lg"
                   variant="outline"
                   className="bg-transparent border-primary-foreground hover:bg-primary-foreground hover:text-primary hover:scale-110 hover:shadow-xl transition-transform duration-300"
                   asChild
                 >
-                  <Link href="/about">Learn More</Link>
+                  <Link href="/auth/login">Log in</Link>
                 </Button>
               </motion.div>
             </motion.div>

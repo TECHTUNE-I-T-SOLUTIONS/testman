@@ -15,7 +15,8 @@ export async function GET(req: Request) {
       );
     }
 
-    const questions = await Question.find({ courseId });
+    const sort = url.searchParams.get("sort") === "asc" ? 1 : -1;
+    const questions = await Question.find({ courseId }).sort({ createdAt: sort });
 
     return NextResponse.json(questions, { status: 200 });
   } catch (error) {
