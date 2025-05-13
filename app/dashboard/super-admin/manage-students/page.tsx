@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react";
 import { Search, Users, AlertCircle, RefreshCw } from "lucide-react"
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -28,6 +29,7 @@ export type Student = {
 
 
 export default function ManageStudents() {
+  const { data: session } = useSession(); // ✅ GET SESSION  
   const [students, setStudents] = useState<Student[]>([])
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
@@ -40,36 +42,34 @@ export default function ManageStudents() {
   const [activeTab, setActiveTab] = useState("all")
 
   useEffect(() => {
-    async function fetchStudents() {
-      setLoading(true)
-      setError(null)
+    if (!session?.user?.email) return;
+
+    const fetchStudents = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const res = await fetch("/api/students")
-        if (!res.ok) throw new Error("Failed to fetch students")
-        const rawData: Student[] = await res.json()
+        const res = await fetch(`/api/students?email=${session.user.email}`);
+        if (!res.ok) throw new Error("Failed to fetch students");
+
+        const rawData: Student[] = await res.json();
 
         const data = rawData.map(student => ({
           ...student,
-          isActive:
-            student.isActive === true
-            // student.isActive === "true" ||
-            // student.isActive === 1
-            // student.isActive === "1"
+          isActive: student.isActive === true,
         }));
 
-        setStudents(data)
-        setFilteredStudents(data)
+        setStudents(data);
+        setFilteredStudents(data);
       } catch (error) {
-        console.error("Failed to fetch students:", error)
-        setError("Failed to load students. Please try again.")
+        console.error("Failed to fetch students:", error);
+        setError("Failed to load students. Please try again.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchStudents()
-  }, [])
-
+    fetchStudents();
+  }, [session?.user?.email]);
 
   useEffect(() => {
     let filtered = students;

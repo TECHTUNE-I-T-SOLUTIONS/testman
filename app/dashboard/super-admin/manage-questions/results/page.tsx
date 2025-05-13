@@ -78,9 +78,23 @@ export default function ResultPage() {
 
   const stats = {
     totalStudents: results.length,
-    averageScore: results.length
-      ? (results.reduce((sum, result) => sum + (result.score / result.totalMarks) * 100, 0) / results.length).toFixed(1)
-      : "0",
+    averageScore: (() => {
+      const validScores = results.filter(
+        (result) =>
+          typeof result.score === "number" &&
+          typeof result.totalMarks === "number" &&
+          result.totalMarks > 0
+      );
+
+      if (validScores.length === 0) return "0";
+
+      const totalPercentage = validScores.reduce((sum, result) => {
+        return sum + (result.score / result.totalMarks) * 100;
+      }, 0);
+
+      return (totalPercentage / validScores.length).toFixed(1);
+    })(),
+
     passRate: results.length
       ? ((results.filter(r => ["A", "B", "C", "D"].includes(r.grade)).length / results.length) * 100).toFixed(1)
       : "0",

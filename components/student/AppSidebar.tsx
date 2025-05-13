@@ -209,12 +209,15 @@ const AppSidebar = () => {
                         href={isDisabled ? "#" : item.path}
                         onClick={(e) => {
                           if (isDisabled) {
-                            e.preventDefault()
-                            setShowInactiveModal(true)
+                            e.preventDefault();
+                            setShowInactiveModal(true);
+                          } else {
+                            setOpenMobile(false); // Close sidebar on active link click
                           }
                         }}
                         className="flex items-center py-2"
                       >
+
                         <div
                           className={cn(
                             "text-muted-foreground",

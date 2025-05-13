@@ -161,7 +161,37 @@ export default function AttemptExam() {
   const handleSubmit = useCallback(async (isAutoSubmit = false) => {
     if (!exam || submitting) return;
 
+    // Network check
+    if (!navigator.onLine) {
+      toast({
+        title: "No Internet Connection",
+        description: "Please check your network connection before submitting to avoid errors.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Optional: Try fetching a lightweight endpoint to verify actual connectivity
+    try {
+      const ping = await fetch("/favicon.ico", { method: "HEAD", cache: "no-cache" });
+      if (!ping.ok) throw new Error();
+    } catch (err) {
+      console.error("Connection check failed:", err);
+      toast({
+        title: "Unstable Connection",
+        description: "We detected a poor or unstable connection. Please try again when you're connected properly.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+
     if (!isAutoSubmit && !showConfirmSubmit) {
+      toast({
+        title: "Network OK ✅",
+        description: "Good network detected. Click again to confirm submission.",
+        variant: "default",
+      });
       setShowConfirmSubmit(true);
       return;
     }
@@ -195,6 +225,7 @@ export default function AttemptExam() {
       setShowConfirmSubmit(false);
     }
   }, [exam, submitting, showConfirmSubmit, toast, examId, answers, router]);
+
 
   // Auto-submit when time expires
   useEffect(() => {

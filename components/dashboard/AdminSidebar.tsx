@@ -64,6 +64,23 @@ const CustomSidebarTrigger = () => {
 
 const MobileSidebarTrigger = () => {
   const { setOpenMobile } = useSidebar()
+    useEffect(() => {
+      const handleRouteChange = () => {
+        if (window.innerWidth < 768) {
+          setOpenMobile(false)
+        }
+      }
+
+      window.addEventListener("hashchange", handleRouteChange)
+      window.addEventListener("popstate", handleRouteChange)
+
+      return () => {
+        window.removeEventListener("hashchange", handleRouteChange)
+        window.removeEventListener("popstate", handleRouteChange)
+      }
+    }, [setOpenMobile])
+
+  
   return (
     <Button
       variant="ghost"
@@ -83,7 +100,7 @@ const AdminSidebar = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
-  const { state } = useSidebar()
+  const { state, setOpenMobile } = useSidebar() 
   const { data: session } = useSession()
 
   const adminEmail = session?.user?.email ?? "admin@example.com"
@@ -94,7 +111,9 @@ const AdminSidebar = () => {
 
   const navItems = [
     { label: "Home", path: "/dashboard/super-admin", icon: <Home className="h-5 w-5" /> },
-    {
+
+    // Only show to super-admin
+    isSuperAdmin && {
       label: "Manage Academics",
       icon: <Users className="h-5 w-5" />,
       subItems: [
@@ -105,6 +124,7 @@ const AdminSidebar = () => {
         { label: "Courses", path: "/dashboard/super-admin/manage-academics/courses", icon: <Cpu className="h-4 w-4" /> },
       ],
     },
+
     {
       label: "Manage Questions",
       icon: <HelpCircle className="h-5 w-5" />,
@@ -114,16 +134,21 @@ const AdminSidebar = () => {
         { label: "Manage Results", path: "/dashboard/super-admin/manage-questions/results", icon: <List className="h-4 w-4" /> },
       ],
     },
-    isSuperAdmin && {
+
+    // Only for super-admin
+    (adminRole === "super-admin" || adminRole === "Admin") && {
       label: "Manage Admins",
       path: "/dashboard/super-admin/manage-admins",
       icon: <Tag className="h-5 w-5" />,
     },
+
+    // Available to all roles
     {
       label: "Manage Students",
       path: "/dashboard/super-admin/manage-students",
       icon: <Cpu className="h-5 w-5" />,
     },
+
     isSuperAdmin && {
       label: "Manage Notes",
       icon: <NotebookPen className="h-5 w-5" />,
@@ -132,6 +157,7 @@ const AdminSidebar = () => {
         { label: "view Notes", path: "/dashboard/super-admin/manage-notes/view", icon: <NotebookTabs className="h-4 w-4" /> },
       ],
     },
+
     isSuperAdmin && {
       label: "Manage Advertisements",
       icon: <Megaphone className="h-5 w-5" />,
@@ -140,8 +166,10 @@ const AdminSidebar = () => {
         { label: "view Ads", path: "/dashboard/super-admin/manage-ads/view", icon: <View className="h-4 w-4" /> },
       ],
     },
+
     { label: "Profile", path: "/dashboard/super-admin/profile", icon: <Settings className="h-5 w-5" /> },
   ].filter((item): item is Exclude<typeof item, false> => item !== false)
+
 
   const toggleDropdown = (label: string) => {
     setOpenDropdowns((prev) => ({ ...prev, [label]: !prev[label] }))
@@ -201,7 +229,11 @@ const AdminSidebar = () => {
                       tooltip={item.label}
                       className={cn("transition-all duration-200", isPathActive(item.path!) ? "bg-primary/10 text-primary" : "hover:bg-muted")}
                     >
-                      <button onClick={() => router.push(item.path!)} className="flex items-center py-2 w-full">
+                      <button onClick={() => {
+                        router.push(item.path!)
+                        setOpenMobile(false)
+                      }}
+                       className="flex items-center py-2 w-full">
                         <div className={cn("text-current", isCollapsed ? "mx-auto" : "mr-3")}>{item.icon}</div>
                         {!isCollapsed && <span>{item.label}</span>}
                       </button>

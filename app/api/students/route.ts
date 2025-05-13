@@ -29,14 +29,43 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const email = searchParams.get("email"); // Logged-in admin's email
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "Admin email is required" },
+        { status: 400 }
+      );
+    }
+
     const db = await connectdb();
     if (!db) throw new Error("Database connection failed");
+
+    // Fetch the admin using email
+    const admin = await db.collection("admins").findOne({ email });
+
+    if (!admin) {
+      return NextResponse.json(
+        { error: "Admin not found" },
+        { status: 404 }
+      );
+    }
+
+    // Build match condition based on role
+    const matchCondition: Record<string, unknown> = {};
+    if (admin.role === "Admin" && admin.assignedFaculty) {
+      matchCondition.faculty = admin.assignedFaculty;
+    } else if (admin.role === "Sub-Admin" && admin.assignedDepartment) {
+      matchCondition.department = admin.assignedDepartment;
+    }
 
     const students = await db
       .collection(STUDENT_COLLECTION)
       .aggregate([
+        { $match: matchCondition },
         {
           $lookup: {
             from: "faculties",
@@ -70,7 +99,7 @@ export async function GET() {
             name: 1,
             email: 1,
             matricNumber: 1,
-            isActive: 1, // Already stored as string
+            isActive: 1,
             loggedIn: 1,
             status: 1,
             faculty: { _id: "$faculty._id", name: "$faculty.name" },
