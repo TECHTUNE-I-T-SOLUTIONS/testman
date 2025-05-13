@@ -19,7 +19,7 @@ interface Exam {
   scheduledTime?: string
   totalQuestions?: number
   passingScore?: number
-}
+} 
 
 export default function StudentExamList() {
   const params = useParams()
@@ -55,17 +55,8 @@ export default function StudentExamList() {
 
         const result = await response.json()
 
-        // For demo purposes, let's enhance the data with some additional fields
-        const enhancedExams = Array.isArray(result)
-          ? result.map((exam) => ({
-              ...exam,
-              description: exam.description || "This exam will test your knowledge on the course material.",
-              totalQuestions: exam.totalQuestions || Math.floor(Math.random() * 20) + 10,
-              passingScore: exam.passingScore || 60,
-            }))
-          : []
-
-        setExams(enhancedExams)
+        const filtered = Array.isArray(result) ? result : []
+        setExams(filtered)
       } catch (error) {
         console.error("Error fetching exams:", error)
         setError("Failed to load exams. Please try again.")
@@ -92,18 +83,13 @@ export default function StudentExamList() {
         hour12: true,
       }).format(date)
     } catch (e) {
-      console.log(e)
       return dateString
     }
   }
 
   const getStatusBadge = (exam: Exam) => {
     if (!exam.isActive) {
-      return (
-        <Badge variant="outline" className="bg-gray-100 text-gray-800">
-          Inactive
-        </Badge>
-      )
+      return <Badge variant="outline" className="bg-gray-100 text-gray-800">Inactive</Badge>
     }
 
     if (exam.scheduledTime) {
@@ -111,19 +97,11 @@ export default function StudentExamList() {
       const now = new Date()
 
       if (scheduledDate > now) {
-        return (
-          <Badge variant="outline" className="bg-blue-100 text-blue-800">
-            Scheduled
-          </Badge>
-        )
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800">Scheduled</Badge>
       }
     }
 
-    return (
-      <Badge variant="outline" className="bg-green-100 text-green-800">
-        Available
-      </Badge>
-    )
+    return <Badge variant="outline" className="bg-green-100 text-green-800">Available</Badge>
   }
 
   return (
@@ -178,7 +156,7 @@ export default function StudentExamList() {
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-xl">{exam.title}</CardTitle>
-                    <CardDescription>{exam.description}</CardDescription>
+                    <CardDescription>{exam.description || "No description provided."}</CardDescription>
                   </div>
                   {getStatusBadge(exam)}
                 </div>
@@ -194,13 +172,13 @@ export default function StudentExamList() {
                   <div className="flex items-center text-sm text-muted-foreground">
                     <CheckCircle className="h-4 w-4 mr-2 text-primary" />
                     <span>
-                      Questions: <span className="font-medium text-foreground">{exam.totalQuestions}</span>
+                      Questions: <span className="font-medium text-foreground">{exam.totalQuestions ?? "Not Assigned"}</span>
                     </span>
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground">
                     <AlertCircle className="h-4 w-4 mr-2 text-primary" />
                     <span>
-                      Passing Score: <span className="font-medium text-foreground">{exam.passingScore}%</span>
+                      Passing Score: <span className="font-medium text-foreground">{exam.passingScore ?? "60"}%</span>
                     </span>
                   </div>
                 </div>
@@ -239,4 +217,3 @@ export default function StudentExamList() {
     </div>
   )
 }
-

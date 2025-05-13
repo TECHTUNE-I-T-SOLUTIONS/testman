@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -18,6 +19,9 @@ interface AdminFormData {
 }
 
 export default function AdminForm({ fetchAdmins }: AdminFormProps) {
+  const { data: session, status } = useSession();
+  const currentUserRole = session?.user?.role;
+
   const {
     register,
     handleSubmit,
@@ -31,14 +35,9 @@ export default function AdminForm({ fetchAdmins }: AdminFormProps) {
 
   const role = watch("role");
   const [loading, setLoading] = useState(false);
-  const [faculties, setFaculties] = useState<{ _id: string; name: string }[]>(
-    []
-  );
-  const [departments, setDepartments] = useState<
-    { _id: string; name: string }[]
-  >([]);
+  const [faculties, setFaculties] = useState<{ _id: string; name: string }[]>([]);
+  const [departments, setDepartments] = useState<{ _id: string; name: string }[]>([]);
 
- 
   useEffect(() => {
     async function fetchData() {
       try {
@@ -47,8 +46,7 @@ export default function AdminForm({ fetchAdmins }: AdminFormProps) {
           fetch("/api/departments"),
         ]);
 
-        if (!facultyRes.ok || !departmentRes.ok)
-          throw new Error("Failed to fetch data");
+        if (!facultyRes.ok || !departmentRes.ok) throw new Error("Failed to fetch data");
 
         const facultyData = await facultyRes.json();
         const departmentData = await departmentRes.json();
@@ -56,7 +54,7 @@ export default function AdminForm({ fetchAdmins }: AdminFormProps) {
         setFaculties(facultyData);
         setDepartments(departmentData);
       } catch (error) {
-        console.error("Error fetching faculties or department", error)
+        console.error("Error fetching faculties or departments", error);
         toast.error("Error fetching faculties or departments");
       }
     }
@@ -64,11 +62,18 @@ export default function AdminForm({ fetchAdmins }: AdminFormProps) {
     fetchData();
   }, []);
 
- 
+  // Reset assigned fields when role changes
   useEffect(() => {
     setValue("assignedFaculty", undefined);
     setValue("assignedDepartment", undefined);
   }, [role, setValue]);
+
+  // Force role to "Sub-Admin" if current user is Admin
+  useEffect(() => {
+    if (currentUserRole === "Admin") {
+      setValue("role", "Sub-Admin");
+    }
+  }, [currentUserRole, setValue]);
 
   const onSubmit = async (data: AdminFormData) => {
     try {
@@ -85,7 +90,7 @@ export default function AdminForm({ fetchAdmins }: AdminFormProps) {
       fetchAdmins();
       reset();
     } catch (error) {
-      console.error("Error creating admin", error)
+      console.error("Error creating admin", error);
       toast.error("Error creating admin");
     } finally {
       setLoading(false);
@@ -99,30 +104,22 @@ export default function AdminForm({ fetchAdmins }: AdminFormProps) {
       </h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
- 
+        {/* Matric Number */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Matric Number
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Matric Number</label>
           <input
-            {...register("matricNumber", {
-              required: "Matric number is required",
-            })}
+            {...register("matricNumber", { required: "Matric number is required" })}
             placeholder="Enter Matric Number"
             className="w-full p-3 border text-gray-900 border-purple-300 rounded focus:ring focus:ring-purple-200"
           />
           {errors.matricNumber && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.matricNumber.message}
-            </p>
+            <p className="text-red-500 text-sm mt-1">{errors.matricNumber.message}</p>
           )}
         </div>
 
-
+        {/* Email */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Email</label>
           <input
             {...register("email", { required: "Email is required" })}
             type="email"
@@ -134,10 +131,9 @@ export default function AdminForm({ fetchAdmins }: AdminFormProps) {
           )}
         </div>
 
+        {/* Password */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Password
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Password</label>
           <input
             {...register("password", { required: "Password is required" })}
             type="password"
@@ -145,30 +141,33 @@ export default function AdminForm({ fetchAdmins }: AdminFormProps) {
             className="w-full p-3 border text-gray-900 border-purple-300 rounded focus:ring focus:ring-purple-200"
           />
           {errors.password && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.password.message}
-            </p>
+            <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
           )}
         </div>
 
+        {/* Role */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Role
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Role</label>
           <select
             {...register("role")}
             className="w-full p-3 text-gray-900 border border-purple-300 rounded bg-white focus:ring focus:ring-purple-200"
+            disabled={currentUserRole === "Admin"} // prevent changing role
           >
-            <option value="Admin">Admin</option>
-            <option value="Sub-Admin">Sub-Admin</option>
+            {currentUserRole === "super-admin" ? (
+              <>
+                <option value="Admin">Admin</option>
+                <option value="Sub-Admin">Sub-Admin</option>
+              </>
+            ) : (
+              <option value="Sub-Admin">Sub-Admin</option>
+            )}
           </select>
         </div>
 
-        {role === "Admin" && (
+        {/* Conditional Faculty or Department */}
+        {role === "Admin" && currentUserRole === "super-admin" && (
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Assigned Faculty
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Assigned Faculty</label>
             <select
               {...register("assignedFaculty", {
                 required: "Faculty is required",
@@ -183,18 +182,14 @@ export default function AdminForm({ fetchAdmins }: AdminFormProps) {
               ))}
             </select>
             {errors.assignedFaculty && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.assignedFaculty.message}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{errors.assignedFaculty.message}</p>
             )}
           </div>
         )}
 
         {role === "Sub-Admin" && (
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Assigned Department
-            </label>
+            <label className="block text-sm font-medium text-gray-700">Assigned Department</label>
             <select
               {...register("assignedDepartment", {
                 required: "Department is required",
@@ -209,9 +204,7 @@ export default function AdminForm({ fetchAdmins }: AdminFormProps) {
               ))}
             </select>
             {errors.assignedDepartment && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.assignedDepartment.message}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{errors.assignedDepartment.message}</p>
             )}
           </div>
         )}

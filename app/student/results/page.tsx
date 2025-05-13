@@ -77,30 +77,9 @@ export default function Results() {
           }
         } = await res.json()
 
-        // For demo purposes, let's add some additional fields if they don't exist
-        const enhancedResults = data.results.map((result) => ({
-          ...result,
-          date: result.date || new Date(Date.now() - Math.random() * 10000000000).toISOString(),
-          duration: result.duration || Math.floor(Math.random() * 60) + 30,
-        }))
-
-        setResults(enhancedResults)
+        setResults(data.results)
         setTotalPages(data.totalPages)
-        setStats(
-          data.stats || {
-            totalExams: enhancedResults.length,
-            averageScore: enhancedResults.length
-              ? enhancedResults.reduce((acc, curr) => acc + (curr.score / curr.totalQuestions) * 100, 0) /
-                enhancedResults.length
-              : 0,
-            highestScore: enhancedResults.length
-              ? Math.max(...enhancedResults.map((r) => (r.score / r.totalQuestions) * 100))
-              : 0,
-            lowestScore: enhancedResults.length
-              ? Math.min(...enhancedResults.map((r) => (r.score / r.totalQuestions) * 100))
-              : 0,
-          },
-        )
+        setStats(data.stats) // ✅ Add this line
       } catch (error) {
         console.error("Error fetching results:", error)
         setError("Failed to load results. Please try again.")

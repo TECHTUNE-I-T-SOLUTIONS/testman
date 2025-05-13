@@ -53,7 +53,7 @@ export async function GET(req: Request) {
         .populate({
           path: "examId",
           model: Exam,
-          select: "title courseId",
+          select: "title courseId duration", // ✅ Include duration
           populate: {
             path: "courseId",
             model: Course,
@@ -83,7 +83,8 @@ export async function GET(req: Request) {
         examTitle: result.examId?.title || "Unknown Exam",
         score: result.score,
         totalQuestions: result.totalMarks,
-        createdAt: result.createdAt,
+        date: result.createdAt,
+        duration: result.examId?.duration || 0, // ✅ Get from exam
         answers: (result.answers as Answer[]).map((ans) => ({
           questionId: {
             questionText: ans.questionId?.questionText || "Unknown Question",
@@ -92,7 +93,20 @@ export async function GET(req: Request) {
         })),
       }));
 
-      return NextResponse.json({ results: data, totalPages }, { status: 200 });
+      const scores = results.map((r) => r.score);
+      const totalExams = scores.length;
+      const averageScore = totalExams > 0 ? scores.reduce((a, b) => a + b, 0) / totalExams : 0;
+      const highestScore = totalExams > 0 ? Math.max(...scores) : 0;
+      const lowestScore = totalExams > 0 ? Math.min(...scores) : 0;
+
+      const stats = {
+        totalExams,
+        averageScore,
+        highestScore,
+        lowestScore,
+      };
+
+      return NextResponse.json({ results: data, totalPages, stats }, { status: 200 });
     }
 
     // CASE 3: Fetch All

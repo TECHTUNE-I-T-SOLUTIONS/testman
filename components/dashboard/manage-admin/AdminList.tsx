@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import AdminActions from "./AdminActions";
 
 interface Admin {
@@ -28,10 +29,12 @@ interface AdminListProps {
 }
 
 export default function AdminList({ admins, fetchAdmins }: AdminListProps) {
+  const { data: session, status } = useSession();
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
 
-  // Fetch faculty and department names
+  const currentRole = session?.user?.role; // 👈 Extract logged-in admin role
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -56,22 +59,25 @@ export default function AdminList({ admins, fetchAdmins }: AdminListProps) {
     fetchData();
   }, []);
 
-  // Helper function to get faculty name from ID
-  const getFacultyName = (facultyId?: string) => {
-    return (
-      faculties.find((faculty) => faculty._id === facultyId)?.name || "N/A"
-    );
-  };
+  // Helper functions
+  const getFacultyName = (facultyId?: string) =>
+    faculties.find((faculty) => faculty._id === facultyId)?.name || "N/A";
 
-  // Helper function to get department name from ID
-  const getDepartmentName = (departmentId?: string) => {
-    return (
-      departments.find((department) => department._id === departmentId)?.name ||
-      "N/A"
-    );
-  };
+  const getDepartmentName = (departmentId?: string) =>
+    departments.find((department) => department._id === departmentId)?.name || "N/A";
 
-  if (admins.length === 0) {
+  // ⛔ Wait for session to load
+  if (status === "loading") {
+    return <p className="text-center text-gray-500">Loading...</p>;
+  }
+
+  // 🔐 Filter admins based on logged-in role
+  const visibleAdmins =
+    currentRole === "Admin"
+      ? admins.filter((admin) => admin.role === "Sub-Admin")
+      : admins; // Super-admin sees all
+
+  if (visibleAdmins.length === 0) {
     return <p className="text-center text-gray-500">No admins found.</p>;
   }
 
@@ -94,7 +100,7 @@ export default function AdminList({ admins, fetchAdmins }: AdminListProps) {
           </tr>
         </thead>
         <tbody>
-          {admins.map((admin, index) => (
+          {visibleAdmins.map((admin, index) => (
             <tr
               key={admin._id}
               className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}

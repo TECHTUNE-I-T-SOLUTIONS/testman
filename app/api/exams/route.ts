@@ -11,51 +11,56 @@ export async function GET(req: Request) {
   const courseIdOrName = url.searchParams.get("courseId");
 
   try {
+    // Fetch single exam by ID
     if (examId) {
       const exam = await Exam.findById(examId)
         .populate("courseId", "name")
         .populate("questions");
+
       if (!exam) {
-        return NextResponse.json(
-          { message: "Exam not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ message: "Exam not found" }, { status: 404 });
       }
-      return NextResponse.json(exam, { status: 200 });
+
+      const enrichedExam = {
+        ...exam.toObject(),
+        totalQuestions: exam.questions?.length || 0,
+      };
+
+      return NextResponse.json(enrichedExam, { status: 200 });
     }
 
+    // Filter exams by courseId or course name
+    let filter = {};
     if (courseIdOrName) {
-      let filter = {};
       if (courseIdOrName.length === 24) {
         filter = { courseId: courseIdOrName };
       } else {
         const course = await Course.findOne({ name: courseIdOrName });
         if (!course) {
-          return NextResponse.json(
-            { message: "Course not found" },
-            { status: 404 }
-          );
+          return NextResponse.json({ message: "Course not found" }, { status: 404 });
         }
         filter = { courseId: course._id };
       }
-      const exams = await Exam.find(filter)
-        .populate("courseId", "name")
-        .populate("questions");
-      return NextResponse.json(exams, { status: 200 });
     }
 
-    const exams = await Exam.find()
+    // Fetch multiple exams (filtered or all)
+    const exams = await Exam.find(filter)
       .populate("courseId", "name")
       .populate("questions");
-    return NextResponse.json(exams, { status: 200 });
+
+    const enrichedExams = exams.map((exam) => ({
+      ...exam.toObject(),
+      totalQuestions: exam.questions?.length || 0,
+    }));
+
+    return NextResponse.json(enrichedExams, { status: 200 });
+
   } catch (error) {
     console.error("Error fetching exams:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
+
 
 export async function POST(req: Request) {
   await connectdb();
