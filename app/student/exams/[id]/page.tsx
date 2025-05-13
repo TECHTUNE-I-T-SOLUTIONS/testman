@@ -83,6 +83,7 @@ export default function StudentExamList() {
         hour12: true,
       }).format(date)
     } catch (e) {
+      console.error("Error formatting date:", e)
       return dateString
     }
   }

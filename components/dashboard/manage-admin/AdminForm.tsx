@@ -19,6 +19,7 @@ interface AdminFormData {
 }
 
 export default function AdminForm({ fetchAdmins }: AdminFormProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: session, status } = useSession();
   const currentUserRole = session?.user?.role;
 

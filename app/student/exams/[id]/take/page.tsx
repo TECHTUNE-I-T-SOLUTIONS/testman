@@ -176,6 +176,7 @@ export default function AttemptExam() {
       const ping = await fetch("/favicon.ico", { method: "HEAD", cache: "no-cache" });
       if (!ping.ok) throw new Error();
     } catch (err) {
+      console.error("Connection check failed:", err);
       toast({
         title: "Unstable Connection",
         description: "We detected a poor or unstable connection. Please try again when you're connected properly.",
@@ -183,6 +184,7 @@ export default function AttemptExam() {
       });
       return;
     }
+
 
     if (!isAutoSubmit && !showConfirmSubmit) {
       toast({

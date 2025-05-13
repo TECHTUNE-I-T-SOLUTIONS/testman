@@ -91,8 +91,8 @@ export default function ToggleExamStatus({ exam }: ToggleExamStatusProps) {
           <div className="bg-white rounded-md shadow-lg max-w-sm w-full p-6">
             <h2 className="text-lg font-semibold mb-4">Confirm Delete</h2>
             <p className="mb-6 text-sm text-gray-700">
-              Are you sure you want to permanently delete the exam "
-              <span className="font-bold">{exam.title}</span>"?
+              Are you sure you want to permanently delete the exam &quot;
+              <span className="font-bold">{exam.title}</span>&quot;?
             </p>
 
             <div className="flex justify-end gap-3">

@@ -42,9 +42,9 @@ export default function ManageStudents() {
   const [activeTab, setActiveTab] = useState("all")
 
   useEffect(() => {
-    if (!session?.user?.email) return; // Wait for session to load
+    if (!session?.user?.email) return;
 
-    async function fetchStudents() {
+    const fetchStudents = async () => {
       setLoading(true);
       setError(null);
       try {
@@ -66,10 +66,10 @@ export default function ManageStudents() {
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchStudents();
-  }, [session]); // ✅ Rerun when session is loaded
+  }, [session?.user?.email]);
 
   useEffect(() => {
     let filtered = students;

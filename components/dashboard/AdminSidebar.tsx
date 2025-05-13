@@ -64,22 +64,22 @@ const CustomSidebarTrigger = () => {
 
 const MobileSidebarTrigger = () => {
   const { setOpenMobile } = useSidebar()
-  useEffect(() => {
-    const handleRouteChange = () => {
-      // Auto close on route change for mobile sidebar
-      if (window.innerWidth < 768) {
-        setOpenMobile(false)
+    useEffect(() => {
+      const handleRouteChange = () => {
+        if (window.innerWidth < 768) {
+          setOpenMobile(false)
+        }
       }
-    }
 
-    window.addEventListener("hashchange", handleRouteChange)
-    window.addEventListener("popstate", handleRouteChange)
+      window.addEventListener("hashchange", handleRouteChange)
+      window.addEventListener("popstate", handleRouteChange)
 
-    return () => {
-      window.removeEventListener("hashchange", handleRouteChange)
-      window.removeEventListener("popstate", handleRouteChange)
-    }
-  }, [])
+      return () => {
+        window.removeEventListener("hashchange", handleRouteChange)
+        window.removeEventListener("popstate", handleRouteChange)
+      }
+    }, [setOpenMobile])
+
   
   return (
     <Button

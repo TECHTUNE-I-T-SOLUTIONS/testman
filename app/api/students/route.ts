@@ -55,7 +55,7 @@ export async function GET(req: Request) {
     }
 
     // Build match condition based on role
-    let matchCondition: any = {};
+    const matchCondition: Record<string, unknown> = {};
     if (admin.role === "Admin" && admin.assignedFaculty) {
       matchCondition.faculty = admin.assignedFaculty;
     } else if (admin.role === "Sub-Admin" && admin.assignedDepartment) {
