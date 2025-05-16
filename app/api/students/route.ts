@@ -32,11 +32,11 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const email = searchParams.get("email"); // Logged-in admin's email
+    const email = searchParams.get("email"); // Logged-in user's email
 
     if (!email) {
       return NextResponse.json(
-        { error: "Admin email is required" },
+        { error: "Email is required" },
         { status: 400 }
       );
     }
@@ -44,22 +44,39 @@ export async function GET(req: Request) {
     const db = await connectdb();
     if (!db) throw new Error("Database connection failed");
 
-    // Fetch the admin using email
+    // Try finding in admins collection
     const admin = await db.collection("admins").findOne({ email });
 
-    if (!admin) {
-      return NextResponse.json(
-        { error: "Admin not found" },
-        { status: 404 }
-      );
-    }
+    let matchCondition: Record<string, unknown> = {};
 
-    // Build match condition based on role
-    const matchCondition: Record<string, unknown> = {};
-    if (admin.role === "Admin" && admin.assignedFaculty) {
-      matchCondition.faculty = admin.assignedFaculty;
-    } else if (admin.role === "Sub-Admin" && admin.assignedDepartment) {
-      matchCondition.department = admin.assignedDepartment;
+    if (admin) {
+      // Admin found, apply filtering based on role
+      if (admin.role === "Admin" && admin.assignedFaculty) {
+        matchCondition.faculty = admin.assignedFaculty;
+      } else if (admin.role === "Sub-Admin" && admin.assignedDepartment) {
+        matchCondition.department = admin.assignedDepartment;
+      } else if (admin.role === "super-admin") {
+        matchCondition = {}; // All students
+      }
+    } else {
+      // Not in admins, check users for super-admin
+      const user = await db.collection("users").findOne({ email });
+
+      if (!user) {
+        return NextResponse.json(
+          { error: "User not found in admins or users collection" },
+          { status: 404 }
+        );
+      }
+
+      if (user.role === "super-admin") {
+        matchCondition = {}; // All students
+      } else {
+        return NextResponse.json(
+          { error: "Unauthorized: Insufficient permissions" },
+          { status: 403 }
+        );
+      }
     }
 
     const students = await db
@@ -111,6 +128,7 @@ export async function GET(req: Request) {
       .toArray();
 
     return NextResponse.json(students, { status: 200 });
+
   } catch (error) {
     console.error("Error fetching students:", error);
     return NextResponse.json(

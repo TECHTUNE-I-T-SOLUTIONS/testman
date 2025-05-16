@@ -167,6 +167,15 @@ const AdminSidebar = () => {
       ],
     },
 
+    // ✅ Add Create Blog button here
+    {
+      label: "Manage Blog",
+      icon: <Book className="h-5 w-5" />,
+      subItems: [
+        { label: "Create Blog", path: "/dashboard/super-admin/blog/create", icon: <NotepadTextDashed className="h-4 w-4" /> },
+        { label: "View Blogs", path: "/dashboard/super-admin/blog/view", icon: <View className="h-4 w-4" /> },
+      ],
+    },
     { label: "Profile", path: "/dashboard/super-admin/profile", icon: <Settings className="h-5 w-5" /> },
   ].filter((item): item is Exclude<typeof item, false> => item !== false)
 
