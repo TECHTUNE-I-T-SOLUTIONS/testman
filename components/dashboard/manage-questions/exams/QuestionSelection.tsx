@@ -62,9 +62,14 @@ export default function QuestionSelection({
     setValue("selectedQuestions", updatedSelection);
   };
 
-  const filteredQuestions = questions.filter((q) =>
-    q.questionText.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredQuestions = questions.filter((q) => {
+    if (!searchTerm) return true;
+    if (!q.createdAt) return false;
+
+    const questionDate = new Date(q.createdAt).toISOString().split("T")[0]; // 'YYYY-MM-DD'
+    return questionDate === searchTerm;
+  });
+
 
   return (
     <div>
@@ -75,12 +80,12 @@ export default function QuestionSelection({
       {/* 🔍 Search and Sort Controls */}
       <div className="flex justify-between items-center gap-2 mb-3">
         <input
-          type="text"
-          placeholder="Search by question..."
+          type="date"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="flex-1 p-2 border border-gray-300 rounded-md"
         />
+
         <select
           value={sortOrder}
           onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
@@ -95,20 +100,25 @@ export default function QuestionSelection({
         {loading ? (
           <p className="text-purple-500 text-sm">⏳ Loading questions...</p>
         ) : filteredQuestions.length > 0 ? (
-          filteredQuestions.map((q) => (
-            <label
-              key={q._id}
-              className="flex items-center gap-3 p-2 hover:bg-purple-100 rounded-md cursor-pointer transition"
-            >
-              <input
-                type="checkbox"
-                checked={selectedQuestions.includes(q._id)}
-                onChange={() => toggleSelection(q._id)}
-                className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-              />
-              <span className="text-gray-800">{q.questionText}</span>
-            </label>
-          ))
+              filteredQuestions.map((q) => (
+                <label
+                  key={q._id}
+                  className="flex items-start gap-3 p-2 hover:bg-purple-100 rounded-md cursor-pointer transition"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedQuestions.includes(q._id)}
+                    onChange={() => toggleSelection(q._id)}
+                    className="mt-1 w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-sm text-gray-500">
+                      📅 {q.createdAt ? new Date(q.createdAt).toLocaleDateString() : "Unknown Date"}
+                    </span>
+                    <span className="text-gray-800">{q.questionText}</span>
+                  </div>
+                </label>
+              ))
         ) : (
           <p className="text-gray-500 text-sm">
             🚫 No questions match your search.
