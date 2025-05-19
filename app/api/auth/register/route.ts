@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import Student from "@/lib/models/student";
 import { connectdb } from "@/lib/connectdb";
+// import { sendSignupEmail } from "@/lib/notifications/email";
+// import { sendSignupSMS } from "@/lib/notifications/sms"; // ⛔️ Uncomment when sender ID is ready
 
 export async function POST(req: Request) {
   await connectdb();
@@ -16,8 +18,9 @@ export async function POST(req: Request) {
       level,
       password,
       confirmPassword,
-      status, // ✅ Get the status from request body
-      loggedIn, // get the login status from the request as well
+      status,
+      loggedIn,
+      phoneNumber, // optional field for SMS
     } = await req.json();
 
     if (password !== confirmPassword) {
@@ -45,16 +48,29 @@ export async function POST(req: Request) {
       department,
       level,
       password: hashedPassword,
-      status: status || "Inactive", // ✅ Added status (fallback just in case)
-      loggedIn: loggedIn || "False" // Added another login state here
+      status: status || "Inactive",
+      loggedIn: loggedIn || "False",
+      phoneNumber, // save phone if provided
     });
 
     await newStudent.save();
+
+    // ✅ Send welcome email
+    // await sendSignupEmail(email, name);
+
+    // ⛔️ Optionally send SMS (enable after setting sender ID)
+    /*
+    if (phoneNumber) {
+      await sendSignupSMS(phoneNumber, name);
+    }
+    */
+
     return NextResponse.json(
       { message: "Student registered successfully" },
       { status: 201 }
     );
   } catch (error) {
+    console.error("Registration error:", error);
     return NextResponse.json(
       { message: "Registration failed", error },
       { status: 500 }

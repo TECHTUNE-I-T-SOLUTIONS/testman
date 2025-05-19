@@ -1,0 +1,31 @@
+import { NextResponse } from "next/server";
+import mongoose from "mongoose";
+import { connectdb } from "@/lib/connectdb";
+
+const STUDENT_COLLECTION = "students";
+
+export async function GET() {
+  try {
+    const db = await connectdb();
+    if (!db) throw new Error("Database connection failed");
+
+    // Add `phoneNumber` field to all students if not present
+    const result = await db.collection(STUDENT_COLLECTION).updateMany(
+      { phoneNumber: { $exists: false } },
+      { $set: { phoneNumber: "" } } // Default to empty string if not set
+    );
+
+    return NextResponse.json(
+      {
+        message: `Updated ${result.modifiedCount} students with phoneNumber field.`,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error updating phoneNumber field:", error);
+    return NextResponse.json(
+      { error: "Failed to update students" },
+      { status: 500 }
+    );
+  }
+}

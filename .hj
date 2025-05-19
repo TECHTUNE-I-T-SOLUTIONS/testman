@@ -7,3 +7,20 @@ DEFAULT_ADMIN_EMAIL=yusufabdullahi2910@gmail.com
 DEFAULT_ADMIN_PASSWORD=Yusasive
 DEFAULT_ADMIN_MATRIC_NUMBER=20/56EB004
 JWT_SECRET=7ea56d76e45a80f5488ba48419d241ee004452d742ccedba9dca9cedeba0dd39
+
+
+# Resend API
+# RESEND_API_KEY=re_W3Np1F8i_6rniaMGwMNNFJrzVwqb1rZJb
+# RESEND_SENDER_EMAIL=onboarding@resend.dev
+
+# Termii API
+# TERMII_API_KEY=TLlSmBQOZhBltdTootbmNbgkMdBezoipfXNEtGrLqIfciNsgYqdnOqyTzdbRqv
+# TERMII_SENDER_ID=GLORIOUSFUTURE    # (Custom sender ID approved by Termii)
+
+
+# RESEND_API_KEY: re_W3Np1F8i_6rniaMGwMNNFJrzVwqb1rZJb
+
+
+# Termii_LIVE_API_KEY: TLlSmBQOZhBltdTootbmNbgkMdBezoipfXNEtGrLqIfciNsgYqdnOqyTzdbRqv
+
+# Secrect key: tsk_nLGSbEvS2euSVUY1ApIMsb81Fs
