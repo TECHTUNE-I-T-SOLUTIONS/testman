@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import Student from "@/lib/models/student";
 import { connectdb } from "@/lib/connectdb";
-import { sendSignupEmail } from "@/lib/notifications/email";
+// import { sendSignupEmail } from "@/lib/notifications/email";
 // import { sendSignupSMS } from "@/lib/notifications/sms"; // ⛔️ Uncomment when sender ID is ready
 
 export async function POST(req: Request) {
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     await newStudent.save();
 
     // ✅ Send welcome email
-    await sendSignupEmail(email, name);
+    // await sendSignupEmail(email, name);
 
     // ⛔️ Optionally send SMS (enable after setting sender ID)
     /*
