@@ -11,9 +11,9 @@ export interface IStudent extends Document {
   createdAt: Date;
   status: "Active" | "Inactive";
   loggedIn: "True" | "False";
-  isActive: boolean; // ✅ now a boolean
+  isActive: boolean;
+  phoneNumber?: string; // ✅ added
 }
-
 
 const StudentSchema = new Schema<IStudent>(
   {
@@ -24,6 +24,7 @@ const StudentSchema = new Schema<IStudent>(
     department: { type: Schema.Types.ObjectId, ref: "Department", required: true },
     level: { type: Schema.Types.ObjectId, ref: "Level", required: true },
     password: { type: String, required: true },
+    phoneNumber: { type: String }, // ✅ added
     status: {
       type: String,
       enum: ["Active", "Inactive"],
@@ -42,6 +43,7 @@ const StudentSchema = new Schema<IStudent>(
   },
   { timestamps: true }
 );
+
 
 const Student =
   mongoose.models.Student || mongoose.model<IStudent>("Student", StudentSchema);

@@ -61,6 +61,20 @@ const PersonalInfoForm = () => {
               required
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="phoneNumber">Phone Number</Label>
+            <Input
+              id="phoneNumber"
+              name="phoneNumber"
+              type="tel"
+              onChange={(e) =>
+                setFormData({ ...formData, phoneNumber: e.target.value })
+              }
+              placeholder="Enter your phone number"
+              required
+              autoComplete="tel"
+            />
+          </div>
         </div>
         <div className="flex justify-end mt-7">
           <Button onClick={() => setStep(2)}>Continue</Button>

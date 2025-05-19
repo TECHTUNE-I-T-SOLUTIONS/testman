@@ -116,6 +116,7 @@ export async function GET(req: Request) {
             name: 1,
             email: 1,
             matricNumber: 1,
+            phoneNumber: 1, // ✅ Added
             isActive: 1,
             loggedIn: 1,
             status: 1,
@@ -123,7 +124,7 @@ export async function GET(req: Request) {
             department: { _id: "$department._id", name: "$department.name" },
             level: { _id: "$level._id", name: "$level.name" },
           },
-        },
+        }
       ])
       .toArray();
 

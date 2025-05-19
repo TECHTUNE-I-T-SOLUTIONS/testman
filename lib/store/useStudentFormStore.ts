@@ -7,6 +7,7 @@ interface FormData {
   faculty: string;
   department: string;
   level: string;
+  phoneNumber: string; // ✅ added
   password: string;
   confirmPassword: string;
 }
@@ -27,27 +28,31 @@ const useFormStore = create<FormStore>((set) => ({
     faculty: '',
     department: '',
     level: '',
+    phoneNumber: '', // ✅ initialized
     password: '',
     confirmPassword: '',
   },
-  step: 1, // Default step value
-  setStep: (step) => set(() => ({ step })), // Corrected setter function
-  setFormData: (data) => set((state) => ({
-    formData: { ...state.formData, ...data },
-  })),
-  resetForm: () => set({
-    formData: {
-      name: '',
-      email: '',
-      matricNumber: '',
-      faculty: '',
-      department: '',
-      level: '',
-      password: '',
-      confirmPassword: '',
-    },
-    step: 1, // Reset step as well
-  }),
+  step: 1,
+  setStep: (step) => set(() => ({ step })),
+  setFormData: (data) =>
+    set((state) => ({
+      formData: { ...state.formData, ...data },
+    })),
+  resetForm: () =>
+    set({
+      formData: {
+        name: '',
+        email: '',
+        matricNumber: '',
+        faculty: '',
+        department: '',
+        level: '',
+        phoneNumber: '', // ✅ reset
+        password: '',
+        confirmPassword: '',
+      },
+      step: 1,
+    }),
 }));
 
 export default useFormStore;

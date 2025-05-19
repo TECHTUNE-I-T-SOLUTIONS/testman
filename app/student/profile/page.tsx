@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { BookOpen, ChevronDown, ChevronUp, KeyRound, UserCircle2, Search } from "lucide-react";
-import { getStudentFromToken } from "@/utils/auth";
+import { getStudentFromToken, logoutStudent } from "@/utils/auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Student {
   name: string;
@@ -16,6 +17,7 @@ interface Student {
   department: { _id: string; name: string };
   level: { _id: string; name: string };
   isActive: boolean;
+  phoneNumber?: string; // ✅ added
 }
 
 
@@ -35,6 +37,14 @@ export default function ProfilePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showRelevant, setShowRelevant] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [editingPhone, setEditingPhone] = useState(false);
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showPasswordConfirmModal, setShowPasswordConfirmModal] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState<"Weak" | "Medium" | "Strong" | "Very Strong" | "">("");
+  const [passwordFeedback, setPasswordFeedback] = useState<string[]>([]);
+
 
   // Get student from token and fetch their data
   useEffect(() => {
@@ -48,10 +58,12 @@ export default function ProfilePage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to fetch");
 
-      setStudent({
-        ...data,
-        isActive: data.isActive === "True" || data.isActive === true,
-      });
+        setStudent({
+          ...data,
+          isActive: data.isActive === "True" || data.isActive === true,
+        });
+
+        setPhoneNumber(data.phoneNumber || ""); // This is the fix
       } catch (err) {
         console.error("Failed to fetch student", err);
       }
@@ -59,6 +71,7 @@ export default function ProfilePage() {
 
     fetchStudentDetails();
   }, []);
+
 
   // Fetch all courses and derive relevant + searchable ones
   useEffect(() => {
@@ -89,24 +102,89 @@ export default function ProfilePage() {
       return;
     }
 
+    // Password strength check
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      toast.error("Password must include uppercase, lowercase, number, and special character.");
+      return;
+    }
+
     try {
       const res = await fetch("/api/auth/change-password", {
-        method: "POST",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: newPassword }),
       });
 
+      const result = await res.json();
+
       if (res.ok) {
-        toast.success("Password changed successfully");
+        toast.success("Password changed successfully. Logging out...");
         setNewPassword("");
+        setIsLoggingOut(true);
+        setTimeout(async () => {
+          await logoutStudent();
+          router.push("/auth/login");
+        }, 1500);
       } else {
-        toast.error("Failed to change password");
+        toast.error(result.error || "Failed to change password");
       }
     } catch (error) {
-      console.error("Something went wrong:", error);      
+      console.error("Something went wrong:", error);
       toast.error("Something went wrong");
     }
   };
+
+
+  
+  const handleUpdatePhoneNumber = async () => {
+    try {
+      const res = await fetch("/api/students/update-phone", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          matricNumber: student?.matricNumber,
+          phoneNumber,
+        }),
+      });
+
+      if (!res.ok) {
+        toast.error("Failed to update phone number");
+        return;
+      }
+
+      toast.success("Phone number updated!");
+      setEditingPhone(false);
+    } catch (err) {
+      console.error("Error updating phone number:", err);
+      toast.error("An error occurred");
+    }
+  };
+
+  const handlePhoneBlur = () => {
+    if (phoneNumber === student?.phoneNumber) {
+      setEditingPhone(false);
+    }
+  };
+  
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setPhoneNumber(student?.phoneNumber || "");
+        setEditingPhone(false);
+      }
+    };
+
+    if (editingPhone) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [editingPhone, student]);
+
 
   // Courses not in student's faculty (used for search)
   const otherCourses = allCourses.filter(
@@ -116,6 +194,44 @@ export default function ProfilePage() {
   const filteredSearchResults = otherCourses.filter((course) =>
     `${course.code} ${course.name}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const evaluatePassword = (password: string) => {
+    const feedback: string[] = [];
+
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[\W_]/.test(password);
+    const isLongEnough = password.length >= 8;
+
+    if (!hasUpperCase) feedback.push("Add at least one uppercase letter.");
+    if (!hasLowerCase) feedback.push("Add at least one lowercase letter.");
+    if (!hasNumber) feedback.push("Add at least one number.");
+    if (!hasSpecialChar) feedback.push("Add at least one special character.");
+    if (!isLongEnough) feedback.push("Password must be at least 8 characters long.");
+
+    // Specify the union type directly
+    let strength: "" | "Weak" | "Medium" | "Strong" | "Very Strong" = "";
+
+    const passedChecks = [hasUpperCase, hasLowerCase, hasNumber, hasSpecialChar, isLongEnough].filter(Boolean).length;
+    switch (passedChecks) {
+      case 5:
+        strength = "Very Strong";
+        break;
+      case 4:
+        strength = "Strong";
+        break;
+      case 3:
+        strength = "Medium";
+        break;
+      default:
+        strength = "Weak";
+    }
+
+    setPasswordStrength(strength);
+    setPasswordFeedback(feedback);
+  };
+
 
   return (
     <div className="min-h-screen bg-white text-white px-4 py-10 flex justify-center items-start">
@@ -144,6 +260,44 @@ export default function ProfilePage() {
                     <span className="font-semibold text-black">Active:</span>{" "}
                     {student.isActive ? "Yes" : "No"}
                   </p>
+                  <div className="col-span-1 sm:col-span-2 flex flex-col gap-2">
+                    <label className="font-semibold text-black">Phone Number: {student.phoneNumber}</label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="tel"
+                        value={phoneNumber}
+                        disabled={!editingPhone}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        onBlur={handlePhoneBlur}
+
+                        onKeyDown={(e) => {
+                          if (e.key === "Escape") {
+                            setPhoneNumber(student?.phoneNumber || "");
+                            setEditingPhone(false);
+                          }
+                        }}
+                        placeholder="Enter phone number"
+                        className={`text-black transition-colors duration-200 ${
+                          editingPhone ? "bg-white border border-black" : "bg-gray-200"
+                        }`}
+                        autoFocus={editingPhone}
+                      />
+
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          if (editingPhone) {
+                            handleUpdatePhoneNumber();
+                          } else {
+                            setEditingPhone(true);
+                          }
+                        }}
+                        className="bg-white text-black font-bold"
+                      >
+                        {editingPhone ? "Save" : "Edit"}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -219,16 +373,82 @@ export default function ProfilePage() {
                   type="password"
                   placeholder="New Password"
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="bg-black border-gray-700 text-black placeholder-gray-500"
+                  onChange={(e) => {
+                    const pwd = e.target.value;
+                    setNewPassword(pwd);
+                    evaluatePassword(pwd);
+                  }}
+                  className="bg-gray-300 border-gray-700 text-black placeholder-gray-500"
                 />
                 <Button
-                  onClick={handleChangePassword}
+                  onClick={() => setShowPasswordConfirmModal(true)}
                   className="mt-3 w-full bg-white text-black font-bold hover:bg-gray-300 transition"
                 >
                   Update Password
                 </Button>
+
+
+                {newPassword && (
+                  <div className="mt-2">
+                    <p className="text-sm font-semibold">
+                      Strength: <span className={
+                        passwordStrength === "Very Strong" ? "text-green-700" :
+                        passwordStrength === "Strong" ? "text-green-500" :
+                        passwordStrength === "Medium" ? "text-yellow-600" :
+                        "text-red-600"
+                      }>
+                        {passwordStrength}
+                      </span>
+                    </p>
+                    {passwordFeedback.length > 0 && (
+                      <ul className="text-sm text-red-600 list-disc list-inside mt-1 space-y-1">
+                        {passwordFeedback.map((msg, idx) => (
+                          <li key={idx}>{msg}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
               </div>
+
+              {showPasswordConfirmModal && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+                  <div className="bg-white p-6 rounded-lg shadow-xl w-[90%] max-w-md text-center space-y-4">
+                    <h2 className="text-lg font-semibold text-red-600">Confirm Password Change</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Changing your password will immediately log you out. You’ll have to log in again with the new password.
+                    </p>
+
+                    <div className="flex justify-center gap-4 pt-2">
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          setShowPasswordConfirmModal(false);
+                          handleChangePassword();
+                        }}
+                      >
+                        Yes, Change Password
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowPasswordConfirmModal(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {isLoggingOut && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+                  <div className="bg-white p-4 rounded shadow-lg text-center">
+                    <p className="text-black font-semibold">Logging you out...</p>
+                  </div>
+                </div>
+              )}
+
             </>
           ) : (
             <p className="text-center text-gray-900 animate-pulse">Loading profile...</p>

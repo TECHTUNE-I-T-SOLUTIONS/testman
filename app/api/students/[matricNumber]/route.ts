@@ -50,7 +50,8 @@ export async function GET(req: Request) {
             name: 1,
             email: 1,
             matricNumber: 1,
-            isActive: 1, // Keep as stored (boolean)
+            phoneNumber: 1, // ✅ added this line
+            isActive: 1,
             loggedIn: 1,
             status: 1,
             faculty: { _id: "$faculty._id", name: "$faculty.name" },
@@ -59,7 +60,7 @@ export async function GET(req: Request) {
             createdAt: 1,
             updatedAt: 1,
           },
-        },
+        }
       ])
       .toArray();
 

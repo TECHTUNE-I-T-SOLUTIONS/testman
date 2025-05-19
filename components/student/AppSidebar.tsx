@@ -77,8 +77,13 @@ const AppSidebar = () => {
     name: string;
     matricNumber: string;
     loggedIn: boolean;
-    isActive: boolean; // boolean not string
-  } | null>(null)
+    isActive: boolean;
+    phoneNumber?: string;
+    faculty?: { name: string };
+    department?: { name: string };
+    level?: { name: string };
+  } | null>(null);
+
 
   useEffect(() => {
     const fetchStudent = async () => {
@@ -96,7 +101,11 @@ const AppSidebar = () => {
           name: data.name,
           matricNumber: data.matricNumber,
           loggedIn: true,
-          isActive: data.isActive?.toString().toLowerCase() === "true"
+          isActive: data.isActive?.toString().toLowerCase() === "true",
+          phoneNumber: data.phoneNumber,
+          faculty: data.faculty,
+          department: data.department,
+          level: data.level,
         };
 
         setStudent(studentDetails);
@@ -109,6 +118,7 @@ const AppSidebar = () => {
 
     fetchStudent();
   }, [router]);
+
 
   useEffect(() => {
     if ((showInactiveModal || showLogoutConfirm) && window.innerWidth < 768) {
@@ -288,7 +298,15 @@ const AppSidebar = () => {
                 onClick={() => {
                   const adminPhone = "2348083191228";
                   const message = encodeURIComponent(
-                    `Hello Admin,\n\nMy name is ${student?.name?.split(" ")[0]}. I'm trying to access my account on Operation Save my CGPA, but it shows that my account is inactive.\n\nKindly help me restore access to the full resources.\n\nThank you!`
+                    `Hello Admin,\n\n` +
+                    `My name is ${student?.name?.split(" ")[0]}. I'm trying to access my account on Operation Save my CGPA, but it shows that my account is inactive.\n\n` +
+                    `Here are my details:\n` +
+                    `Matric Number: ${student?.matricNumber},\n` +
+                    `Phone Number: ${student?.phoneNumber || "N/A"},\n` +
+                    `Faculty: ${student?.faculty?.name || "N/A"},\n` +
+                    `Department: ${student?.department?.name || "N/A"},\n` +
+                    `Level: ${student?.level?.name || "N/A"}.\n\n` +
+                    `Kindly help me restore access to the full resources.\n\nThank you!`
                   );
                   window.open(`https://wa.me/${adminPhone}?text=${message}`, "_blank");
                 }}
