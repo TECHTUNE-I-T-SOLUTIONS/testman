@@ -24,3 +24,15 @@ JWT_SECRET=7ea56d76e45a80f5488ba48419d241ee004452d742ccedba9dca9cedeba0dd39
 # Termii_LIVE_API_KEY: TLlSmBQOZhBltdTootbmNbgkMdBezoipfXNEtGrLqIfciNsgYqdnOqyTzdbRqv
 
 # Secrect key: tsk_nLGSbEvS2euSVUY1ApIMsb81Fs
+
+
+
+service id: service_3lhluih
+
+welcome template id: template_eo7dzoc
+
+PW RESET: template_wpe1koo
+
+
+public key: GeI_lRIKxBfXr8CAa
+private key: "g0Ol6QD0N3p_HMaSSpSXR"

@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import Student from "@/lib/models/student";
 import { connectdb } from "@/lib/connectdb";
-// import { sendSignupEmail } from "@/lib/notifications/email";
-// import { sendSignupSMS } from "@/lib/notifications/sms"; // ⛔️ Uncomment when sender ID is ready
+import { sendSignupEmail } from "@/lib/notifications/email";
 
 export async function POST(req: Request) {
   await connectdb();
@@ -55,15 +54,18 @@ export async function POST(req: Request) {
 
     await newStudent.save();
 
-    // ✅ Send welcome email
-    // await sendSignupEmail(email, name);
-
-    // ⛔️ Optionally send SMS (enable after setting sender ID)
-    /*
-    if (phoneNumber) {
-      await sendSignupSMS(phoneNumber, name);
+    // ✅ Send welcome email after successful save
+    try {
+      await sendSignupEmail(email, name);
+    } catch (err) {
+      console.warn("Welcome email failed, but registration succeeded", err);
     }
-    */
+
+
+    // if (phoneNumber) {
+    //   await sendSignupSMS(phoneNumber, name);
+    // }
+
 
     return NextResponse.json(
       { message: "Student registered successfully" },
