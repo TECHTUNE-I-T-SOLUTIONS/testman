@@ -40,91 +40,83 @@ const AppSidebar = () => {
   const isCollapsed = state === "collapsed"
   const [showInactiveModal, setShowInactiveModal] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
-
-  // A custom trigger component that adapts to the sidebar state
-  const CustomSidebarTrigger = () => {
-    const { state, toggleSidebar } = useSidebar()
-
-    return (
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={toggleSidebar}
-        className="h-8 w-8 rounded-full absolute right-[-12px] top-4 bg-background border shadow-sm z-10 hidden md:flex"
-      >
-        {state === "collapsed" ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        <span className="sr-only">Toggle Sidebar</span>
-      </Button>
-    )
-  }
-
-  // Mobile trigger that's visible on small screens
-  const MobileSidebarTrigger = () => {
-    return (
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setOpenMobile(true)}
-        className="fixed top-4 left-4 z-50 md:hidden"
-      >
-        <Menu className="h-5 w-5" />
-        <span className="sr-only">Open Menu</span>
-      </Button>
-    )
-  }
+  const [showPhoneModal, setShowPhoneModal] = useState(false)
 
   const [student, setStudent] = useState<{
-    name: string;
-    matricNumber: string;
-    loggedIn: boolean;
-    isActive: boolean;
-    phoneNumber?: string;
-    faculty?: { name: string };
-    department?: { name: string };
-    level?: { name: string };
-  } | null>(null);
+    name: string
+    matricNumber: string
+    loggedIn: boolean
+    isActive: boolean
+    phoneNumber?: string
+    faculty?: { name: string }
+    department?: { name: string }
+    level?: { name: string }
+  } | null>(null)
+
+  // Fetch student data and manage modal visibility
+  const fetchStudent = async () => {
+    try {
+      const tokenStudent = await getStudentFromToken()
+      if (!tokenStudent?.matricNumber) return router.push("/auth/login")
+
+      const encodedMatric = encodeURIComponent(tokenStudent.matricNumber)
+      const res = await fetch(`/api/students/${encodedMatric}`)
+      const data = await res.json()
+
+      if (!res.ok) throw new Error(data.error || "Failed to fetch student")
+
+      const studentDetails = {
+        name: data.name,
+        matricNumber: data.matricNumber,
+        loggedIn: true,
+        isActive: data.isActive?.toString().toLowerCase() === "true",
+        phoneNumber: data.phoneNumber,
+        faculty: data.faculty,
+        department: data.department,
+        level: data.level,
+      }
+
+      setStudent(studentDetails)
+
+      // Always show inactive modal if not active
+      if (!studentDetails.isActive) setShowInactiveModal(true)
+
+      // Only show phone modal if phone number is missing and NOT on profile page
+      if (!studentDetails.phoneNumber) {
+        if (pathname !== "/student/profile") {
+          setShowPhoneModal(true)
+        } else {
+          setShowPhoneModal(false)
+        }
+      } else {
+        setShowPhoneModal(false)
+      }
+    } catch (error) {
+      console.error("Error fetching student:", error)
+    }
+  }
 
 
   useEffect(() => {
-    const fetchStudent = async () => {
-      try {
-        const tokenStudent = await getStudentFromToken();
-        if (!tokenStudent?.matricNumber) return router.push("/auth/login");
+    // Re-run the fetch to determine modal visibility on every path change
+    fetchStudent()
+  }, [pathname])
 
-        const encodedMatric = encodeURIComponent(tokenStudent.matricNumber);
-        const res = await fetch(`/api/students/${encodedMatric}`);
-        const data = await res.json();
-
-        if (!res.ok) throw new Error(data.error || "Failed to fetch student");
-
-        const studentDetails = {
-          name: data.name,
-          matricNumber: data.matricNumber,
-          loggedIn: true,
-          isActive: data.isActive?.toString().toLowerCase() === "true",
-          phoneNumber: data.phoneNumber,
-          faculty: data.faculty,
-          department: data.department,
-          level: data.level,
-        };
-
-        setStudent(studentDetails);
-
-        if (!studentDetails.isActive) setShowInactiveModal(true);
-      } catch (error) {
-        console.error("Error fetching student:", error);
-      }
-    };
-
-    fetchStudent();
-  }, [router]);
-
-
+  // Auto-close mobile sidebar when modals are shown
   useEffect(() => {
     if ((showInactiveModal || showLogoutConfirm) && window.innerWidth < 768) {
       setOpenMobile(false)
     }
   }, [showInactiveModal, showLogoutConfirm, setOpenMobile])
+
+  // Poll every 5 minutes to refresh student data
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      await fetchStudent()
+    }, 300000) // 5 minutes
+
+    return () => clearInterval(interval)
+  }, [])
 
   const navItems = [
     { label: "Home", path: "/student", icon: <House className="h-5 w-5" /> },
@@ -166,6 +158,37 @@ const AppSidebar = () => {
   if (!student) {
     return null // or a loading spinner
   }
+
+  // Sidebar toggle (desktop)
+  const CustomSidebarTrigger = () => {
+    const { state, toggleSidebar } = useSidebar()
+
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={toggleSidebar}
+        className="h-8 w-8 rounded-full absolute right-[-12px] top-4 bg-background border shadow-sm z-10 hidden md:flex"
+      >
+        {state === "collapsed" ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+        <span className="sr-only">Toggle Sidebar</span>
+      </Button>
+    )
+  }
+
+  // Mobile sidebar trigger
+  const MobileSidebarTrigger = () => (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => setOpenMobile(true)}
+      className="fixed top-4 left-4 z-50 md:hidden"
+    >
+      <Menu className="h-5 w-5" />
+      <span className="sr-only">Open Menu</span>
+    </Button>
+  )
+
 
   return (
     <>
@@ -344,6 +367,26 @@ const AppSidebar = () => {
                 ) : (
                   "Log Out"
                 )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPhoneModal && (
+        <div className="fixed inset-0 bg-black/50 z-[99] flex items-center justify-center">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-[90%] max-w-md text-center space-y-4">
+            <h2 className="text-lg font-semibold text-red-600">Update Required</h2>
+            <p className="text-muted-foreground">
+              Please update your phone number to continue using the platform.
+            </p>
+            <div className="pt-2">
+              <Button
+                onClick={() => {
+                  router.push("/student/profile");
+                }}
+              >
+                Update Now
               </Button>
             </div>
           </div>
