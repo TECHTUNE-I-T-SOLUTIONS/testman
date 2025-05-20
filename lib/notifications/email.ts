@@ -1,33 +1,26 @@
-import { Resend } from 'resend';
+import emailjs from "@emailjs/nodejs";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+export async function sendSignupEmail(toEmail: string, studentName: string) {
+  const serviceID = process.env.EMAILJS_SERVICE_ID!;
+  const templateID = process.env.EMAILJS_WELCOME_TEMPLATE_ID!;
+  const publicKey = process.env.EMAILJS_PUBLIC_KEY!;
+  const privateKey = process.env.EMAILJS_PRIVATE_KEY!;
 
-export async function sendSignupEmail(to: string, name: string) {
-  const html = `
-    <h2>🎉 Welcome, ${name}!</h2>
-    <p>Your account has been successfully created on <strong>Glorious Future Academy</strong>.</p>
-    <p>We’re excited to have you onboard!</p>
-  `;
+  const templateParams = {
+    to_name: studentName,
+    to_email: toEmail,
+  };
 
-  return await resend.emails.send({
-    from: process.env.RESEND_SENDER_EMAIL!,
-    to,
-    subject: '✅ Registration Successful',
-    html,
-  });
+  try {
+    const result = await emailjs.send(serviceID, templateID, templateParams, {
+      publicKey,
+      privateKey, // ✅ Ensure it's passed here just like in OTP
+    });
+
+    console.log("Signup Email Sent:", result);
+    return result;
+  } catch (error) {
+    console.error("Error sending signup email:", error);
+    throw new Error("Failed to send signup email");
+  }
 }
-
-export async function sendLoginEmail(to: string, name: string) {
-  const html = `
-    <h2>👋 Welcome back, ${name}!</h2>
-    <p>You just logged into your Glorious Future Academy account.</p>
-  `;
-
-  return await resend.emails.send({
-    from: process.env.RESEND_SENDER_EMAIL!,
-    to,
-    subject: '🔐 Login Notification',
-    html,
-  });
-}
- 
