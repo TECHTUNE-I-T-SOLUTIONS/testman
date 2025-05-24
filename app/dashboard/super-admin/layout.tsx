@@ -21,7 +21,7 @@ export default function AdminLayout({
   // Handle authentication and authorization
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/dashboard/login");
+      router.push("/auth/admin/login");
     } else if (
       session &&
       !["super-admin", "Admin", "Sub-Admin"].includes(session.user?.role as string)

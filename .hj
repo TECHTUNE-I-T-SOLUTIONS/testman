@@ -35,4 +35,19 @@ PW RESET: template_wpe1koo
 
 
 public key: GeI_lRIKxBfXr8CAa
-private key: "g0Ol6QD0N3p_HMaSSpSXR"
+private key: "g0Ol6QD0N3p_HMaSSpSXR" 
+
+
+# Termii API
+TERMII_API_KEY=TLlSmBQOZhBltdTootbmNbgkMdBezoipfXNEtGrLqIfciNsgYqdnOqyTzdbRqv
+TERMIi_EMAIL_CONFIG_ID=edfde8ea-0692-43eb-bfda-4d2bd8f47350
+TERMII_SENDER_ID=OPSMCGPA
+TERMII_API_URL=https://api.ng.termii.com
+
+re_Yoy8ZXtt_8hxGYPeKqh6pHYEHXSCiTq4U
+
+EMAILJS_SERVICE_ID=service_3lhluih
+EMAILJS_WELCOME_TEMPLATE_ID=template_eo7dzoc
+EMAILJS_PASSWORD_TEMPLATE_ID=template_wpe1koo
+EMAILJS_PUBLIC_KEY=GeI_lRIKxBfXr8CAa
+EMAILJS_PRIVATE_KEY=g0Ol6QD0N3p_HMaSSpSXR

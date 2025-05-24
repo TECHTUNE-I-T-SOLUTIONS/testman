@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Trophy, ArrowUpRight } from "lucide-react";
+import { Trophy, ArrowUpRight, HelpCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { getStudentFromToken } from "@/utils/auth";
+import Shepherd from "shepherd.js";
+import "shepherd.js/dist/css/shepherd.css";
 
 interface Leader {
   name: string;
@@ -21,6 +23,80 @@ export default function Leaderboard() {
   const [showModal, setShowModal] = useState(false);
   const [fullLeaders, setFullLeaders] = useState<Leader[]>([]);
 
+  // Shepherd instance
+  const startTour = useCallback(() => {
+    const tour = new Shepherd.Tour({
+      defaultStepOptions: {
+        classes: 'shadow-md bg-blue-100 text-blue-900',
+        scrollTo: { behavior: 'smooth', block: 'center' },
+        cancelIcon: { enabled: true },
+      },
+      useModalOverlay: true,
+    });
+
+    tour.addStep({
+      id: 'top-scorers',
+      text: 'This section shows the top 3 scorers in your faculty!',
+      attachTo: { element: '.top-scorers-header', on: 'bottom' },
+      buttons: [
+        {
+          text: 'Next',
+          action: tour.next,
+        },
+      ],
+    });
+
+    tour.addStep({
+      id: 'leaderboard-entry',
+      text: 'Each row shows a student\'s name and total score.',
+      attachTo: { element: '.leaderboard-entry', on: 'bottom' },
+      buttons: [
+        {
+          text: 'Back',
+          action: tour.back,
+        },
+        {
+          text: 'Next',
+          action: tour.next,
+        },
+      ],
+    });
+
+    tour.addStep({
+      id: 'your-score',
+      text: 'This is your current score and ranking.',
+      attachTo: { element: '.your-score', on: 'top' },
+      buttons: [
+        {
+          text: 'Back',
+          action: tour.back,
+        },
+        {
+          text: 'Next',
+          action: tour.next,
+        },
+      ],
+    });
+
+    tour.addStep({
+      id: 'view-full',
+      text: 'Click here to view the full leaderboard.',
+      attachTo: { element: '.view-full-btn', on: 'top' },
+      buttons: [
+        {
+          text: 'Back',
+          action: tour.back,
+        },
+        {
+          text: 'Finish',
+          action: tour.complete,
+        },
+      ],
+    });
+
+    tour.start();
+  }, []);
+
   const fetchLeaderboard = useCallback(async () => {
     setLoading(true);
     try {
@@ -35,7 +111,6 @@ export default function Leaderboard() {
       const facultyId = studentData?.faculty?._id || studentData?.faculty;
       if (!facultyId) throw new Error("Faculty ID not found");
 
-      // Fetch leaderboard
       const leaderboardRes = await fetch(`/api/leaderboard?facultyId=${facultyId}`);
       if (!leaderboardRes.ok) throw new Error("Failed to fetch leaderboard");
 
@@ -56,16 +131,13 @@ export default function Leaderboard() {
       }
       setPrevTopScore(currentTopScore);
 
-      // Fetch user's score
       const resultsRes = await fetch(`/api/results/highestScore/${student.id}`);
       const resultsData = resultsRes.ok ? await resultsRes.json() : null;
       const score = resultsData?.highestScore ?? 0;
       setUserScore(score);
 
-      // Full leaderboard for modal
       setFullLeaders(data.slice(0, 10));
 
-      // Calculate user rank
       const userIndex = data.findIndex((entry) => entry.name === student.name);
       setUserRank(userIndex >= 0 ? userIndex + 1 : null);
     } catch (err) {
@@ -81,9 +153,15 @@ export default function Leaderboard() {
 
   useEffect(() => {
     fetchLeaderboard();
-    const interval = setInterval(fetchLeaderboard, 30000);
+    const interval = setInterval(fetchLeaderboard, 100000);
     return () => clearInterval(interval);
   }, [fetchLeaderboard]);
+
+  // useEffect(() => {
+  //   // Trigger the tour after short delay
+  //   const timeout = setTimeout(() => startTour(), 1000);
+  //   return () => clearTimeout(timeout);
+  // }, [startTour]);
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);
@@ -91,10 +169,22 @@ export default function Leaderboard() {
   return (
     <Card className="p-4 shadow-lg rounded-2xl bg-gradient-to-br from-blue-100 to-white animate-fade-in-up overflow-hidden">
       <div className="flex flex-col items-center justify-between mb-4">
-        <div className="flex justify-center gap-2">
-          <Trophy className="text-yellow-500 h-6 w-6 animate-pulse" />
-          <h2 className="text-xl font-bold text-blue-800">Top 3 Scorers</h2>
+        <div className="flex justify-between items-center w-full">
+          <div className="flex justify-center gap-2 items-center top-scorers-header">
+            <Trophy className="text-yellow-500 h-6 w-6 animate-pulse" />
+            <h2 className="text-xl font-bold text-blue-800">Top 3 Scorers</h2>
+          </div>
+          <button
+            onClick={startTour}
+            className="text-blue-600 hover:text-blue-800 transition flex items-center gap-1 text-sm"
+            title="Show Guide"
+          >
+          click here 👉
+            <HelpCircle className="w-6 h-6" />
+            <span className="hidden sm:inline">Help</span>
+          </button>
         </div>
+
         {newHighScore && (
           <div className="flex items-center gap-1 text-sm font-semibold text-green-600 animate-bounce">
             <ArrowUpRight className="w-4 h-4" />
@@ -111,7 +201,7 @@ export default function Leaderboard() {
             <div
               key={leader.name}
               className={cn(
-                "flex justify-between items-center px-4 py-2 rounded-lg bg-white shadow-sm border transition-all",
+                "leaderboard-entry flex justify-between items-center px-4 py-2 rounded-lg bg-white shadow-sm border transition-all",
                 index === 0 && "bg-yellow-100 font-bold border-yellow-400",
                 index !== 0 && "hover:bg-blue-50"
               )}
@@ -134,13 +224,13 @@ export default function Leaderboard() {
       <div className="mt-6 text-center">
         <button
           onClick={openModal}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          className="view-full-btn px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
         >
           View Full Leaderboard
         </button>
       </div>
 
-      <div className="mt-6 text-center text-sm text-gray-700">
+      <div className="mt-6 text-center text-sm text-gray-700 your-score">
         <p className="font-semibold">
           Your Score: <span className="text-blue-700">{userScore} pts</span>
         </p>
