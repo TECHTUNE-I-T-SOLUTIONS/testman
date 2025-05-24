@@ -8,6 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+
 
 interface Student {
   name: string;
@@ -37,16 +45,25 @@ export default function ProfilePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showRelevant, setShowRelevant] = useState(false);
   const [newPassword, setNewPassword] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(student?.phoneNumber || "+234");
   const [editingPhone, setEditingPhone] = useState(false);
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showPasswordConfirmModal, setShowPasswordConfirmModal] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<"Weak" | "Medium" | "Strong" | "Very Strong" | "">("");
   const [passwordFeedback, setPasswordFeedback] = useState<string[]>([]);
+  const [faculties, setFaculties] = useState<{ _id: string; name: string }[]>([]);
+  const [departments, setDepartments] = useState<{ _id: string; name: string }[]>([]);
+  const [levels, setLevels] = useState<{ _id: string; name: string }[]>([]);
+  const [selectedFaculty, setSelectedFaculty] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState("");
+  const [savingInstitutionalInfo, setSavingInstitutionalInfo] = useState(false);
+  const [isEditingInstitutionalInfo, setIsEditingInstitutionalInfo] = useState(false);
 
 
   // Get student from token and fetch their data
+
   useEffect(() => {
     const fetchStudentDetails = async () => {
       try {
@@ -62,8 +79,15 @@ export default function ProfilePage() {
           ...data,
           isActive: data.isActive === "True" || data.isActive === true,
         });
+        setSelectedFaculty(data.faculty?._id || "");
+        setSelectedDepartment(data.department?._id || "");
+        setSelectedLevel(data.level?._id || "");
 
-        setPhoneNumber(data.phoneNumber || ""); // This is the fix
+        const number = data.phoneNumber || "";
+        setPhoneNumber(number);
+        setCountryCode(getCountryCode(number));
+        setLocalNumber(getLocalNumber(number));
+
       } catch (err) {
         console.error("Failed to fetch student", err);
       }
@@ -95,6 +119,83 @@ export default function ProfilePage() {
 
     if (student) fetchCourses();
   }, [student]);
+
+
+  useEffect(() => {
+    fetch("/api/faculties")
+      .then((res) => res.json())
+      .then(setFaculties)
+      .catch(() => toast.error("Failed to load faculties."));
+  }, []);
+
+  useEffect(() => {
+    if (!selectedFaculty) return;
+    fetch(`/api/departments?facultyId=${selectedFaculty}`)
+      .then((res) => res.json())
+      .then(setDepartments)
+      .catch(() => toast.error("Failed to load departments."));
+  }, [selectedFaculty]);
+
+  useEffect(() => {
+    if (!selectedDepartment) return;
+    fetch(`/api/levels?departmentId=${selectedDepartment}`)
+      .then((res) => res.json())
+      .then((data) => setLevels(Array.isArray(data?.levels) ? data.levels : []))
+      .catch(() => toast.error("Failed to load levels."));
+  }, [selectedDepartment]);
+
+  const handleSaveInstitutionalInfo = async () => {
+    if (!student?.matricNumber || !selectedFaculty || !selectedDepartment || !selectedLevel) {
+      toast.error("Please select all institutional information.");
+      return;
+    }
+
+    setSavingInstitutionalInfo(true);
+    try {
+      const res = await fetch("/api/students/set-institutional-info", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          matricNumber: student.matricNumber,
+          facultyId: selectedFaculty,
+          departmentId: selectedDepartment,
+          levelId: selectedLevel,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        if (data.message === "No changes detected") {
+          toast.info("No updates were made. Info is already up to date.");
+        } else {
+          toast.success("Institutional info updated successfully!");
+        }
+
+        // ✅ Update student info locally
+        setStudent((prev) =>
+          prev
+            ? {
+                ...prev,
+                faculty: faculties.find((f) => f._id === selectedFaculty)!,
+                department: departments.find((d) => d._id === selectedDepartment)!,
+                level: levels.find((l) => l._id === selectedLevel)!,
+              }
+            : null
+        );
+
+        // ✅ Exit editing mode
+        setIsEditingInstitutionalInfo(false);
+      } else {
+        toast.error(data.error || "Update failed");
+      }
+    } catch (error) {
+      console.error("Error Saving data:", error);
+      toast.error("Error saving data.");
+    } finally {
+      setSavingInstitutionalInfo(false);
+    }
+  };
 
   const handleChangePassword = async () => {
     if (!newPassword) {
@@ -138,28 +239,44 @@ export default function ProfilePage() {
 
   
   const handleUpdatePhoneNumber = async () => {
+    if (!phoneNumber || !/^\+?\d{10,15}$/.test(phoneNumber)) {
+      toast.error("Please enter a valid phone number (10–15 digits, optional '+').");
+      return;
+    }
+
+    if (!student?.matricNumber) {
+      toast.error("Matric number missing. Cannot update.");
+      return;
+    }
+
     try {
       const res = await fetch("/api/students/update-phone", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          matricNumber: student?.matricNumber,
-          phoneNumber,
+          matricNumber: student.matricNumber,
+          phoneNumber: phoneNumber.trim(),
         }),
       });
 
+      const result = await res.json();
+
       if (!res.ok) {
-        toast.error("Failed to update phone number");
+        toast.error(result.error || "Failed to update phone number.");
         return;
       }
 
       toast.success("Phone number updated!");
       setEditingPhone(false);
+      // Optionally reset phoneNumber state here if needed
+      // setPhoneNumber("");
+
     } catch (err) {
       console.error("Error updating phone number:", err);
-      toast.error("An error occurred");
+      toast.error("An error occurred while updating.");
     }
   };
+
 
   const handlePhoneBlur = () => {
     if (phoneNumber === student?.phoneNumber) {
@@ -232,6 +349,30 @@ export default function ProfilePage() {
     setPasswordFeedback(feedback);
   };
 
+  const getCountryCode = (number: string) => number.match(/^\+\d+/)?.[0] || "+234";
+  const getLocalNumber = (number: string) => number.replace(/^\+\d+/, "").replace(/\D/g, "");
+
+  // ⬅️ Move these ABOVE useEffect
+  const [countryCode, setCountryCode] = useState(() => getCountryCode(phoneNumber));
+  const [localNumber, setLocalNumber] = useState(() => getLocalNumber(phoneNumber));
+
+  // Sync full phone number when either part changes
+  useEffect(() => {
+    if (editingPhone) {
+      setPhoneNumber(`${countryCode}${localNumber}`);
+    }
+  }, [countryCode, localNumber, editingPhone]);
+
+
+  // On cancel/edit, reset both
+  useEffect(() => {
+    if (!editingPhone && student?.phoneNumber) {
+      setCountryCode(getCountryCode(student.phoneNumber));
+      setLocalNumber(getLocalNumber(student.phoneNumber));
+    }
+  }, [editingPhone, student]);
+
+
 
   return (
     <div className="min-h-screen bg-white text-white px-4 py-10 flex justify-center items-start">
@@ -248,55 +389,207 @@ export default function ProfilePage() {
             <>
               {/* Profile Info */}
               <div>
-                <h2 className="text-xl font-semibold mb-4 text-black">Personal Information</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-black">Personal Information</h2>
+                  {!isEditingInstitutionalInfo ? (
+                    <button
+                      className="text-blue-600 font-medium hover:underline"
+                      onClick={() => setIsEditingInstitutionalInfo(true)}
+                    >
+                      Edit
+                    </button>
+                  ) : (
+                    <div className="flex gap-3">
+                      <button
+                        className="text-green-600 font-medium hover:underline"
+                        onClick={handleSaveInstitutionalInfo}
+                        disabled={savingInstitutionalInfo}
+                      >
+                        {savingInstitutionalInfo ? "Saving..." : "Save"}
+                      </button>
+                      <button
+                        className="text-red-600 font-medium hover:underline"
+                        onClick={() => {
+                          setIsEditingInstitutionalInfo(false);
+                          // Reset values to original
+                          setSelectedFaculty(student.faculty?._id || "");
+                          setSelectedDepartment(student.department?._id || "");
+                          setSelectedLevel(student.level?._id || "");
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-900">
                   <p><span className="font-semibold text-black">Name:</span> {student.name}</p>
                   <p><span className="font-semibold text-black">Matric Number:</span> {student.matricNumber}</p>
                   <p><span className="font-semibold text-black">Email:</span> {student.email}</p>
-                  <p><span className="font-semibold text-black">Faculty:</span> {student.faculty.name}</p>
-                  <p><span className="font-semibold text-black">Department:</span> {student.department.name}</p>
-                  <p><span className="font-semibold text-black">Level:</span> {student.level.name}</p>
+                  <div>
+                    <label className="block text-sm font-semibold text-black mb-1">Faculty</label>
+                    {isEditingInstitutionalInfo ? (
+                      <Select
+                        onValueChange={(value) => setSelectedFaculty(value)}
+                        value={selectedFaculty}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Faculty" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {faculties.map((faculty) => (
+                            <SelectItem key={faculty._id} value={faculty._id}>
+                              {faculty.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <p className="text-sm">{student.faculty?.name || "N/A"}</p>
+                    )}
+                  </div>
+
+
+
+                  <div>
+                    <label className="block text-sm font-semibold text-black mb-1">Department</label>
+                    {isEditingInstitutionalInfo ? (
+                      <Select
+                        onValueChange={(value) => setSelectedDepartment(value)}
+                        value={selectedDepartment}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Department" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {departments.map((dept) => (
+                            <SelectItem key={dept._id} value={dept._id}>
+                              {dept.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <p className="text-sm">{student.department?.name || "N/A"}</p>
+                    )}
+                  </div>
+
+
+
+                  <div>
+                    <label className="block text-sm font-semibold text-black mb-1">Level</label>
+                    {isEditingInstitutionalInfo ? (
+                      <Select
+                        onValueChange={(value) => setSelectedLevel(value)}
+                        value={selectedLevel}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {levels.map((level) => (
+                            <SelectItem key={level._id} value={level._id}>
+                              {level.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <p className="text-sm">{student.level?.name || "N/A"}</p>
+                    )}
+                  </div>
+
+
+
+                  {(!student.faculty?.name || !student.department?.name || !student.level?.name) && (
+                    <Button
+                      onClick={handleSaveInstitutionalInfo}
+                      disabled={savingInstitutionalInfo}
+                      className="mt-4"
+                    >
+                      {savingInstitutionalInfo ? "Saving..." : "Save Institutional Info"}
+                    </Button>
+                  )}
                   <p>
                     <span className="font-semibold text-black">Active:</span>{" "}
                     {student.isActive ? "Yes" : "No"}
                   </p>
                   <div className="col-span-1 sm:col-span-2 flex flex-col gap-2">
                     <label className="font-semibold text-black">Phone Number: {student.phoneNumber}</label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="tel"
-                        value={phoneNumber}
-                        disabled={!editingPhone}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        onBlur={handlePhoneBlur}
+                      <div className="flex items-center gap-2">
+                        {/* Country Code Selector */}
+                        <select
+                          disabled={!editingPhone}
+                          value={countryCode}
+                          onChange={(e) => setCountryCode(e.target.value)}
+                          className={`text-black text-sm rounded-md px-2 py-1 border ${
+                            editingPhone ? "bg-white border-black" : "bg-gray-200"
+                          }`}
+                        >
+                          <option value="+234">🇳🇬 +234</option>
+                          <option value="+1">🇺🇸 +1</option>
+                          <option value="+44">🇬🇧 +44</option>
+                          <option value="+91">🇮🇳 +91</option>
+                          <option value="+27">🇿🇦 +27</option>
+                          <option value="+49">🇩🇪 +49</option>
+                          <option value="+33">🇫🇷 +33</option>
+                          <option value="+61">🇦🇺 +61</option>
+                          <option value="+81">🇯🇵 +81</option>
+                          <option value="+39">🇮🇹 +39</option>
+                          <option value="+86">🇨🇳 +86</option>
+                          <option value="+62">🇮🇩 +62</option>
+                          <option value="+55">🇧🇷 +55</option>
+                          <option value="+7">🇷🇺 +7</option>
+                          <option value="+82">🇰🇷 +82</option>
+                          <option value="+351">🇵🇹 +351</option>
+                          <option value="+34">🇪🇸 +34</option>
+                          <option value="+46">🇸🇪 +46</option>
+                          <option value="+31">🇳🇱 +31</option>
+                          <option value="+92">🇵🇰 +92</option>
+                        </select>
 
-                        onKeyDown={(e) => {
-                          if (e.key === "Escape") {
-                            setPhoneNumber(student?.phoneNumber || "");
-                            setEditingPhone(false);
-                          }
-                        }}
-                        placeholder="Enter phone number"
-                        className={`text-black transition-colors duration-200 ${
-                          editingPhone ? "bg-white border border-black" : "bg-gray-200"
-                        }`}
-                        autoFocus={editingPhone}
-                      />
+                        {/* Phone Input */}
+                        <Input
+                          type="tel"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          value={localNumber}
+                          disabled={!editingPhone}
+                          onChange={(e) => {
+                            const clean = e.target.value.replace(/\D/g, "");
+                            setLocalNumber(clean);
+                          }}
+                          onBlur={handlePhoneBlur}
+                          onKeyDown={(e) => {
+                            if (e.key === "Escape") {
+                              setCountryCode(getCountryCode(student?.phoneNumber || "+234"));
+                              setLocalNumber(getLocalNumber(student?.phoneNumber || ""));
+                              setEditingPhone(false);
+                            }
+                          }}
+                          placeholder="Enter phone number"
+                          className={`text-black transition-colors duration-200 ${
+                            editingPhone ? "bg-white border border-black" : "bg-gray-200"
+                          }`}
+                          autoFocus={editingPhone}
+                        />
 
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          if (editingPhone) {
-                            handleUpdatePhoneNumber();
-                          } else {
-                            setEditingPhone(true);
-                          }
-                        }}
-                        className="bg-white text-black font-bold"
-                      >
-                        {editingPhone ? "Save" : "Edit"}
-                      </Button>
-                    </div>
+                        {/* Save/Edit Button */}
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            if (editingPhone) {
+                              handleUpdatePhoneNumber();
+                            } else {
+                              setEditingPhone(true);
+                            }
+                          }}
+                          className="bg-white text-black font-bold"
+                        >
+                          {editingPhone ? "Save" : "Edit"}
+                        </Button>
+                      </div>
                   </div>
                 </div>
               </div>

@@ -1,0 +1,58 @@
+"use client";
+
+import { createContext, useState, useContext, ReactNode } from "react";
+import Joyride, { Step, CallBackProps, STATUS } from "react-joyride";
+
+type JoyrideContextType = {
+  addSteps: (newSteps: Step[]) => void;
+  startTour: () => void;
+};
+
+const JoyrideContext = createContext<JoyrideContextType | undefined>(undefined);
+
+export const JoyrideProvider = ({ children }: { children: ReactNode }) => {
+  const [steps, setSteps] = useState<Step[]>([]);
+  const [run, setRun] = useState(false);
+
+  const addSteps = (newSteps: Step[]) => {
+    setSteps((prevSteps) => [...prevSteps, ...newSteps]);
+  };
+
+  const startTour = () => {
+    setRun(true);
+  };
+
+  const handleCallback = (data: CallBackProps) => {
+    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(data.status)) {
+      setRun(false);
+    }
+  };
+
+  return (
+    <JoyrideContext.Provider value={{ addSteps, startTour }}>
+      <Joyride
+        steps={steps}
+        run={run}
+        continuous
+        showSkipButton
+        showProgress
+        callback={handleCallback}
+        styles={{
+          options: {
+            primaryColor: "#2563eb",
+            zIndex: 10000,
+          },
+        }}
+      />
+      {children}
+    </JoyrideContext.Provider>
+  );
+};
+
+export const useJoyride = (): JoyrideContextType => {
+  const context = useContext(JoyrideContext);
+  if (!context) {
+    throw new Error("useJoyride must be used within a JoyrideProvider");
+  }
+  return context;
+};

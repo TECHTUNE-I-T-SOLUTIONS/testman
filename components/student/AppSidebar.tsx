@@ -29,8 +29,10 @@ import {
   MessageCircle,
   ChevronRight,
   Menu,
+  Info,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+
 
 const AppSidebar = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -41,6 +43,7 @@ const AppSidebar = () => {
   const [showInactiveModal, setShowInactiveModal] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [showPhoneModal, setShowPhoneModal] = useState(false)
+  const [showSidebarHelpModal, setShowSidebarHelpModal] = useState(false)
 
   const [student, setStudent] = useState<{
     name: string
@@ -102,12 +105,15 @@ const AppSidebar = () => {
     fetchStudent()
   }, [pathname])
 
+
   // Auto-close mobile sidebar when modals are shown
   useEffect(() => {
-    if ((showInactiveModal || showLogoutConfirm) && window.innerWidth < 768) {
-      setOpenMobile(false)
+    if (showInactiveModal || showLogoutConfirm) {
+      setOpenMobile(false);
     }
-  }, [showInactiveModal, showLogoutConfirm, setOpenMobile])
+  }, [showInactiveModal, showLogoutConfirm, setOpenMobile]);
+
+
 
   // Poll every 5 minutes to refresh student data
   useEffect(() => {
@@ -194,7 +200,21 @@ const AppSidebar = () => {
     <>
       <MobileSidebarTrigger />
 
-      <Sidebar collapsible="icon" className="relative border-r">
+
+      
+        <Sidebar
+          collapsible="icon"
+          className={cn("relative border-r")}
+        >
+          <Button
+            onClick={() => setShowSidebarHelpModal(true)}
+            variant="outline"
+            size="icon"
+            className="mt-4 ml-60"
+            title="Sidebar Help"
+          >
+            <Info className="h-16 w-16" />
+          </Button>
         <CustomSidebarTrigger />
 
         <SidebarHeader className={cn("p-4 flex flex-col items-center relative", isCollapsed ? "pb-2" : "pb-4")}>
@@ -203,18 +223,20 @@ const AppSidebar = () => {
               <Avatar className={cn("border-2 border-primary/20", isCollapsed ? "h-8 w-8" : "h-16 w-16")}>
                 <AvatarFallback className="bg-primary/10 text-primary">{firstInitial}</AvatarFallback>
               </Avatar>
-              {student?.loggedIn && (
-                <div
-                  className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-green-500 border-2 border-white"
-                  title="Online status"
-                />
-              )}
+                {student?.loggedIn && (
+                  <div
+                    className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-green-500 border-2 border-white"
+                    title="Online status"
+                  />
+                )}
             </div>
           </div>
           {!isCollapsed && (
             <>
               <h2 className="text-xl font-bold text-center">Student Portal</h2>
-              <p className="text-sm text-muted-foreground mt-1">Welcome, {student?.name?.split(" ")[0]}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Welcome, {student?.name?.split(" ")[0]}
+              </p>
             </>
           )}
         </SidebarHeader>
@@ -245,12 +267,11 @@ const AppSidebar = () => {
                             e.preventDefault();
                             setShowInactiveModal(true);
                           } else {
-                            setOpenMobile(false); // Close sidebar on active link click
+                            setOpenMobile(false);
                           }
                         }}
                         className="flex items-center py-2"
                       >
-
                         <div
                           className={cn(
                             "text-muted-foreground",
@@ -306,6 +327,27 @@ const AppSidebar = () => {
         </SidebarFooter>
 
       </Sidebar>
+
+      {showSidebarHelpModal && (
+        <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-lg">
+            <h2 className="text-xl font-semibold mb-4">Sidebar Navigation Help</h2>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li><strong>Home:</strong> Go to the student dashboard overview.</li>
+              <li><strong>Take Exams:</strong> Start your available exams. Only for active students.</li>
+              <li><strong>Results:</strong> View your past exam scores. Only for active students.</li>
+              <li><strong>Notes:</strong> Access your saved or provided notes.</li>
+              <li><strong>Profile:</strong> View and update your student profile.</li>
+              <li><strong>Online Status:</strong> The green dot means you&apos;re online and active.</li>
+              <li><strong>Logout:</strong> Sign out of your student account.</li>
+            </ul>
+            <div className="mt-6 text-right">
+              <Button variant="default" onClick={() => setShowSidebarHelpModal(false)}>Close</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {showInactiveModal && (
         <div className="fixed inset-0 bg-black/50 z-[99] flex items-center justify-center">

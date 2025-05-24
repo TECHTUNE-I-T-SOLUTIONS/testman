@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import Student from "@/lib/models/student";
 import { connectdb } from "@/lib/connectdb";
 import { sendSignupEmail } from "@/lib/notifications/email";
+// import { sendSignupSMS } from "@/lib/notifications/welcome-sms";
 
 export async function POST(req: Request) {
   await connectdb();
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
       confirmPassword,
       status,
       loggedIn,
-      phoneNumber, // optional field for SMS
+      phoneNumber, // optional
     } = await req.json();
 
     if (password !== confirmPassword) {
@@ -49,23 +50,28 @@ export async function POST(req: Request) {
       password: hashedPassword,
       status: status || "Inactive",
       loggedIn: loggedIn || "False",
-      phoneNumber, // save phone if provided
+      phoneNumber,
     });
 
     await newStudent.save();
 
-    // ✅ Send welcome email after successful save
+    // ✅ Send welcome email
     try {
       await sendSignupEmail(email, name);
     } catch (err) {
       console.warn("Welcome email failed, but registration succeeded", err);
     }
 
-
+    // ✅ Send welcome SMS if phone is available
     // if (phoneNumber) {
-    //   await sendSignupSMS(phoneNumber, name);
+    //   try {
+    //     await sendSignupSMS(phoneNumber, name);
+    //   } catch (err) {
+    //     console.warn("Welcome SMS failed, but registration succeeded", err);
+    //   }
     // }
 
+    // await sendSMSorWhatsAppOTP(phoneNumber, "Welcome to Operation Save My CGPA!", "whatsapp");
 
     return NextResponse.json(
       { message: "Student registered successfully" },

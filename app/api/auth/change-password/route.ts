@@ -4,11 +4,16 @@ import { connectdb } from "@/lib/connectdb";
 import Student from "@/lib/models/student";
 import { getStudentFromToken } from "@/utils/auth";
 
+// Notifications
+import { sendSignupSMS } from "@/lib/notifications/welcome-sms";
+import { sendCustomSMSOrWhatsApp } from "@/lib/termii";
+import { sendOtpEmailTermii } from "@/lib/notifications/emailotpTermii";
+
 export async function PATCH(req: NextRequest) {
   try {
     await connectdb();
 
-    const student = await getStudentFromToken(); // ✅ NO ARGUMENT HERE
+    const student = await getStudentFromToken();
     if (!student?.matricNumber) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -31,11 +36,34 @@ export async function PATCH(req: NextRequest) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-
     existingStudent.password = hashedPassword;
     await existingStudent.save();
 
-    return NextResponse.json({ message: "Password updated successfully" });
+    // ✅ Prepare notification content
+    const name = existingStudent.name;
+    const email = existingStudent.email;
+    const phone = existingStudent.phoneNumber;
+
+    const message = `Hello ${name}, your password has been changed successfully. If this wasn't you, please contact support immediately.`;
+
+    // ✅ Send notifications in parallel
+    if (phone) {
+      // Send via SMS (optional welcome message)
+      sendSignupSMS(phone, name).catch(err => console.error("SMS error:", err));
+
+      // Send OTP or notification via SMS only
+      sendCustomSMSOrWhatsApp(phone, message, "sms").catch(err =>
+        console.error("WhatsApp/SMS error:", err)
+      );
+    }
+
+
+    // Send via Email
+    sendOtpEmailTermii(email, "Password Change Notification", message).catch(err =>
+      console.error("Email error:", err)
+    );
+
+    return NextResponse.json({ message: "Password updated and notifications sent" });
 
   } catch (error) {
     console.error("Error changing password:", error);
