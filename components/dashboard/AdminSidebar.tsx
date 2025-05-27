@@ -167,6 +167,17 @@ const AdminSidebar = () => {
       ],
     },
 
+    // ✅ Add this
+    isSuperAdmin && {
+      label: "Announcements",
+      icon: <Megaphone className="h-5 w-5" />,
+      subItems: [
+        { label: "Create", path: "/dashboard/super-admin/announcements/create", icon: <ClipboardPlus className="h-4 w-4" /> },
+        { label: "View", path: "/dashboard/super-admin/announcements/view", icon: <View className="h-4 w-4" /> },
+      ],
+    },
+
+
     // ✅ Add Create Blog button here
     {
       label: "Manage Blog",

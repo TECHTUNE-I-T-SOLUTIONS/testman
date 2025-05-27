@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Level from "@/lib/models/Level";
 import Department from "@/lib/models/department";
 import { connectdb } from "@/lib/connectdb";
+import mongoose from "mongoose";
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,9 +11,15 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const departmentId = searchParams.get("departmentId");
 
-    const levels = await Level.find(departmentId ? { departmentId } : {})
+    const isValidObjectId = (id: string | null) =>
+      typeof id === "string" && mongoose.Types.ObjectId.isValid(id);
+
+    const levels = await Level.find(
+      isValidObjectId(departmentId) ? { departmentId } : {}
+    )
       .populate("departmentId", "name")
       .lean();
+
 
     if (!levels.length) {
       return NextResponse.json(

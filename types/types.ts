@@ -37,13 +37,15 @@ export type LevelInput = {
   departmentId: string;
 };
 
+type Ref = { _id: string; name: string };
+
 export type Course = {
   _id?: string;
   name: string;
   code: string;
-  facultyId?: string
-  departmentId?: { _id: string; name: string } | string
-  levelId?: { _id: string; name: string } | string
+  departmentId: string | Ref;
+  levelId: string | Ref;
+  facultyId?: string | Ref;
 };
 
 export interface Option {

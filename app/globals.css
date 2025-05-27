@@ -222,3 +222,18 @@
 .animate-slide-up {
   animation: slide-up 0.3s ease-out forwards;
 }
+
+
+@keyframes scroll-text {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-scroll-text {
+  display: inline-block;
+  animation: scroll-text 80s linear infinite;
+}
