@@ -3,6 +3,8 @@ import Course from "@/lib/models/course";
 import Level from "@/lib/models/Level";
 import mongoose from "mongoose";
 import { connectdb } from "@/lib/connectdb";
+import Faculty from "@/lib/models/faculty";
+import Department from "@/lib/models/department";
 
 export async function GET() {
   await connectdb();
@@ -32,6 +34,17 @@ export async function POST(req: Request) {
       );
     }
 
+    const faculty = await Faculty.findById(facultyId);
+    if (!faculty) {
+      return NextResponse.json({ error: "Faculty not found" }, { status: 404 });
+    }
+
+    const department = await Department.findById(departmentId);
+    if (!department) {
+      return NextResponse.json({ error: "Department not found" }, { status: 404 });
+    }
+
+    
     const level = await Level.findById(levelId);
     if (!level) {
       return NextResponse.json({ error: "Level not found" }, { status: 404 });
@@ -55,12 +68,11 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PUT(req: Request) {
+export async function PATCH(req: Request) {
   await connectdb();
 
   try {
-    const { id, name, code, facultyId, departmentId, levelId } =
-      await req.json();
+    const { id, name, code, facultyId, departmentId, levelId } = await req.json();
 
     if (!id || !name || !code || !facultyId || !departmentId || !levelId) {
       return NextResponse.json(
@@ -74,11 +86,22 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
+    // Duplicate check
+    const duplicate = await Course.findOne({ name, _id: { $ne: id } });
+    if (duplicate) {
+      return NextResponse.json(
+        { error: "Course with this name already exists" },
+        { status: 409 }
+      );
+    }
+
     if (existingCourse.levelId.toString() !== levelId) {
       await Level.findByIdAndUpdate(existingCourse.levelId, {
         $pull: { courses: id },
       });
-      await Level.findByIdAndUpdate(levelId, { $push: { courses: id } });
+      await Level.findByIdAndUpdate(levelId, {
+        $push: { courses: id },
+      });
     }
 
     const updatedCourse = await Course.findByIdAndUpdate(
@@ -96,6 +119,8 @@ export async function PUT(req: Request) {
     );
   }
 }
+
+
 
 export async function DELETE(req: Request) {
   await connectdb();
