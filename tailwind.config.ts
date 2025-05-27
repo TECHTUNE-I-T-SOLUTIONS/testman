@@ -83,6 +83,10 @@ const config: Config = {
           from: { opacity: '0' },
           to: { opacity: '1' }
         },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
         marquee: {
           '0%': { transform: 'translateX(100%)' },
           '100%': { transform: 'translateX(-100%)' }
@@ -93,6 +97,7 @@ const config: Config = {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in': 'fadeIn 0.3s ease-out',
         'pulse-shadow': 'pulse-shadow 3s ease-in-out infinite',
+        'slide-up': 'slideUp 0.4s ease-out',
         'marquee': 'marquee 20s linear infinite'
       }
     }

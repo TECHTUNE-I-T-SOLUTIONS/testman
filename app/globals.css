@@ -235,5 +235,5 @@
 
 .animate-scroll-text {
   display: inline-block;
-  animation: scroll-text 80s linear infinite;
+  animation: scroll-text 100s linear infinite;
 }
