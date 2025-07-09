@@ -16,7 +16,7 @@ import {
 } from "../ui/sidebar"
 import { Button } from "../ui/button"
 import { Avatar, AvatarFallback } from "../ui/avatar"
-import Link from "next/link"
+import { Badge } from "../ui/badge"
 import {
   BookOpenCheck,
   NotebookPen,
@@ -25,50 +25,53 @@ import {
   LogOut,
   User,
   Loader2,
-  ChevronLeft,
   MessageCircle,
-  ChevronRight,
-  Menu,
   Info,
+  Phone,
+  AlertTriangle,
+  CheckCircle,
+  X,
+  Crown,
+  Zap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
+interface Student {
+  name: string
+  matricNumber: string
+  loggedIn: boolean
+  isActive: boolean
+  phoneNumber?: string
+  faculty?: { name: string }
+  department?: { name: string }
+  level?: { name: string }
+}
 
 const AppSidebar = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
-  const { state, setOpenMobile } = useSidebar()
+  const { state, setOpenMobile, isMobile } = useSidebar()
   const isCollapsed = state === "collapsed"
   const [showInactiveModal, setShowInactiveModal] = useState(false)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [showPhoneModal, setShowPhoneModal] = useState(false)
   const [showSidebarHelpModal, setShowSidebarHelpModal] = useState(false)
-
-  const [student, setStudent] = useState<{
-    name: string
-    matricNumber: string
-    loggedIn: boolean
-    isActive: boolean
-    phoneNumber?: string
-    faculty?: { name: string }
-    department?: { name: string }
-    level?: { name: string }
-  } | null>(null)
+  const [student, setStudent] = useState<Student | null>(null)
+  const [loading, setLoading] = useState(true)
 
   // Fetch student data and manage modal visibility
   const fetchStudent = async () => {
     try {
+      setLoading(true)
       const tokenStudent = await getStudentFromToken()
       if (!tokenStudent?.matricNumber) return router.push("/auth/login")
-
       const encodedMatric = encodeURIComponent(tokenStudent.matricNumber)
       const res = await fetch(`/api/students/${encodedMatric}`)
       const data = await res.json()
-
       if (!res.ok) throw new Error(data.error || "Failed to fetch student")
-
-      const studentDetails = {
+      const studentDetails: Student = {
         name: data.name,
         matricNumber: data.matricNumber,
         loggedIn: true,
@@ -78,73 +81,61 @@ const AppSidebar = () => {
         department: data.department,
         level: data.level,
       }
-
       setStudent(studentDetails)
-
-      // Always show inactive modal if not active
+      // Show inactive modal if not active
       if (!studentDetails.isActive) setShowInactiveModal(true)
-
-      // Only show phone modal if phone number is missing and NOT on profile page
-      if (!studentDetails.phoneNumber) {
-        if (pathname !== "/student/profile") {
-          setShowPhoneModal(true)
-        } else {
-          setShowPhoneModal(false)
-        }
+      // Show phone modal if phone number is missing and NOT on profile page
+      if (!studentDetails.phoneNumber && pathname !== "/student/profile") {
+        setShowPhoneModal(true)
       } else {
         setShowPhoneModal(false)
       }
     } catch (error) {
       console.error("Error fetching student:", error)
+      router.push("/auth/login")
+    } finally {
+      setLoading(false)
     }
   }
 
-
   useEffect(() => {
-    // Re-run the fetch to determine modal visibility on every path change
     fetchStudent()
   }, [pathname])
 
-
   // Auto-close mobile sidebar when modals are shown
   useEffect(() => {
-    if (showInactiveModal || showLogoutConfirm) {
-      setOpenMobile(false);
+    if ((showInactiveModal || showLogoutConfirm) && isMobile) {
+      setOpenMobile(false)
     }
-  }, [showInactiveModal, showLogoutConfirm, setOpenMobile]);
-
-
+  }, [showInactiveModal, showLogoutConfirm, setOpenMobile, isMobile])
 
   // Poll every 5 minutes to refresh student data
   useEffect(() => {
-    const interval = setInterval(async () => {
-      await fetchStudent()
-    }, 300000) // 5 minutes
-
+    const interval = setInterval(fetchStudent, 300000) // 5 minutes
     return () => clearInterval(interval)
   }, [])
 
   const navItems = [
-    { label: "Home", path: "/student", icon: <House className="h-5 w-5" /> },
+    { label: "Dashboard", path: "/student", icon: House },
     {
       label: "Take Exams",
       path: "/student/exams",
-      icon: <BookOpenCheck className="h-5 w-5" />,
+      icon: BookOpenCheck,
       requiresActive: true,
     },
     {
       label: "Results",
       path: "/student/results",
-      icon: <FileUser className="h-5 w-5" />,
+      icon: FileUser,
       requiresActive: true,
     },
     {
       label: "Notes",
       path: "/student/notes",
-      icon: <NotebookPen className="h-5 w-5" />,
+      icon: NotebookPen,
       requiresActive: true,
     },
-    { label: "Profile", path: "/student/profile", icon: <User className="h-5 w-5" /> },
+    { label: "Profile", path: "/student/profile", icon: User },
   ]
 
   const handleLogOut = async () => {
@@ -159,255 +150,317 @@ const AppSidebar = () => {
     }
   }
 
-  const firstInitial = student?.name ? student.name.split(" ")[0][0] : "S"
-
-  if (!student) {
-    return null // or a loading spinner
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleNavClick = (item: any) => {
+    if (item.requiresActive && !student?.isActive) {
+      setShowInactiveModal(true)
+      return
+    }
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+    router.push(item.path)
   }
 
-  // Sidebar toggle (desktop)
-  const CustomSidebarTrigger = () => {
-    const { state, toggleSidebar } = useSidebar()
+  const firstInitial = student?.name ? student.name.split(" ")[0][0].toUpperCase() : "S"
 
+  if (loading) {
     return (
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={toggleSidebar}
-        className="h-8 w-8 rounded-full absolute right-[-12px] top-4 bg-background border shadow-sm z-10 hidden md:flex"
-      >
-        {state === "collapsed" ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        <span className="sr-only">Toggle Sidebar</span>
-      </Button>
+      <Sidebar className="border-r border-gray-200 bg-white">
+        <SidebarContent className="flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3 py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            <p className="text-sm text-gray-500">Loading...</p>
+          </div>
+        </SidebarContent>
+      </Sidebar>
     )
   }
 
-  // Mobile sidebar trigger
-  const MobileSidebarTrigger = () => (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => setOpenMobile(true)}
-      className="fixed top-4 left-4 z-50 md:hidden"
-    >
-      <Menu className="h-5 w-5" />
-      <span className="sr-only">Open Menu</span>
-    </Button>
-  )
-
+  if (!student) return null
 
   return (
-    <>
-      <MobileSidebarTrigger />
-
-
-      
-        <Sidebar
-          collapsible="icon"
-          className={cn("relative border-r")}
-        >
-          <Button
-            onClick={() => setShowSidebarHelpModal(true)}
-            variant="outline"
-            size="icon"
-            className="mt-4 ml-60"
-            title="Sidebar Help"
-          >
-            <Info className="h-16 w-16" />
-          </Button>
-        <CustomSidebarTrigger />
-
-        <SidebarHeader className={cn("p-4 flex flex-col items-center relative", isCollapsed ? "pb-2" : "pb-4")}>
-          <div className="w-full flex items-center justify-center mb-4">
-            <div className="relative mb-4">
-              <Avatar className={cn("border-2 border-primary/20", isCollapsed ? "h-8 w-8" : "h-16 w-16")}>
-                <AvatarFallback className="bg-primary/10 text-primary">{firstInitial}</AvatarFallback>
+    <TooltipProvider>
+      <Sidebar collapsible="icon" className="border-r border-gray-200 bg-white">
+        <SidebarHeader className="border-b border-gray-100 p-6">
+          {/* Centered Student Info */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            {/* Avatar with Online Status */}
+            <div className="relative">
+              <Avatar className={cn("border-2 border-gray-200", isCollapsed ? "h-10 w-10" : "h-16 w-16")}>
+                <AvatarFallback className="bg-gray-900 text-white font-semibold text-xl">{firstInitial}</AvatarFallback>
               </Avatar>
-                {student?.loggedIn && (
-                  <div
-                    className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-green-500 border-2 border-white"
-                    title="Online status"
-                  />
-                )}
+              {student.loggedIn && (
+                <div
+                  className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-green-500 border-2 border-white shadow-sm"
+                  title="Online"
+                />
+              )}
             </div>
+
+            {/* Student Details - Only show when not collapsed */}
+            {!isCollapsed && (
+              <div className="space-y-2 w-full">
+                <h3 className="font-semibold text-gray-900 text-lg leading-tight">{student.name}</h3>
+                <p className="text-sm text-gray-600 font-mono">{student.matricNumber}</p>
+
+                {/* Status Badge with Premium/Freemium Icon */}
+                <div className="flex items-center justify-center gap-2">
+                  <Badge
+                    variant={student.isActive ? "default" : "destructive"}
+                    className={cn(
+                      "text-xs px-3 py-1 font-medium flex items-center gap-1.5",
+                      student.isActive
+                        ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-50"
+                        : "bg-red-50 text-red-700 border-red-200 hover:bg-red-50",
+                    )}
+                  >
+                    {student.isActive ? (
+                      <>
+                        <CheckCircle className="h-3 w-3" />
+                        Active
+                      </>
+                    ) : (
+                      <>
+                        <AlertTriangle className="h-3 w-3" />
+                        Inactive
+                      </>
+                    )}
+                  </Badge>
+
+                  {/* Premium/Freemium Icon with Tooltip */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={cn(
+                          "p-1.5 rounded-full border-2 cursor-help transition-colors",
+                          student.isActive
+                            ? "bg-yellow-50 border-yellow-200 text-yellow-600 hover:bg-yellow-100"
+                            : "bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100",
+                        )}
+                      >
+                        {student.isActive ? <Crown className="h-3.5 w-3.5" /> : <Zap className="h-3.5 w-3.5" />}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs">
+                      <p className="font-medium mb-1">{student.isActive ? "Premium Access" : "Freemium Access"}</p>
+                      <p className="text-xs text-gray-600">
+                        {student.isActive
+                          ? "You have full access to all features including exams, results, and notes."
+                          : "Limited access. Activate your account for full premium features."}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Portal Title - Only show when not collapsed */}
           {!isCollapsed && (
-            <>
-              <h2 className="text-xl font-bold text-center">Student Portal</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Welcome, {student?.name?.split(" ")[0]}
-              </p>
-            </>
+            <div className="mt-6 pt-6 border-t border-gray-100 text-center">
+              <h2 className="text-xl font-bold text-gray-900">Student Portal</h2>
+              <p className="text-sm text-gray-600 mt-1">Academic Management System</p>
+            </div>
           )}
         </SidebarHeader>
-        <SidebarSeparator />
-        <SidebarContent className="px-2 py-4">
+
+        <SidebarContent className="p-3">
           <SidebarMenu>
             {navItems.map((item) => {
-              const isActive = pathname === item.path && (!item.requiresActive || student?.isActive);
-              const isDisabled = item.requiresActive && !student?.isActive
-
+              const isActive = pathname === item.path
+              const isDisabled = item.requiresActive && !student.isActive
+              const IconComponent = item.icon
               return (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
-                    asChild
                     isActive={isActive}
-                    tooltip={item.label}
+                    tooltip={isCollapsed ? item.label : undefined}
                     className={cn(
-                      "transition-all duration-200",
-                      isActive && "bg-primary/10 font-medium",
-                      isDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-primary/10"
+                      "transition-all duration-200 h-12 mb-1 rounded-lg",
+                      isActive && "bg-gray-900 text-white hover:bg-gray-800 shadow-sm",
+                      isDisabled && "opacity-50 cursor-not-allowed",
+                      !isActive && !isDisabled && "hover:bg-gray-50 text-gray-700",
                     )}
+                    onClick={() => handleNavClick(item)}
                   >
-                    <div>
-                      <Link
-                        href={isDisabled ? "#" : item.path}
-                        onClick={(e) => {
-                          if (isDisabled) {
-                            e.preventDefault();
-                            setShowInactiveModal(true);
-                          } else {
-                            setOpenMobile(false);
-                          }
-                        }}
-                        className="flex items-center py-2"
-                      >
-                        <div
-                          className={cn(
-                            "text-muted-foreground",
-                            isCollapsed ? "mx-auto" : "mr-3",
-                            isActive && "text-primary"
-                          )}
-                        >
-                          {item.icon}
-                        </div>
-                        {!isCollapsed && <span>{item.label}</span>}
-                      </Link>
-                    </div>
+                    <IconComponent className="h-5 w-5" />
+                    {!isCollapsed && (
+                      <div className="flex items-center justify-between flex-1">
+                        <span className="font-medium">{item.label}</span>
+                        {isDisabled && <AlertTriangle className="h-4 w-4 text-amber-500" />}
+                      </div>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )
             })}
           </SidebarMenu>
+
+          {!isCollapsed && (
+            <div className="mt-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <Info className="h-5 w-5 text-gray-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-gray-700">
+                  <p className="font-medium mb-2">Need Help?</p>
+                  <button
+                    onClick={() => setShowSidebarHelpModal(true)}
+                    className="text-gray-900 hover:text-gray-700 underline font-medium"
+                  >
+                    View navigation guide
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </SidebarContent>
 
         <SidebarSeparator />
 
-        <SidebarFooter className={cn("p-4", isCollapsed && "flex flex-col items-center")}>
-          {!isCollapsed && student && (
-            <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
-              <span>ID: {student.matricNumber}</span>
-              <span
-                className={cn(
-                  "px-2 py-1 text-white rounded-md text-xs",
-                  student.isActive ? "bg-green-600" : "bg-red-500"
-                )}
-              >
-                {student.isActive ? "Active" : "Inactive"}
-              </span>
-            </div>
-          )}
-
+        <SidebarFooter className="p-4 border-t border-gray-100">
           <Button
             onClick={() => setShowLogoutConfirm(true)}
             disabled={isLoggingOut}
             variant="outline"
             size={isCollapsed ? "icon" : "default"}
             className={cn(
-              "border-muted-foreground/20 hover:bg-destructive hover:text-destructive-foreground transition-colors duration-300",
-              isCollapsed ? "w-8 h-8 p-0" : "w-full",
+              "border-gray-200 text-gray-700 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors",
+              isCollapsed ? "w-10 h-10" : "w-full justify-start h-11",
             )}
-            title="Sign Out"
           >
-            <>
-              <LogOut className="h-4 w-4" />
-              {!isCollapsed && <span className="ml-2">Sign Out</span>}
-            </>
+            <LogOut className="h-4 w-4" />
+            {!isCollapsed && <span className="ml-2 font-medium">Sign Out</span>}
           </Button>
         </SidebarFooter>
-
       </Sidebar>
 
+      {/* Help Modal */}
       {showSidebarHelpModal && (
-        <div className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-lg">
-            <h2 className="text-xl font-semibold mb-4">Sidebar Navigation Help</h2>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><strong>Home:</strong> Go to the student dashboard overview.</li>
-              <li><strong>Take Exams:</strong> Start your available exams. Only for active students.</li>
-              <li><strong>Results:</strong> View your past exam scores. Only for active students.</li>
-              <li><strong>Notes:</strong> Access your saved or provided notes.</li>
-              <li><strong>Profile:</strong> View and update your student profile.</li>
-              <li><strong>Online Status:</strong> The green dot means you&apos;re online and active.</li>
-              <li><strong>Logout:</strong> Sign out of your student account.</li>
-            </ul>
-            <div className="mt-6 text-right">
-              <Button variant="default" onClick={() => setShowSidebarHelpModal(false)}>Close</Button>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[80vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-gray-900">Navigation Guide</h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowSidebarHelpModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="p-6 space-y-6">
+              {navItems.map((item) => {
+                const IconComponent = item.icon
+                return (
+                  <div key={item.label} className="flex items-start gap-4">
+                    <div className="p-3 bg-gray-100 rounded-lg">
+                      <IconComponent className="h-5 w-5 text-gray-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900 mb-1">{item.label}</h3>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        {item.label === "Dashboard" && "View your academic overview and announcements"}
+                        {item.label === "Take Exams" && "Access and complete available examinations"}
+                        {item.label === "Results" && "View your exam scores and performance history"}
+                        {item.label === "Notes" && "Access study materials and saved notes"}
+                        {item.label === "Profile" && "Manage your personal and academic information"}
+                      </p>
+                      {item.requiresActive && (
+                        <Badge variant="secondary" className="mt-2 text-xs">
+                          Requires Active Account
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>
       )}
 
-
+      {/* Inactive Account Modal */}
       {showInactiveModal && (
-        <div className="fixed inset-0 bg-black/50 z-[99] flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-[90%] max-w-md text-center space-y-4">
-            <h2 className="text-lg font-semibold text-red-600">Access Restricted</h2>
-            <p className="text-muted-foreground">
-              Your account is inactive. Please contact the admin for access to full resources.
-            </p>
-
-            <div className="flex justify-center gap-4 pt-2">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 space-y-6">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto">
+                <AlertTriangle className="h-8 w-8 text-red-600" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900">Account Inactive</h2>
+              <p className="text-gray-600 leading-relaxed">
+                Your account is currently inactive. Contact the administrator to activate your account and access all
+                features.
+              </p>
+            </div>
+            <div className="flex gap-3 pt-4">
               <Button
-                variant="default"
-                onClick={() => {
-                  const adminPhone = "2348083191228";
-                  const message = encodeURIComponent(
-                    `Hello Admin,\n\n` +
-                    `My name is ${student?.name?.split(" ")[0]}. I'm trying to access my account on Operation Save my CGPA, but it shows that my account is inactive.\n\n` +
-                    `Here are my details:\n` +
-                    `Matric Number: ${student?.matricNumber},\n` +
-                    `Phone Number: ${student?.phoneNumber || "N/A"},\n` +
-                    `Faculty: ${student?.faculty?.name || "N/A"},\n` +
-                    `Department: ${student?.department?.name || "N/A"},\n` +
-                    `Level: ${student?.level?.name || "N/A"}.\n\n` +
-                    `Kindly help me restore access to the full resources.\n\nThank you!`
-                  );
-                  window.open(`https://wa.me/${adminPhone}?text=${message}`, "_blank");
-                }}
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Contact Admin
-              </Button>
-
-              <Button
-                onClick={() => setShowInactiveModal(false)}
                 variant="outline"
+                onClick={() => setShowInactiveModal(false)}
+                className="flex-1 border-gray-200 text-gray-700"
               >
                 Close
               </Button>
+              <Button
+                onClick={() => {
+                  const adminPhone = "2348083191228"
+                  const message = encodeURIComponent(
+                    `Hello Admin,\n\n` +
+                      `My name is ${student.name}. I need to activate my account on Operation Save my CGPA.\n\n` +
+                      `Details:\n` +
+                      `Matric Number: ${student.matricNumber}\n` +
+                      `Phone: ${student.phoneNumber || "N/A"}\n` +
+                      `Faculty: ${student.faculty?.name || "N/A"}\n` +
+                      `Department: ${student.department?.name || "N/A"}\n` +
+                      `Level: ${student.level?.name || "N/A"}\n\n` +
+                      `Please help activate my account.\n\nThank you!`,
+                  )
+                  window.open(`https://wa.me/${adminPhone}?text=${message}`, "_blank")
+                }}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+              >
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Contact Admin
+              </Button>
             </div>
           </div>
         </div>
       )}
 
-
+      {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/50 z-[99] flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-[90%] max-w-md text-center space-y-4">
-            <h2 className="text-lg font-semibold">Confirm Logout</h2>
-            <p className="text-muted-foreground">Are you sure you want to log out?</p>
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setShowLogoutConfirm(false)}>Cancel</Button>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 space-y-6">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto">
+                <LogOut className="h-8 w-8 text-red-600" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900">Sign Out</h2>
+              <p className="text-gray-600">Are you sure you want to sign out of your account?</p>
+            </div>
+            <div className="flex gap-3 pt-4">
               <Button
-                variant="destructive"
+                variant="outline"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 border-gray-200 text-gray-700"
+              >
+                Cancel
+              </Button>
+              <Button
                 onClick={handleLogOut}
                 disabled={isLoggingOut}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
               >
                 {isLoggingOut ? (
-                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Signing Out...
+                  </>
                 ) : (
-                  "Log Out"
+                  "Sign Out"
                 )}
               </Button>
             </div>
@@ -415,26 +468,32 @@ const AppSidebar = () => {
         </div>
       )}
 
+      {/* Phone Number Update Modal */}
       {showPhoneModal && (
-        <div className="fixed inset-0 bg-black/50 z-[99] flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-[90%] max-w-md text-center space-y-4">
-            <h2 className="text-lg font-semibold text-red-600">Update Required</h2>
-            <p className="text-muted-foreground">
-              Please update your phone number to continue using the platform.
-            </p>
-            <div className="pt-2">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 space-y-6">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto">
+                <Phone className="h-8 w-8 text-amber-600" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900">Update Required</h2>
+              <p className="text-gray-600">Please add your phone number to continue using the platform.</p>
+            </div>
+            <div className="pt-4">
               <Button
                 onClick={() => {
-                  router.push("/student/profile");
+                  router.push("/student/profile")
+                  setShowPhoneModal(false)
                 }}
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white h-11"
               >
-                Update Now
+                Update Phone Number
               </Button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </TooltipProvider>
   )
 }
 

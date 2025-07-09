@@ -5,13 +5,11 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { Loader2 } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 
-// Define the schema for form validation
 const facultySchema = z.object({
   name: z.string().min(2, { message: "Faculty name must be at least 2 characters" }),
   session: z.string().min(1, { message: "Please select a session" }),
@@ -30,7 +28,6 @@ export default function FacultyForm({ onSave, onCancel, editingFaculty, saving =
   const [sessions, setSessions] = useState<{ _id: string; name: string }[]>([])
   const [loadingSessions, setLoadingSessions] = useState(false)
 
-  // Initialize the form with react-hook-form
   const form = useForm<FacultyFormValues>({
     resolver: zodResolver(facultySchema),
     defaultValues: {
@@ -39,7 +36,6 @@ export default function FacultyForm({ onSave, onCancel, editingFaculty, saving =
     },
   })
 
-  // Update form values when editingFaculty changes
   useEffect(() => {
     if (editingFaculty) {
       form.reset({
@@ -54,7 +50,6 @@ export default function FacultyForm({ onSave, onCancel, editingFaculty, saving =
     }
   }, [editingFaculty, form])
 
-  // Fetch sessions for the dropdown
   useEffect(() => {
     const fetchSessions = async () => {
       setLoadingSessions(true)
@@ -71,7 +66,6 @@ export default function FacultyForm({ onSave, onCancel, editingFaculty, saving =
         setLoadingSessions(false)
       }
     }
-
     fetchSessions()
   }, [])
 
@@ -144,4 +138,3 @@ export default function FacultyForm({ onSave, onCancel, editingFaculty, saving =
     </Form>
   )
 }
-

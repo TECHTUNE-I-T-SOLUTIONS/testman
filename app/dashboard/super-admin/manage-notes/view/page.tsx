@@ -1,52 +1,96 @@
-"use client"; // Add this line to make this component a client component
+"use client"
 
-import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
-import { Trash, Edit, Search, FileText } from "lucide-react";
-import clsx from "clsx";
-import CourseDropdown from "@/components/dashboard/manage-questions/questions/CourseDropdown";
+import type React from "react"
+
+import { useState, useEffect } from "react"
+import { toast } from "sonner"
+import { Trash2, Edit, Search, FileText, Eye, Download, Filter } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import CourseDropdown from "@/components/dashboard/manage-questions/questions/CourseDropdown"
+import Header from "@/components/dashboard/Header"
 
 interface Note {
-  _id: string;
-  title: string;
-  fileUrl: string;
-  fileType: string;
+  _id: string
+  title: string
+  fileUrl: string
+  fileType: string
   courseId: {
-    _id: string;
-    name: string;
-    code: string;
-  };
+    _id: string
+    name: string
+    code: string
+  }
 }
 
 export default function ViewNotesPage() {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [filteredNotes, setFilteredNotes] = useState<Note[]>([]);
-  const [search, setSearch] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState("");
-
-
-  const [modalOpen, setModalOpen] = useState(false);
-  const [currentNote, setCurrentNote] = useState<Note | null>(null);
-  const [newFile, setNewFile] = useState<File | null>(null);
-  const [newTitle, setNewTitle] = useState("");
-  const [newFileUrl, setNewFileUrl] = useState("");
-  const [newFileType, setNewFileType] = useState("");
-
+  const [notes, setNotes] = useState<Note[]>([])
+  const [filteredNotes, setFilteredNotes] = useState<Note[]>([])
+  const [search, setSearch] = useState("")
+  const [selectedCourse, setSelectedCourse] = useState("")
+  const [fileTypeFilter, setFileTypeFilter] = useState("all")
+  const [modalOpen, setModalOpen] = useState(false)
+  const [currentNote, setCurrentNote] = useState<Note | null>(null)
+  const [newFile, setNewFile] = useState<File | null>(null)
+  const [newTitle, setNewTitle] = useState("")
+  const [newFileUrl, setNewFileUrl] = useState("")
+  const [newFileType, setNewFileType] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const noteRes = await fetch("/api/notes");
-        const noteData = await noteRes.json();
-        setNotes(noteData);
-        setFilteredNotes(noteData);
+        setIsLoading(true)
+        const noteRes = await fetch("/api/notes")
+        const noteData = await noteRes.json()
+        setNotes(noteData)
+        setFilteredNotes(noteData)
       } catch {
-        toast.error("Failed to load notes or courses");
+        toast.error("Failed to load notes")
+      } finally {
+        setIsLoading(false)
       }
-    };
+    }
+    fetchAll()
+  }, [])
 
-    fetchAll();
-  }, []);
+  useEffect(() => {
+    let filtered = notes
+
+    // Filter by search term
+    if (search) {
+      filtered = filtered.filter(
+        (note) =>
+          note.title.toLowerCase().includes(search.toLowerCase()) ||
+          note.courseId.name.toLowerCase().includes(search.toLowerCase()) ||
+          note.courseId.code.toLowerCase().includes(search.toLowerCase()),
+      )
+    }
+
+    // Filter by course
+    if (selectedCourse) {
+      filtered = filtered.filter((note) => note.courseId._id === selectedCourse)
+    }
+
+    // Filter by file type
+    if (fileTypeFilter !== "all") {
+      filtered = filtered.filter((note) => note.fileType.toLowerCase() === fileTypeFilter)
+    }
+
+    setFilteredNotes(filtered)
+  }, [notes, search, selectedCourse, fileTypeFilter])
 
   const deleteNote = async (id: string) => {
     try {
@@ -54,165 +98,391 @@ export default function ViewNotesPage() {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
-      });
+      })
+      if (!res.ok) throw new Error("Failed to delete note")
 
-      if (!res.ok) throw new Error("Failed to delete note");
-
-      const updated = notes.filter((note) => note._id !== id);
-      setNotes(updated);
-      setFilteredNotes(updated);
-      toast.success("Note deleted");
+      const updated = notes.filter((note) => note._id !== id)
+      setNotes(updated)
+      setFilteredNotes(updated)
+      toast.success("Note deleted successfully")
     } catch {
-      toast.error("Could not delete note");
+      toast.error("Could not delete note")
     }
-  };
-
+  }
 
   const handleEdit = (noteId: string) => {
-    const noteToEdit = notes.find((note) => note._id === noteId);
+    const noteToEdit = notes.find((note) => note._id === noteId)
     if (noteToEdit) {
-      setCurrentNote(noteToEdit);
-      setNewTitle(noteToEdit.title);
-      setNewFileUrl(noteToEdit.fileUrl);
-      setNewFileType(noteToEdit.fileType);
-      setModalOpen(true);
+      setCurrentNote(noteToEdit)
+      setNewTitle(noteToEdit.title)
+      setNewFileUrl(noteToEdit.fileUrl)
+      setNewFileType(noteToEdit.fileType)
+      setModalOpen(true)
     }
-  };
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]
     if (file) {
-      setNewFile(file);
-      setNewFileUrl(URL.createObjectURL(file));
-      setNewFileType(file.type);
+      // Validate file type
+      const allowed = [
+        "application/pdf",
+        "text/plain",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ]
+
+      if (!allowed.includes(file.type)) {
+        toast.error("Unsupported file type. Please upload PDF, TXT, DOC, or DOCX files.")
+        return
+      }
+
+      // Check file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("File size must be less than 10MB")
+        return
+      }
+
+      setNewFile(file)
+      setNewFileUrl(URL.createObjectURL(file))
+      setNewFileType(file.name.split(".").pop()?.toLowerCase() || "")
     }
-  };
+  }
 
-	const handleSave = async () => {
-	  if (!currentNote) return;
+  const handleSave = async () => {
+    if (!currentNote || !newTitle) {
+      toast.error("Please provide a title")
+      return
+    }
 
-	  const formData = new FormData();
-	  formData.append("id", currentNote._id);
-	  formData.append("title", newTitle);
-	  formData.append("fileUrl", newFileUrl);
-	  formData.append("fileType", newFileType);
+    setIsSaving(true)
+    const formData = new FormData()
+    formData.append("id", currentNote._id)
+    formData.append("title", newTitle)
+    formData.append("fileUrl", newFileUrl)
+    formData.append("fileType", newFileType)
 
-	  if (newFile) {
-	    formData.append("file", newFile); // Append the actual file
-	  }
+    if (newFile) {
+      formData.append("file", newFile)
+    }
 
-	  const res = await fetch("/api/notes", {
-	    method: "PUT",
-	    body: formData,
-	  });
+    try {
+      const res = await fetch("/api/notes", {
+        method: "PUT",
+        body: formData,
+      })
 
-	  if (res.ok) {
-	    toast.success("Note updated successfully");
-	    setModalOpen(false);
-	    // Optionally, update the note state after saving
-	    const updatedNotes = notes.map((note) =>
-	      note._id === currentNote._id ? { ...note, title: newTitle, fileUrl: newFileUrl, fileType: newFileType } : note
-	    );
-	    setNotes(updatedNotes);
-	  } else {
-	    toast.error("Failed to update the note");
-	  }
-	};
+      if (res.ok) {
+        toast.success("Note updated successfully")
+        setModalOpen(false)
 
+        // Update the note in state
+        const updatedNotes = notes.map((note) =>
+          note._id === currentNote._id
+            ? { ...note, title: newTitle, fileUrl: newFileUrl, fileType: newFileType }
+            : note,
+        )
+        setNotes(updatedNotes)
+      } else {
+        toast.error("Failed to update the note")
+      }
+    } catch {
+      toast.error("Failed to update the note")
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
-  return (
-    <div className="p-6 bg-white shadow rounded max-w-5xl mx-auto w-full">
-      <h2 className="text-xl font-bold text-center mb-4">📚 All Notes</h2>
+  const getFileTypeColor = (fileType: string) => {
+    switch (fileType.toLowerCase()) {
+      case "pdf":
+        return "bg-red-100 text-red-800 border-red-200"
+      case "doc":
+      case "docx":
+        return "bg-blue-100 text-blue-800 border-blue-200"
+      case "txt":
+        return "bg-gray-100 text-gray-800 border-gray-200"
+      default:
+        return "bg-purple-100 text-purple-800 border-purple-200"
+    }
+  }
 
-      {/* Search & Course Dropdown */}
-      <div className="grid md:grid-cols-2 gap-4 mb-4">
-        <CourseDropdown selectedCourse={selectedCourse} setSelectedCourse={setSelectedCourse} />
-        <div className="flex items-center border h-12 rounded mt-4 px-2">
-          <Search className="text-gray-400 mr-2" />
-          <input
-            type="text"
-            placeholder="Search by title, code, type..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full p-2 focus:outline-none"
-          />
-        </div>
-      </div>
-
-      {/* Notes List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredNotes.length === 0 ? (
-          <p className="col-span-full text-center text-gray-500">No notes found.</p>
-        ) : (
-          filteredNotes.map((note) => (
-            <div
-              key={note._id}
-              className={clsx("p-4 bg-gray-50 border rounded shadow transition-all hover:shadow-md flex flex-col justify-between")}
-            >
-              <div>
-                <h3 className="font-semibold flex items-center gap-2 text-blue-600">
-                  <FileText size={18} /> {note.title}
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">Type: <strong>{note.fileType?.toUpperCase()}</strong></p>
-                <p className="text-sm text-gray-600">
-                  Course: <strong>{note.courseId.name} ({note.courseId.code})</strong>
-                </p>
-              </div>
-
-              <div className="flex items-center justify-end gap-3 mt-4">
-                <button onClick={() => handleEdit(note._id)} className="text-blue-600 hover:text-blue-800 transition" title="Edit">
-                  <Edit size={18} />
-                </button>
-                <button onClick={() => deleteNote(note._id)} className="text-red-600 hover:text-red-800 transition" title="Delete">
-                  <Trash size={18} />
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Modal for editing note */}
-      {modalOpen && currentNote && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-3/4 md:w-1/2">
-            <h3 className="text-xl font-bold mb-4">Edit Note</h3>
-            <div>
-              <label className="block text-sm font-semibold">Title</label>
-              <input
-                type="text"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded mt-2"
-              />
-            </div>
-
-            <div className="mt-4">
-              <label className="block text-sm font-semibold">File Preview</label>
-              {newFileUrl && (
-                <div className="mt-2">
-                  <iframe src={newFileUrl} className="w-full h-60" />
-                </div>
-              )}
-              {!newFileUrl && currentNote.fileUrl && (
-                <div className="mt-2">
-                  <iframe src={currentNote.fileUrl} className="w-full h-60" />
-                </div>
-              )}
-            </div>
-
-            <div className="mt-4">
-              <label className="block text-sm font-semibold">Replace File</label>
-              <input type="file" onChange={handleFileChange} className="mt-2" />
-            </div>
-
-            <div className="mt-4 flex justify-end gap-3">
-              <button onClick={() => setModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>
-              <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
-            </div>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50/50">
+        <Header title="All Notes" />
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div className="bg-gray-200 h-4 rounded w-3/4"></div>
+                    <div className="bg-gray-200 h-3 rounded w-1/2"></div>
+                    <div className="bg-gray-200 h-3 rounded w-2/3"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
-      )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50/50">
+      <Header title="All Notes" />
+
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
+        {/* Filters */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filter Notes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Search</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search by title, course name, or code..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Filter by Course</Label>
+                <CourseDropdown selectedCourse={selectedCourse} setSelectedCourse={setSelectedCourse} />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Filter by File Type</Label>
+                <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All File Types</SelectItem>
+                    <SelectItem value="pdf">PDF Files</SelectItem>
+                    <SelectItem value="doc">DOC Files</SelectItem>
+                    <SelectItem value="docx">DOCX Files</SelectItem>
+                    <SelectItem value="txt">TXT Files</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <FileText className="h-8 w-8 text-blue-600" />
+                <div>
+                  <p className="text-2xl font-bold">{notes.length}</p>
+                  <p className="text-sm text-muted-foreground">Total Notes</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
+                  <span className="text-red-600 font-bold text-sm">PDF</span>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{notes.filter((note) => note.fileType === "pdf").length}</p>
+                  <p className="text-sm text-muted-foreground">PDF Files</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 font-bold text-sm">DOC</span>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">
+                    {notes.filter((note) => ["doc", "docx"].includes(note.fileType)).length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Word Files</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center">
+                  <span className="text-gray-600 font-bold text-sm">TXT</span>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{notes.filter((note) => note.fileType === "txt").length}</p>
+                  <p className="text-sm text-muted-foreground">Text Files</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Notes Grid */}
+        {filteredNotes.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No notes found</h3>
+              <p className="text-gray-600 mb-4">
+                {notes.length === 0 ? "No notes have been uploaded yet." : "No notes match your current filters."}
+              </p>
+              <Button asChild>
+                <a href="/dashboard/super-admin/manage-notes/create">Upload Your First Note</a>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredNotes.map((note) => (
+              <Card key={note._id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-2">
+                      <FileText className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm line-clamp-2">{note.title}</h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {note.courseId.name} ({note.courseId.code})
+                        </p>
+                      </div>
+                    </div>
+
+                    <Badge className={`text-xs ${getFileTypeColor(note.fileType)}`}>
+                      {note.fileType.toUpperCase()}
+                    </Badge>
+
+                    <div className="flex items-center gap-1">
+                      <Button variant="outline" size="sm" asChild className="flex-1 bg-transparent">
+                        <a
+                          href={note.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1"
+                        >
+                          <Eye className="h-3 w-3" />
+                          View
+                        </a>
+                      </Button>
+
+                      <Button variant="outline" size="sm" asChild className="flex-1 bg-transparent">
+                        <a href={note.fileUrl} download className="flex items-center gap-1">
+                          <Download className="h-3 w-3" />
+                          Download
+                        </a>
+                      </Button>
+
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(note._id)}>
+                        <Edit className="h-3 w-3" />
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => deleteNote(note._id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Edit Modal */}
+        <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Note</DialogTitle>
+              <DialogDescription>Update the note title and optionally replace the file</DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-title">Title</Label>
+                <Input
+                  id="edit-title"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="Enter note title"
+                  maxLength={100}
+                />
+                <p className="text-sm text-muted-foreground text-right">{newTitle.length}/100 characters</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Current File Preview</Label>
+                {newFileUrl && (
+                  <div className="border rounded-lg p-4 bg-gray-50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                      <span className="font-medium">
+                        {newFile?.name || `${currentNote?.title}.${currentNote?.fileType}`}
+                      </span>
+                      <Badge className={getFileTypeColor(newFileType)}>{newFileType.toUpperCase()}</Badge>
+                    </div>
+                    <iframe src={newFileUrl} className="w-full h-60 border rounded" title="File preview" />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="replace-file">Replace File (Optional)</Label>
+                <Input
+                  id="replace-file"
+                  type="file"
+                  accept=".pdf,.txt,.doc,.docx"
+                  onChange={handleFileChange}
+                  className="cursor-pointer"
+                />
+                <p className="text-sm text-muted-foreground">Leave empty to keep current file</p>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setModalOpen(false)} disabled={isSaving}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={isSaving || !newTitle}>
+                {isSaving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
-  );
+  )
 }

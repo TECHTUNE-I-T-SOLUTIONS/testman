@@ -64,9 +64,7 @@ export default function LevelList({
     <div className="space-y-4">
       {levels.map((level) => {
         const departmentId = typeof level.departmentId === "object" ? level.departmentId._id : level.departmentId
-
         const departmentName = level.departmentName || getDepartmentName(departmentId)
-
         return (
           <div
             key={level._id}
@@ -91,7 +89,6 @@ export default function LevelList({
                 <Pencil className="h-4 w-4 mr-1" />
                 Edit
               </Button>
-
               <Button
                 variant="destructive"
                 size="sm"
@@ -116,7 +113,6 @@ export default function LevelList({
         )
       })}
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!confirmDeleteId} onOpenChange={(open) => !open && onCancelDelete()}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -146,4 +142,3 @@ export default function LevelList({
     </div>
   )
 }
-

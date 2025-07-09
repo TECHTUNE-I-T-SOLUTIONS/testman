@@ -1,13 +1,22 @@
 "use client"
-
-import type React from "react"
-
 import { getStudentFromToken } from "@/utils/auth"
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import debounce from "lodash.debounce"
-import { Search, ChevronLeft, ChevronRight, Home, FileText, BarChart2, Award, AlertCircle, Loader2 } from "lucide-react"
-
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  FileText,
+  BarChart2,
+  Award,
+  AlertCircle,
+  Loader2,
+  TrendingUp,
+  Calendar,
+  Clock,
+} from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -63,9 +72,7 @@ export default function Results() {
         const res = await fetch(
           `/api/results?studentId=${student?.id}&page=${page}&search=${debouncedSearch}&filter=${activeTab}`,
         )
-
         if (!res.ok) throw new Error("Failed to fetch results")
-
         const data: {
           results: ExamResult[]
           totalPages: number
@@ -76,10 +83,9 @@ export default function Results() {
             lowestScore: number
           }
         } = await res.json()
-
         setResults(data.results)
         setTotalPages(data.totalPages)
-        setStats(data.stats) // ✅ Add this line
+        setStats(data.stats)
       } catch (error) {
         console.error("Error fetching results:", error)
         setError("Failed to load results. Please try again.")
@@ -88,7 +94,6 @@ export default function Results() {
         setLoading(false)
       }
     }
-
     fetchResults()
   }, [page, debouncedSearch, activeTab])
 
@@ -102,7 +107,7 @@ export default function Results() {
         day: "numeric",
       }).format(date)
     } catch (e) {
-      console.log(e);
+      console.log(e)
       return "Unknown date"
     }
   }
@@ -112,41 +117,44 @@ export default function Results() {
     if (percentage >= 80) {
       return {
         label: "Excellent",
-        color: "bg-green-100 text-green-800 border-green-200",
+        color: "bg-green-50 text-green-700 border-green-200",
         icon: <Award className="h-4 w-4" />,
       }
     } else if (percentage >= 70) {
       return {
         label: "Good",
-        color: "bg-blue-100 text-blue-800 border-blue-200",
+        color: "bg-blue-50 text-blue-700 border-blue-200",
         icon: <Award className="h-4 w-4" />,
       }
     } else if (percentage >= 50) {
       return {
         label: "Average",
-        color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+        color: "bg-yellow-50 text-yellow-700 border-yellow-200",
         icon: <Award className="h-4 w-4" />,
       }
     } else {
       return {
         label: "Needs Improvement",
-        color: "bg-red-100 text-red-800 border-red-200",
+        color: "bg-red-50 text-red-700 border-red-200",
         icon: <AlertCircle className="h-4 w-4" />,
       }
     }
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <BarChart2 className="h-8 w-8 text-primary" />
-            Exam Results
-          </h1>
-          <p className="text-muted-foreground mt-1">View and track your examination performance</p>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-gray-900 rounded-lg">
+              <BarChart2 className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Exam Results</h1>
+          </div>
+          <p className="text-gray-600">View and track your examination performance</p>
         </div>
-        <Button variant="outline" asChild>
+        <Button variant="outline" asChild className="border-gray-200 bg-transparent">
           <Link href="/student" className="flex items-center gap-2">
             <Home className="h-4 w-4" />
             Back to Dashboard
@@ -154,160 +162,184 @@ export default function Results() {
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-4 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Exams</CardTitle>
+      {/* Stats Cards */}
+      <div className="grid gap-6 md:grid-cols-4">
+        <Card className="border-gray-200">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Total Exams
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalExams}</div>
-            <p className="text-xs text-muted-foreground">Exams completed</p>
+            <div className="text-3xl font-bold text-gray-900">{stats.totalExams}</div>
+            <p className="text-xs text-gray-500 mt-1">Exams completed</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Average Score</CardTitle>
+        <Card className="border-gray-200">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Average Score
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.averageScore.toFixed(1)}%</div>
-            <p className="text-xs text-muted-foreground">Across all exams</p>
+            <div className="text-3xl font-bold text-gray-900">{stats.averageScore.toFixed(1)}%</div>
+            <p className="text-xs text-gray-500 mt-1">Across all exams</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Highest Score</CardTitle>
+        <Card className="border-gray-200">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <Award className="h-4 w-4" />
+              Highest Score
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.highestScore.toFixed(1)}%</div>
-            <p className="text-xs text-muted-foreground">Your best performance</p>
+            <div className="text-3xl font-bold text-green-600">{stats.highestScore.toFixed(1)}%</div>
+            <p className="text-xs text-gray-500 mt-1">Your best performance</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Lowest Score</CardTitle>
+        <Card className="border-gray-200">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              Lowest Score
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.lowestScore.toFixed(1)}%</div>
-            <p className="text-xs text-muted-foreground">Area for improvement</p>
+            <div className="text-3xl font-bold text-red-600">{stats.lowestScore.toFixed(1)}%</div>
+            <p className="text-xs text-gray-500 mt-1">Area for improvement</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="mb-8">
+      {/* Results Section */}
+      <Card className="border-gray-200">
         <CardHeader>
-          <CardTitle>Results History</CardTitle>
+          <CardTitle className="text-xl text-gray-900">Results History</CardTitle>
           <CardDescription>View and search your past exam results</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Search and Filter */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search by exam title or course..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8"
+                className="pl-10 border-gray-200"
               />
             </div>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="passed">Passed</TabsTrigger>
-                <TabsTrigger value="failed">Failed</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 bg-gray-100">
+                <TabsTrigger value="all" className="data-[state=active]:bg-white">
+                  All
+                </TabsTrigger>
+                <TabsTrigger value="passed" className="data-[state=active]:bg-white">
+                  Passed
+                </TabsTrigger>
+                <TabsTrigger value="failed" className="data-[state=active]:bg-white">
+                  Failed
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
 
+          {/* Loading State */}
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <Card key={i}>
-                  <CardHeader className="pb-2">
+                <Card key={i} className="border-gray-200">
+                  <CardHeader className="pb-3">
                     <Skeleton className="h-5 w-3/4" />
                     <Skeleton className="h-4 w-1/2 mt-2" />
                   </CardHeader>
                   <CardContent>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between mb-4">
                       <Skeleton className="h-4 w-32" />
                       <Skeleton className="h-6 w-24" />
                     </div>
-                    <Skeleton className="h-3 w-full mt-4" />
+                    <Skeleton className="h-3 w-full" />
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : error ? (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="border-red-200">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           ) : results.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">No Results Found</h3>
-              <p className="text-muted-foreground max-w-md mt-2">
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="p-4 bg-gray-100 rounded-full mb-4">
+                <FileText className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Results Found</h3>
+              <p className="text-gray-600 max-w-md">
                 {searchQuery || activeTab !== "all"
                   ? "Try adjusting your search or filter criteria."
                   : "You haven't taken any exams yet."}
               </p>
             </div>
           ) : (
+            /* Results List */
             <div className="space-y-4">
               {results.map((result) => {
                 const percentage = (result.score / result.totalQuestions) * 100
                 const formattedPercentage = Number.parseFloat(percentage.toFixed(1))
                 const scoreStatus = getScoreStatus(formattedPercentage)
-
                 return (
-                  <Card key={result._id} className="overflow-hidden">
-                    <CardHeader className="pb-2">
+                  <Card key={result._id} className="border-gray-200 hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-3">
                       <div className="flex justify-between items-start">
-                        <div>
-                          <CardTitle className="text-lg">{result.examTitle}</CardTitle>
-                          <CardDescription>{result.course}</CardDescription>
+                        <div className="flex-1">
+                          <CardTitle className="text-lg text-gray-900 mb-1">{result.examTitle}</CardTitle>
+                          <CardDescription className="text-gray-600">{result.course}</CardDescription>
                         </div>
                         <Badge variant="outline" className={scoreStatus.color}>
                           <div className="flex items-center gap-1">
                             {scoreStatus.icon}
-                            <span>{scoreStatus.label}</span>
+                            <span className="font-medium">{scoreStatus.label}</span>
                           </div>
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <FileText className="h-4 w-4 mr-2 text-primary" />
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="flex items-center text-sm text-gray-600">
+                          <FileText className="h-4 w-4 mr-2 text-gray-400" />
                           <span>
                             Score:{" "}
-                            <span className="font-medium text-foreground">
+                            <span className="font-medium text-gray-900">
                               {result.score}/{result.totalQuestions}
                             </span>
                           </span>
                         </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Clock className="h-4 w-4 mr-2 text-primary" />
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Clock className="h-4 w-4 mr-2 text-gray-400" />
                           <span>
-                            Duration: <span className="font-medium text-foreground">{result.duration} min</span>
+                            Duration: <span className="font-medium text-gray-900">{result.duration} min</span>
                           </span>
                         </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Calendar className="h-4 w-4 mr-2 text-primary" />
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Calendar className="h-4 w-4 mr-2 text-gray-400" />
                           <span>
-                            Date: <span className="font-medium text-foreground">{formatDate(result.date || "")}</span>
+                            Date: <span className="font-medium text-gray-900">{formatDate(result.date || "")}</span>
                           </span>
                         </div>
                       </div>
 
-                      <div className="mt-4">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-xs text-muted-foreground">Score Percentage</span>
-                          <span className="text-xs font-medium">{formattedPercentage}%</span>
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm text-gray-600">Score Percentage</span>
+                          <span className="text-sm font-medium text-gray-900">{formattedPercentage}%</span>
                         </div>
-                        <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
+                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                           <div
-                            className={`h-2.5 rounded-full ${
+                            className={`h-2 rounded-full transition-all duration-300 ${
                               formattedPercentage >= 80
                                 ? "bg-green-500"
                                 : formattedPercentage >= 70
@@ -319,13 +351,18 @@ export default function Results() {
                             style={{ width: `${formattedPercentage}%` }}
                           ></div>
                         </div>
-                        <div className="mt-2">
-                          <Link href={`/student/results/${result._id}`}>
-                            <button className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                              View Details
-                            </button>
-                          </Link>
-                        </div>              
+                      </div>
+
+                      <div className="pt-2">
+                        <Link href={`/student/results/${result._id}`}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-gray-200 hover:bg-gray-50 bg-transparent"
+                          >
+                            View Details
+                          </Button>
+                        </Link>
                       </div>
                     </CardContent>
                   </Card>
@@ -334,12 +371,15 @@ export default function Results() {
             </div>
           )}
         </CardContent>
+
+        {/* Pagination */}
         {totalPages > 1 && (
-          <CardFooter className="flex justify-between pt-6 border-t">
+          <CardFooter className="flex justify-between pt-6 border-t border-gray-100">
             <Button
               variant="outline"
               onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
               disabled={page === 1 || loading}
+              className="border-gray-200"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -350,13 +390,14 @@ export default function Results() {
                 </>
               )}
             </Button>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-gray-600 flex items-center">
               Page {page} of {totalPages}
             </div>
             <Button
               variant="outline"
               onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={page === totalPages || loading}
+              className="border-gray-200"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -373,47 +414,3 @@ export default function Results() {
     </div>
   )
 }
-
-function Clock(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
-  )
-}
-
-function Calendar(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-      <line x1="16" x2="16" y1="2" y2="6" />
-      <line x1="8" x2="8" y1="2" y2="6" />
-      <line x1="3" x2="21" y1="10" y2="10" />
-    </svg>
-  )
-}
-
-                                           

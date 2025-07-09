@@ -1,168 +1,200 @@
-// app/contact/page.tsx
-"use client";
-import { useEffect, useState } from "react";
-import { getStudentFromToken } from "@/utils/auth";
-import Link from "next/link";
-import { X, Menu, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
+"use client"
 
-import { FaWhatsapp, FaEnvelope } from "react-icons/fa";
+import { MessageCircle, Phone, Clock, Send } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import Navbar from "@/components/shared/Navbar"
+import { FaWhatsapp, FaEnvelope } from "react-icons/fa"
+
+const contactMethods = [
+  {
+    icon: FaWhatsapp,
+    title: "WhatsApp",
+    description: "Chat with our admin directly for instant support",
+    detail: "+234 808 319 1228",
+    action: "Message Now",
+    href: "https://wa.me/2348083191228",
+    color: "bg-green-50 border-green-200 text-green-800",
+    buttonColor: "bg-green-600 hover:bg-green-700",
+  },
+  {
+    icon: FaEnvelope,
+    title: "Email",
+    description: "Send us a detailed message via email",
+    detail: "support@operationsavemycgpa.com",
+    action: "Send Email",
+    href: "mailto:support@operationsavemycgpa.com",
+    color: "bg-blue-50 border-blue-200 text-blue-800",
+    buttonColor: "bg-blue-600 hover:bg-blue-700",
+  },
+]
+
+const quickLinks = [
+  { title: "Technical Support", description: "Platform issues, login problems, exam difficulties" },
+  { title: "Account Questions", description: "Registration, profile updates, account activation" },
+  { title: "Course Content", description: "Missing courses, question feedback, content suggestions" },
+  { title: "General Inquiries", description: "Platform features, partnerships, collaboration" },
+]
 
 export default function ContactPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  useEffect(() => {
-    // Example: Check localStorage or session for auth token
-    const getToken = async () => {
-      const token = await getStudentFromToken()
-      getStudentFromToken()
-      setIsLoggedIn(!!token);
-    }
-    getToken();
-  }, []);
-
   return (
     <>
-      {/* Navbar */}    
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pl-4 pr-4">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/Operation-save-my-CGPA-07.svg"
-              alt="Operation Save My CGPA Logo"
-              width={30}
-              height={30}
-              className="h-15 w-15"
-            />
-            <span className="text-xl font-bold tracking-tight">
-              Operation Save My CGPA
-            </span>
+      <Navbar />
+      <div className="min-h-screen bg-gray-50">
+        {/* Hero Section */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="container mx-auto px-4 py-16 text-center">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="p-3 bg-gray-900 rounded-full">
+                <MessageCircle className="h-8 w-8 text-white" />
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Contact Us</h1>
+            </div>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Have a question, suggestion, or need support? We&apos;re here to help you succeed in building your CGPA.
+              <span className="text-gray-900 font-medium">
+                {" "}
+                Reach out to us and we&apos;ll get back to you as soon as possible.
+              </span>
+            </p>
           </div>
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6 ml-2 mr-2">
-            <Link
-              href="/"
-              className="text-sm font-medium hover:text-primary hover:text-gray-600 transition-colors"
-            >
-              Home
-            </Link>
-          </nav>
-
-          {/* Auth Buttons */}
-          <div className="hidden md:flex items-center gap-2">
-            {isLoggedIn ? (
-              <Button asChild>
-                <Link href="/student">Go to Dashboard</Link>
-              </Button>
-            ) : (
-              <>
-                <Button variant="outline" asChild>
-                  <Link href="/auth/login">Login</Link>
-                </Button>
-                <Button asChild>
-                  <Link href="/auth/signup">Sign Up</Link>
-                </Button>
-              </>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </Button>
         </div>
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="ml-4 mr-4 md:hidden border-t">
-            <div className="container py-4 space-y-4">
-              <nav className="flex flex-col space-y-3">
-                <Link
-                  href="/"
-                  className="flex items-center justify-between py-2 text-sm font-medium hover:text-primary transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
+        <div className="container mx-auto px-4 py-12">
+          {/* Contact Methods */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            {contactMethods.map((method, index) => {
+              const IconComponent = method.icon
+              return (
+                <Card key={index} className={`border-2 ${method.color} hover:shadow-lg transition-shadow`}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3">
+                      <div className="p-2 bg-white rounded-lg">
+                        <IconComponent className="text-2xl" />
+                      </div>
+                      {method.title}
+                    </CardTitle>
+                    <CardDescription className="text-gray-700">{method.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="p-3 bg-white rounded-lg">
+                      <p className="font-mono text-sm text-gray-900">{method.detail}</p>
+                    </div>
+                    <Button asChild className={`w-full ${method.buttonColor} text-white`} size="lg">
+                      <a
+                        href={method.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2"
+                      >
+                        <IconComponent className="text-lg" />
+                        {method.action}
+                      </a>
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+
+          {/* Quick Help Topics */}
+          <Card className="mb-12">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">What can we help you with?</CardTitle>
+              <CardDescription className="text-lg">Common topics our support team can assist you with</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {quickLinks.map((link, index) => (
+                  <div
+                    key={index}
+                    className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                  >
+                    <h3 className="font-semibold text-gray-900 mb-2">{link.title}</h3>
+                    <p className="text-sm text-gray-600">{link.description}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Support Hours & Response Time */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-gray-600" />
+                  Support Hours
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Monday - Friday</span>
+                  <span className="font-medium">9:00 AM - 6:00 PM</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Saturday</span>
+                  <span className="font-medium">10:00 AM - 4:00 PM</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Sunday</span>
+                  <span className="font-medium">Closed</span>
+                </div>
+                <p className="text-sm text-gray-500 mt-4">* All times are in West Africa Time (WAT)</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Send className="h-5 w-5 text-gray-600" />
+                  Response Time
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">WhatsApp</span>
+                  <span className="font-medium text-green-600">Within 1 hour</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Email</span>
+                  <span className="font-medium text-blue-600">Within 24 hours</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Urgent Issues</span>
+                  <span className="font-medium text-red-600">Immediate</span>
+                </div>
+                <p className="text-sm text-gray-500 mt-4">* Response times may vary during peak periods</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Emergency Contact */}
+          <Card className="bg-red-50 border-red-200">
+            <CardContent className="text-center py-8">
+              <div className="p-3 bg-red-100 rounded-full w-fit mx-auto mb-4">
+                <Phone className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-red-800 mb-2">Urgent Technical Issues?</h3>
+              <p className="text-red-700 mb-4">
+                If you&apos;re experiencing critical platform issues during an exam or urgent academic deadline, contact us
+                immediately via WhatsApp for priority support.
+              </p>
+              <Button asChild className="bg-red-600 hover:bg-red-700 text-white" size="lg">
+                <a
+                  href="https://wa.me/2348083191228?text=URGENT:%20"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2"
                 >
-                  Home
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
-              </nav>
-
-              <div className="pt-2 border-t flex flex-col gap-2">
-                {isLoggedIn ? (
-                  <Button className="w-full" asChild>
-                    <Link href="/student">Go to Dashboard</Link>
-                  </Button>
-                ) : (
-                  <>
-                    <Button variant="outline" className="w-full" asChild>
-                      <Link href="/auth/login">Login</Link>
-                    </Button>
-                    <Button className="w-full" asChild>
-                      <Link href="/auth/signup">Sign Up</Link>
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </header>
-
-      <div className="min-h-screen bg-white px-6 py-12 md:px-20 lg:px-40">
-        <h1 className="text-3xl md:text-4xl font-bold text-center text-purple-700 mb-8">
-          📬 Contact Us
-        </h1>
-
-        <p className="text-lg text-gray-700 text-center max-w-3xl mx-auto mb-10">
-          Have a question, suggestion, or need support? We&apos;re here to help you succeed in building your CGPA. Reach out to us via WhatsApp or email.
-        </p>
-
-        <div className="max-w-2xl mx-auto space-y-8">
-          {/* WhatsApp Contact */}
-          <div className="bg-green-50 border border-green-200 rounded-xl p-6 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <FaWhatsapp className="text-green-500 text-3xl" />
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">WhatsApp</h3>
-                <p className="text-gray-600">Chat with the admin directly</p>
-              </div>
-            </div>
-            <a
-              href="https://wa.me/2348083191228"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-green-500 hover:bg-green-600 text-white font-medium px-5 py-2 rounded-full transition"
-            >
-              Message Now
-            </a>
-          </div>
-
-          {/* Email Contact */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <FaEnvelope className="text-blue-500 text-3xl" />
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">Email</h3>
-                <p className="text-gray-600">Send us an email at:</p>
-                <span className="text-blue-600 font-semibold">
-                  {/* TODO: Insert your real email below */}
-                  your-email@example.com
-                </span>
-              </div>
-            </div>
-          </div>
+                  <FaWhatsapp className="text-lg" />
+                  Emergency Contact
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </>      
-  );
+    </>
+  )
 }

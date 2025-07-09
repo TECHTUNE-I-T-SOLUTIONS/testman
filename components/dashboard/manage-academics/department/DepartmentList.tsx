@@ -43,7 +43,6 @@ export default function DepartmentList({
   deletingId,
   faculties,
 }: DepartmentListProps) {
-  // Function to get faculty name by ID
   const getFacultyName = (facultyId: string): string => {
     const faculty = faculties.find((f) => f._id === facultyId)
     return faculty ? faculty.name : "Unknown Faculty"
@@ -82,7 +81,6 @@ export default function DepartmentList({
               <Pencil className="h-4 w-4 mr-1" />
               Edit
             </Button>
-
             <Button
               variant="destructive"
               size="sm"
@@ -106,7 +104,6 @@ export default function DepartmentList({
         </div>
       ))}
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!confirmDeleteId} onOpenChange={(open) => !open && onCancelDelete()}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -136,4 +133,3 @@ export default function DepartmentList({
     </div>
   )
 }
-
