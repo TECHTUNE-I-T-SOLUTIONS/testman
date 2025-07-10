@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import { Building, PlusCircle, FolderTree, AlertCircle } from "lucide-react"
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -47,7 +46,6 @@ export default function Departments() {
     fetchDepartments()
   }, [])
 
-  // Switch to form tab when editing
   useEffect(() => {
     if (editingDepartment) {
       setActiveTab("form")
@@ -73,9 +71,7 @@ export default function Departments() {
     try {
       const response = await fetch("/api/departments")
       if (!response.ok) throw new Error("Failed to fetch departments")
-
       const data: DepartmentAPIResponse[] = await response.json()
-
       const transformedDepartments = data.map((dept) => {
         const facultyData = typeof dept.facultyId === "object" ? dept.facultyId : null
         return {
@@ -85,7 +81,6 @@ export default function Departments() {
           facultyName: facultyData ? facultyData.name : undefined,
         }
       })
-
       setDepartments(transformedDepartments)
     } catch (error) {
       console.error(error)
@@ -100,14 +95,12 @@ export default function Departments() {
     setSaving(true)
     try {
       let response
-
       if (editingDepartment?._id) {
         response = await fetch(`/api/departments?id=${editingDepartment._id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(departmentInput),
         })
-
         if (!response.ok) throw new Error("Failed to update department.")
         toast.success("Department updated successfully.")
       } else {
@@ -116,11 +109,9 @@ export default function Departments() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(departmentInput),
         })
-
         if (!response.ok) throw new Error("Failed to create department.")
         toast.success("Department created successfully.")
       }
-
       setEditingDepartment(null)
       fetchDepartments()
       setActiveTab("list")
@@ -144,11 +135,9 @@ export default function Departments() {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       })
-
       if (!response.ok) {
         throw new Error("Failed to delete department.")
       }
-
       toast.success("Department deleted successfully.")
       setConfirmDeleteId(null)
       fetchDepartments()
@@ -271,4 +260,3 @@ export default function Departments() {
     </div>
   )
 }
-

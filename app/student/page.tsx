@@ -1,72 +1,77 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { Flame, AlertTriangle } from "lucide-react";
-import Leaderboard from "@/components/student/Leaderboard";
-import Announcements from "@/components/shared/Announcements";
+import { useEffect, useState } from "react"
+import { Flame, AlertTriangle, X } from "lucide-react"
+import Leaderboard from "@/components/student/Leaderboard"
+import Announcements from "@/components/shared/Announcements"
 
 export default function Dashboard() {
-  const [showModal, setShowModal] = useState(true);
-  const streakDays = 3;
+  const [showModal, setShowModal] = useState(true)
+  const streakDays = 3
 
   useEffect(() => {
-    // Auto-close modal after 10s (optional)
-    const timer = setTimeout(() => setShowModal(false), 10000);
-    return () => clearTimeout(timer);
-  }, []);
+    // Auto-close modal after 15s
+    const timer = setTimeout(() => setShowModal(false), 15000)
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
-    <div className="flex-1 space-y-6 p-2 pt-0 md:p-8 relative">
-
-      {/* ✅ Information Modal */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Information Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm transition-all">
-          <div className="bg-white w-[90%] max-w-md p-6 rounded-xl shadow-2xl border border-gray-200 animate-slide-up relative">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-yellow-100 rounded-full">
-                <AlertTriangle className="h-6 w-6 text-yellow-600" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800 mb-1">Update Your Faculty Details</h2>
-                <p className="text-sm text-gray-600">
-                  Students in <strong>General Studies</strong>, <strong>Social Science</strong>, <strong>Veterinary Medicine</strong>, and <strong>Physical Sciences</strong> are advised to update their faculty and department to valid ones.
-                </p>
-                <p className="text-sm text-red-500 mt-2">
-                  These faculties will soon be removed from the platform.
-                </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-2xl border-0 relative animate-in fade-in-0 zoom-in-95 duration-300">
+            <div className="p-6">
+              <button
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
+                onClick={() => setShowModal(false)}
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="h-6 w-6 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-lg font-semibold text-slate-900 mb-2">Update Your Faculty Details</h2>
+                  <p className="text-sm text-slate-600 leading-relaxed mb-3">
+                    Students in <strong>General Studies</strong>, <strong>Social Science</strong>,
+                    <strong> Veterinary Medicine</strong>, and <strong>Physical Sciences</strong> are advised to update
+                    their faculty and department to valid ones.
+                  </p>
+                  <p className="text-sm text-red-600 font-medium">
+                    These faculties will soon be removed from the platform.
+                  </p>
+                </div>
               </div>
             </div>
-            <button
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition"
-              onClick={() => setShowModal(false)}
-            >
-              ✕
-            </button>
           </div>
         </div>
       )}
 
-      {/* ✅ Announcements Component */}
-      <Announcements />
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Announcements */}
+        <Announcements />
 
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="flex justify-center text-3xl font-bold tracking-tight">
-            Student Dashboard
-          </h1>
-          <p className="flex justify-center text-muted-foreground mt-1">
-            Track your progress and upcoming tests
-          </p>
+        {/* Page Header */}
+        <div className="text-center space-y-4">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold tracking-tight text-slate-900">Student Dashboard</h1>
+            <p className="text-lg text-slate-600">Track your progress and academic performance</p>
+          </div>
+
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full">
+            <Flame className="h-5 w-5 text-amber-500" />
+            <span className="text-sm font-medium text-amber-700">{streakDays} day learning streak!</span>
+          </div>
         </div>
-        <div className="flex items-center text-sm text-muted-foreground">
-          <Flame className="mr-1 h-4 w-4 text-amber-500" />
-          <span className="font-medium text-amber-500">{streakDays} day streak!</span>
+
+        {/* Leaderboard Section */}
+        <div className="max-w-4xl mx-auto">
+          <Leaderboard />
         </div>
       </div>
-
-      {/* Leaderboard Section */}
-      <Leaderboard />
     </div>
-  );
+  )
 }

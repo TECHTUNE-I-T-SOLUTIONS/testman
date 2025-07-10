@@ -1,9 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, FileText, Filter, Download, BarChart2, AlertCircle, GraduationCap } from 'lucide-react'
-import { Result } from "@/types/result"
-
+import { Search, FileText, Filter, Download, BarChart2, AlertCircle, GraduationCap } from "lucide-react"
+import type { Result } from "@/types/result"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
@@ -15,17 +14,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import ResultTable from "@/components/dashboard/manage-questions/results/ResultTable"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
-
-
-// interface Result {
-//   _id: string
-//   studentId: { _id: string; name: string }
-//   examId: { _id: string; title: string }
-//   score: number
-//   totalMarks: number
-//   grade: string
-//   answers?: { questionId: { questionText: string }; isCorrect: boolean }[]
-// }
 
 export default function ResultPage() {
   const [results, setResults] = useState<Result[]>([])
@@ -53,26 +41,22 @@ export default function ResultPage() {
         setLoading(false)
       }
     }
-
     fetchResults()
   }, [])
 
   useEffect(() => {
     if (!results.length) return
     let filtered = [...results]
-
     if (searchTerm) {
       filtered = filtered.filter(
-        result =>
+        (result) =>
           result.studentId.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          result.examId.title.toLowerCase().includes(searchTerm.toLowerCase())
+          result.examId.title.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     }
-
     if (gradeFilter !== "all") {
-      filtered = filtered.filter(result => result.grade === gradeFilter)
+      filtered = filtered.filter((result) => result.grade === gradeFilter)
     }
-
     setFilteredResults(filtered)
   }, [searchTerm, gradeFilter, results])
 
@@ -80,36 +64,29 @@ export default function ResultPage() {
     totalStudents: results.length,
     averageScore: (() => {
       const validScores = results.filter(
-        (result) =>
-          typeof result.score === "number" &&
-          typeof result.totalMarks === "number" &&
-          result.totalMarks > 0
-      );
-
-      if (validScores.length === 0) return "0";
-
+        (result) => typeof result.score === "number" && typeof result.totalMarks === "number" && result.totalMarks > 0,
+      )
+      if (validScores.length === 0) return "0"
       const totalPercentage = validScores.reduce((sum, result) => {
-        return sum + (result.score / result.totalMarks) * 100;
-      }, 0);
-
-      return (totalPercentage / validScores.length).toFixed(1);
+        return sum + (result.score / result.totalMarks) * 100
+      }, 0)
+      return (totalPercentage / validScores.length).toFixed(1)
     })(),
-
     passRate: results.length
-      ? ((results.filter(r => ["A", "B", "C", "D"].includes(r.grade)).length / results.length) * 100).toFixed(1)
+      ? ((results.filter((r) => ["A", "B", "C", "D"].includes(r.grade)).length / results.length) * 100).toFixed(1)
       : "0",
     gradeDistribution: {
-      A: results.filter(r => r.grade === "A").length,
-      B: results.filter(r => r.grade === "B").length,
-      C: results.filter(r => r.grade === "C").length,
-      D: results.filter(r => r.grade === "D").length,
-      F: results.filter(r => r.grade === "F").length,
+      A: results.filter((r) => r.grade === "A").length,
+      B: results.filter((r) => r.grade === "B").length,
+      C: results.filter((r) => r.grade === "C").length,
+      D: results.filter((r) => r.grade === "D").length,
+      F: results.filter((r) => r.grade === "F").length,
     },
   }
 
   const handleExportResults = () => {
     const doc = new jsPDF()
-    
+
     doc.setFontSize(16)
     doc.text("Student Examination Results", 14, 20)
 
@@ -185,7 +162,6 @@ export default function ResultPage() {
                 <span>Analytics</span>
               </TabsTrigger>
             </TabsList>
-
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -196,7 +172,6 @@ export default function ResultPage() {
                   className="pl-8"
                 />
               </div>
-
               <Select value={gradeFilter} onValueChange={setGradeFilter}>
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <div className="flex items-center gap-2">
@@ -221,7 +196,7 @@ export default function ResultPage() {
               <CardHeader>
                 <CardTitle>Examination Results</CardTitle>
                 <CardDescription>
-                  {filteredResults.length} {filteredResults.length === 1 ? 'result' : 'results'} found
+                  {filteredResults.length} {filteredResults.length === 1 ? "result" : "results"} found
                   {searchTerm && ` for "${searchTerm}"`}
                   {gradeFilter !== "all" && ` with grade ${gradeFilter}`}
                 </CardDescription>
@@ -246,31 +221,35 @@ export default function ResultPage() {
 
           <TabsContent value="analytics" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
+              <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium">Total Students</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.totalStudents}</div>
-                  <p className="text-xs text-muted-foreground">Students with recorded results</p>
+                  <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{stats.totalStudents}</div>
+                  <p className="text-xs text-blue-600/80 dark:text-blue-400/80">Students with recorded results</p>
                 </CardContent>
               </Card>
-              <Card>
+
+              <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium">Average Score</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.averageScore}%</div>
-                  <p className="text-xs text-muted-foreground">Across all examinations</p>
+                  <div className="text-2xl font-bold text-green-700 dark:text-green-300">{stats.averageScore}%</div>
+                  <p className="text-xs text-green-600/80 dark:text-green-400/80">Across all examinations</p>
                 </CardContent>
               </Card>
-              <Card>
+
+              <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium">Pass Rate</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.passRate}%</div>
-                  <p className="text-xs text-muted-foreground">Students with passing grades (A-D)</p>
+                  <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{stats.passRate}%</div>
+                  <p className="text-xs text-purple-600/80 dark:text-purple-400/80">
+                    Students with passing grades (A-D)
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -284,13 +263,19 @@ export default function ResultPage() {
                 <div className="grid grid-cols-5 gap-4 text-center">
                   {Object.entries(stats.gradeDistribution).map(([grade, count]) => (
                     <div key={grade} className="flex flex-col items-center">
-                      <Badge 
+                      <Badge
                         className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold mb-2
-                          ${grade === 'A' ? 'bg-green-100 text-green-800 hover:bg-green-200' : 
-                           grade === 'B' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 
-                           grade === 'C' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' : 
-                           grade === 'D' ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' : 
-                           'bg-red-100 text-red-800 hover:bg-red-200'}`}
+                          ${
+                            grade === "A"
+                              ? "bg-green-100 text-green-800 hover:bg-green-200"
+                              : grade === "B"
+                                ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                                : grade === "C"
+                                  ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                                  : grade === "D"
+                                    ? "bg-orange-100 text-orange-800 hover:bg-orange-200"
+                                    : "bg-red-100 text-red-800 hover:bg-red-200"
+                          }`}
                       >
                         {grade}
                       </Badge>
@@ -301,7 +286,9 @@ export default function ResultPage() {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full">View Detailed Analytics</Button>
+                <Button variant="outline" className="w-full bg-transparent">
+                  View Detailed Analytics
+                </Button>
               </CardFooter>
             </Card>
           </TabsContent>

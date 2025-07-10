@@ -1,93 +1,95 @@
-import { useState } from "react";
-import ResultDetailsModal from "./ResultDetailsModal";
-import { Result } from "@/types/result"
+"use client"
 
-// interface Option {
-//   text: string;
-//   isCorrect: boolean;
-// }
-
-// interface Answer {
-//   questionId: string; // or `{ _id: string }` if you're populating
-//   question: string;
-//   options: Option[];
-//   correctAnswer: string;
-//   studentAnswer: string;
-//   isCorrect: boolean;
-// }
-
-// interface Result {
-//   _id: string;
-//   studentId: { _id: string; name: string };
-//   examId: { _id: string; title: string };
-//   score: number;
-//   totalMarks: number;
-//   answers?: Answer[];
-// }
+import { useState } from "react"
+import { Eye, User, BookOpen, Target } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import type { Result } from "@/types/result"
+import ResultDetailsModal from "./ResultDetailsModal"
 
 export default function ResultTable({ results }: { results: Result[] }) {
-  const [selectedResult, setSelectedResult] = useState<Result | null>(null);
+  const [selectedResult, setSelectedResult] = useState<Result | null>(null)
+
+  const getGradeColor = (grade: string) => {
+    switch (grade) {
+      case "A":
+        return "bg-green-100 text-green-800 hover:bg-green-200"
+      case "B":
+        return "bg-blue-100 text-blue-800 hover:bg-blue-200"
+      case "C":
+        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+      case "D":
+        return "bg-orange-100 text-orange-800 hover:bg-orange-200"
+      case "F":
+        return "bg-red-100 text-red-800 hover:bg-red-200"
+      default:
+        return "bg-gray-100 text-gray-800 hover:bg-gray-200"
+    }
+  }
+
+  if (results.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="text-4xl mb-4">📊</div>
+        <h3 className="text-lg font-medium">No Results Found</h3>
+        <p className="text-muted-foreground max-w-md mt-2">No examination results match your current filters.</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="mt-6">
-      {results.length > 0 ? (
-        <div className="overflow-x-auto border border-purple-400 rounded-lg shadow-md">
-          <table className="w-full text-sm text-left border-collapse">
-            <thead className="bg-purple-100 text-purple-700 uppercase text-xs tracking-wider">
-              <tr>
-                <th className="border border-purple-300 p-3 text-left">
-                  👨‍🎓 Student
-                </th>
-                <th className="border border-purple-300 p-3 text-left">
-                  📚 Exam
-                </th>
-                <th className="border border-purple-300 p-3 text-left">
-                  🎯 Score
-                </th>
-                <th className="border border-purple-300 p-3 text-center">
-                  🔍 Action
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.map((result, index) => (
-                <tr
-                  key={result._id}
-                  className={`border border-purple-300 ${
-                    index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                  } hover:bg-purple-50 transition`}
-                >
-                  <td className="p-3 text-gray-800">{result.studentId.name}</td>
-                  <td className="p-3 text-gray-800">{result.examId.title}</td>
-                  <td className="p-3 text-gray-800 font-medium">
-                    {result.score} / {result.totalMarks}
-                  </td>
-                  <td className="p-3 text-center">
-                    <button
-                      onClick={() => setSelectedResult(result)}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-                    >
-                      View Details
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p className="mt-6 text-gray-600 text-center text-lg">
-          🚫 No results found.
-        </p>
-      )}
+    <>
+      <div className="space-y-4">
+        {results.map((result) => (
+          <Card key={result._id} className="border-l-4 border-l-primary/20">
+            <CardContent className="p-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">{result.studentId.name}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <BookOpen className="h-4 w-4" />
+                    <span>{result.examId.title}</span>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Target className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">
+                        {result.score} / {result.totalMarks}
+                      </span>
+                      <span className="text-muted-foreground">
+                        ({((result.score / result.totalMarks) * 100).toFixed(1)}%)
+                      </span>
+                    </div>
+
+                    <Badge className={getGradeColor(result.grade)}>Grade {result.grade}</Badge>
+                  </div>
+                </div>
+
+                <div className="flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedResult(result)}
+                    className="flex items-center gap-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    View Details
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       {/* Modal for viewing details */}
-      {selectedResult && (
-        <ResultDetailsModal
-          result={selectedResult}
-          onClose={() => setSelectedResult(null)}
-        />
-      )}
-    </div>
-  );
+      {selectedResult && <ResultDetailsModal result={selectedResult} onClose={() => setSelectedResult(null)} />}
+    </>
+  )
 }

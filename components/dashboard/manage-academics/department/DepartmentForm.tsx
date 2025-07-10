@@ -5,14 +5,12 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { Loader2 } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import type { Faculty } from "@/types/types"
 
-// Define the schema for form validation
 const departmentSchema = z.object({
   name: z.string().min(2, { message: "Department name must be at least 2 characters" }),
   facultyId: z.string().min(1, { message: "Please select a faculty" }),
@@ -41,7 +39,6 @@ export default function DepartmentForm({
   faculties,
   saving = false,
 }: DepartmentFormProps) {
-  // Initialize the form with react-hook-form
   const form = useForm<DepartmentFormValues>({
     resolver: zodResolver(departmentSchema),
     defaultValues: {
@@ -50,7 +47,6 @@ export default function DepartmentForm({
     },
   })
 
-  // Update form values when editingDepartment changes
   useEffect(() => {
     if (editingDepartment) {
       form.reset({
@@ -138,4 +134,3 @@ export default function DepartmentForm({
     </Form>
   )
 }
-

@@ -71,7 +71,6 @@ export default function FacultyList({ faculties, onEdit, onDelete, deletingId }:
               <Pencil className="h-4 w-4 mr-1" />
               Edit
             </Button>
-
             <AlertDialog
               open={facultyToDelete === faculty._id}
               onOpenChange={(open) => !open && setFacultyToDelete(null)}
@@ -121,4 +120,3 @@ export default function FacultyList({ faculties, onEdit, onDelete, deletingId }:
     </div>
   )
 }
-

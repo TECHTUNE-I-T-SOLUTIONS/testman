@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import { Building, PlusCircle, School } from "lucide-react"
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -26,7 +25,6 @@ export default function Faculties() {
     fetchFaculties()
   }, [])
 
-  // Switch to form tab when editing
   useEffect(() => {
     if (editingFaculty) {
       setActiveTab("form")
@@ -56,18 +54,15 @@ export default function Faculties() {
     setSaving(true)
     try {
       let response
-
       if (editingFaculty?._id) {
         response = await fetch(`/api/faculties`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: editingFaculty._id, ...facultyInput }),
         })
-
         if (!response.ok) {
           throw new Error("Failed to update faculty.")
         }
-
         toast.success("Faculty updated successfully.")
       } else {
         response = await fetch("/api/faculties", {
@@ -75,14 +70,11 @@ export default function Faculties() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(facultyInput),
         })
-
         if (!response.ok) {
           throw new Error("Failed to create faculty.")
         }
-
         toast.success("Faculty created successfully.")
       }
-
       setEditingFaculty(null)
       fetchFaculties()
       setActiveTab("list")
@@ -101,15 +93,12 @@ export default function Faculties() {
         toast.error("Invalid faculty ID.")
         return
       }
-
       const response = await fetch(`/api/faculties?id=${id}`, {
         method: "DELETE",
       })
-
       if (!response.ok) {
         throw new Error("Failed to delete faculty.")
       }
-
       toast.success("Faculty deleted successfully.")
       fetchFaculties()
     } catch (error) {
@@ -231,4 +220,3 @@ export default function Faculties() {
     </div>
   )
 }
-
