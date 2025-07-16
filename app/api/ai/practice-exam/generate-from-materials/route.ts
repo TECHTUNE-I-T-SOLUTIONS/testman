@@ -1,4 +1,3 @@
-
 import { type NextRequest, NextResponse } from "next/server"
 import { connectdb } from "@/lib/connectdb"
 import StudyMaterial from "@/lib/models/study-material"
@@ -63,40 +62,53 @@ export async function POST(req: NextRequest) {
     const subject = materials[0]?.subject || "General Study"
     console.log(`🧠 Generating practice exam from ${materials.length} materials…`)
 
-    /* ─ Call Gemini ──────────────────────────────── */
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
-    const prompt = `
-You are an expert educator and exam creator. Your task is to generate a comprehensive practice exam based on the provided study materials.
-The exam should consist of a mix of multiple-choice, true/false, and short-answer questions.
-Ensure the questions cover key concepts, definitions, and important details from the text.
-For multiple-choice questions, provide 4 distinct options, with only one correct answer.
-For true/false questions, clearly state if the statement is true or false.
-For short-answer questions, provide a concise correct answer.
-Each question must include a brief explanation for the correct answer.
-
-Format the output as a JSON array of question objects. Each question object must have the following structure:
-{
-  "questionText": "string",
-  "questionType": "multiple-choice" | "true-false" | "short-answer",
-  "options"?: ["string", "string", "string", "string"],     // Only for multiple-choice
-  "correctAnswer": "string" | "boolean" | "string[]",      // String for SA, boolean for TF, string for MC
-  "explanation": "string"
-}
-
-Ensure the JSON is valid and directly parsable. Do not include any conversational text or markdown outside the JSON block.
-Generate at least 10 questions, but no more than 25, depending on the length and complexity of the material.
-
-Study Materials:
-${combinedText}
-    `
+    /* ─ Call Gemini with retry mechanism ──────────── */
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        maxOutputTokens: 4096,
+        temperature: 0.7,
+      }
+    })
 
     let aiRaw: string
-    try {
-      const geminiResp = await model.generateContent(prompt)
-      aiRaw = (await geminiResp.response).text()
-    } catch (err) {
-      console.error("Gemini generation failed:", err)
-      return NextResponse.json({ error: "AI generation failed" }, { status: 502 })
+    let attempts = 0
+    const maxAttempts = 3
+
+    while (attempts < maxAttempts) {
+      try {
+        console.log(`🤖 Calling Gemini (attempt ${attempts + 1}/${maxAttempts})...`)
+
+        const geminiResp = await model.generateContent(prompt)
+        const response = await geminiResp.response
+
+        if (!response) {
+          throw new Error("Empty response from Gemini")
+        }
+
+        aiRaw = response.text()
+        if (!aiRaw || aiRaw.trim().length === 0) {
+          throw new Error("Empty text response from Gemini")
+        }
+
+        console.log(`✅ Gemini responded with ${aiRaw.length} characters`)
+        break
+
+      } catch (err) {
+        attempts++
+        console.error(`❌ Gemini attempt ${attempts} failed:`, err)
+
+        if (attempts >= maxAttempts) {
+          const errorMsg = err instanceof Error ? err.message : "Unknown error"
+          if (errorMsg.includes("quota") || errorMsg.includes("limit")) {
+            return NextResponse.json({ error: "AI service quota exceeded. Please try again later." }, { status: 429 })
+          }
+          return NextResponse.json({ error: "AI generation failed after multiple attempts" }, { status: 502 })
+        }
+
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempts))
+      }
     }
 
     /* ─ Extract pure JSON (strip ```json …``` if needed) ─ */

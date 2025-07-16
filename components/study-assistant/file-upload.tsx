@@ -160,14 +160,20 @@ export function FileUpload({ onFilesUpdated }: FileUploadProps) {
 
   const pollProcessingStatus = useCallback(
     async (materialId: string) => {
-      /* NEW: skip temp ids (they’re < 24 chars) */
-      if (materialId.length !== 24) return;
+      /* NEW: skip temp ids (they're < 24 chars) */
+      if (materialId.length !== 24) {
+        console.log(`⏭️ Skipping polling for temp ID: ${materialId}`)
+        return
+      }
+
+      console.log(`🔄 Starting to poll processing status for: ${materialId}`)
       let attempts = 0
       const maxAttempts = 60 // Poll for up to 5 minutes (5 seconds * 60 attempts)
       const pollInterval = 5000 // 5 seconds
 
       const poll = async () => {
         if (attempts >= maxAttempts) {
+          console.error(`⏰ Processing timed out for material: ${materialId}`)
           setFiles((prevFiles) =>
             prevFiles.map((f) =>
               f.id === materialId

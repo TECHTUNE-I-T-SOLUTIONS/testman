@@ -130,29 +130,31 @@ export default function StudyAssistant() {
 
     setIsGeneratingExam(true)
     try {
+      console.log("🔄 Starting exam generation for files:", files.map(f => f.id))
+      
       const response = await fetch("/api/ai/practice-exam/generate-from-materials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           materialIds: files.map((f) => f.id),
-          examTitle: `Practice Exam - ${files[0].title}`,
-          questionCount: 10,
+          sessionId: currentSession?._id || undefined,
         }),
       })
 
+      const data = await response.json()
+      console.log("📝 API Response:", data)
+
       if (response.ok) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const data = await response.json()
         toast.success("Practice exam generated automatically!")
         fetchPracticeExams()
         setActiveTab("exams")
       } else {
-        const error = await response.json()
-        toast.error(error.error || "Failed to generate practice exam")
+        console.error("❌ API Error:", data)
+        toast.error(data.error || "Failed to generate practice exam")
       }
     } catch (error) {
-      console.error("Error generating practice exam:", error)
-      toast.error("Error generating practice exam")
+      console.error("💥 Network Error:", error)
+      toast.error("Network error during exam generation")
     } finally {
       setIsGeneratingExam(false)
     }
@@ -185,7 +187,15 @@ export default function StudyAssistant() {
 
   useEffect(() => {
     const completed = uploadedFiles.filter(f => f.processingStatus === "completed")
+    console.log(`📁 Files status check:`, {
+      total: uploadedFiles.length,
+      completed: completed.length,
+      isGeneratingExam,
+      completedIds: completed.map(f => f.id)
+    })
+    
     if (completed.length && !isGeneratingExam) {
+      console.log(`🚀 Triggering auto exam generation for ${completed.length} files`)
       void generatePracticeExamFromMaterials(completed)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
