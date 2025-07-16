@@ -1,0 +1,45 @@
+"use client";
+
+import { useState } from "react";
+
+export default function UpdatePhoneTrigger() {
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleClick = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/students/update-phone-column");
+      const data = await res.json();
+      setMessage(data.message || data.error);
+    } catch (error) {
+      setMessage("Failed to call update API.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ padding: "2rem" }}>
+      <h1>One-Time Phone Number Column Adder</h1>
+      <button
+        onClick={handleClick}
+        disabled={loading}
+        style={{
+          padding: "10px 20px",
+          background: "blue",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
+        {loading ? "Updating..." : "Add Phone Column to Students"}
+      </button>
+
+      {message && (
+        <p style={{ marginTop: "1rem", fontWeight: "bold" }}>{message}</p>
+      )}
+    </div>
+  );
+}

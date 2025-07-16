@@ -1,0 +1,59 @@
+# MONGODB_URI=mongodb://localhost:27017/exam-management
+MONGODB_URI = mongodb+srv://Damzy1:Damzy01!@cluster0.ueytv.mongodb.net/savemycgpa?retryWrites=true&w=majority&appName=Cluster0/savemycgpa
+MONGODB_DB=school-management
+NEXTAUTH_SECRET=d4d53d4982d0fc688c662f8b49496ac1bbe09571016b6be1bf42500dfb0c2044
+NEXTAUTH_URL=http://localhost:3000
+DEFAULT_ADMIN_EMAIL=yusufabdullahi2910@gmail.com
+DEFAULT_ADMIN_PASSWORD=Yusasive
+DEFAULT_ADMIN_MATRIC_NUMBER=20/56EB004
+JWT_SECRET=7ea56d76e45a80f5488ba48419d241ee004452d742ccedba9dca9cedeba0dd39
+
+
+# Resend API
+# RESEND_API_KEY=re_W3Np1F8i_6rniaMGwMNNFJrzVwqb1rZJb
+# RESEND_SENDER_EMAIL=onboarding@resend.dev
+
+# Termii API
+# TERMII_API_KEY=TLlSmBQOZhBltdTootbmNbgkMdBezoipfXNEtGrLqIfciNsgYqdnOqyTzdbRqv
+# TERMII_SENDER_ID=GLORIOUSFUTURE    # (Custom sender ID approved by Termii)
+
+
+# RESEND_API_KEY: re_W3Np1F8i_6rniaMGwMNNFJrzVwqb1rZJb
+
+
+# Termii_LIVE_API_KEY: TLlSmBQOZhBltdTootbmNbgkMdBezoipfXNEtGrLqIfciNsgYqdnOqyTzdbRqv
+
+# Secrect key: tsk_nLGSbEvS2euSVUY1ApIMsb81Fs
+
+
+
+service id: service_3lhluih
+
+welcome template id: template_eo7dzoc
+
+PW RESET: template_wpe1koo
+
+
+public key: GeI_lRIKxBfXr8CAa
+private key: "g0Ol6QD0N3p_HMaSSpSXR" 
+
+
+# Termii API
+TERMII_API_KEY=TLlSmBQOZhBltdTootbmNbgkMdBezoipfXNEtGrLqIfciNsgYqdnOqyTzdbRqv
+TERMIi_EMAIL_CONFIG_ID=edfde8ea-0692-43eb-bfda-4d2bd8f47350
+TERMII_SENDER_ID=OPSMCGPA
+TERMII_API_URL=https://api.ng.termii.com
+
+re_Yoy8ZXtt_8hxGYPeKqh6pHYEHXSCiTq4U
+
+EMAILJS_SERVICE_ID=service_3lhluih
+EMAILJS_WELCOME_TEMPLATE_ID=template_eo7dzoc
+EMAILJS_PASSWORD_TEMPLATE_ID=template_wpe1koo
+EMAILJS_PUBLIC_KEY=GeI_lRIKxBfXr8CAa
+EMAILJS_PRIVATE_KEY=g0Ol6QD0N3p_HMaSSpSXR
+
+
+# Gemini AI (newly provided)
+GEMINI_API_KEY=AIzaSyA2Rrlw3ymJtUIsPq7oVydiIybR8EwHSBA
+
+# NJtOoYXGYJMA7kwwt6xVhA%3D%3D
