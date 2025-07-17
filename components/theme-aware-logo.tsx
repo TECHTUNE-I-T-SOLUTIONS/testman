@@ -1,3 +1,4 @@
+
 "use client"
 
 import Image from "next/image"
@@ -9,13 +10,12 @@ interface ThemeAwareLogoProps {
   className?: string
 }
 
-export { ThemeAwareLogo }
-export default function ThemeAwareLogo({ width = 32, height = 32, className = "" }: ThemeAwareLogoProps) {
+export function ThemeAwareLogo({ width = 32, height = 32, className = "" }: ThemeAwareLogoProps) {
   const { theme } = useTheme()
-
+  
   // Determine if we should use dark logo (white version)
   const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-
+  
   return (
     <div className={`relative ${className}`} style={{ width, height }}>
       <Image
