@@ -1,7 +1,7 @@
 "use client";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/student/AppSidebar";
+import AppSidebar from "@/components/student/AppSidebar";
 import Navbar from "@/components/shared/Navbar";
 import { useSession, SessionProvider } from "next-auth/react";
 import { useRouter } from "next/navigation";
