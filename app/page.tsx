@@ -27,9 +27,12 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle"
 
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { ArrowRight, BookOpen, Users, Award, TrendingUp, Star, Menu, X } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { ThemeAwareLogo } from "@/components/theme-aware-logo"
 import { getStudentFromToken } from "@/utils/auth"
 import EvidenceVideos from "@/components/EvidenceVideos"
 import CookieNotice from "@/components/CookieNotice"
@@ -179,13 +182,7 @@ const Page: FC = () => {
         <div className="w-full max-w-none px-4 lg:px-6 xl:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
-              <Image
-                src="/Operation-save-my-CGPA-07.svg"
-                alt="Operation Save My CGPA Logo"
-                width={30}
-                height={30}
-                className="h-15 w-15"
-              />
+              <ThemeAwareLogo/>
               <span className="text-xl font-bold tracking-tight">Operation Save My CGPA</span>
             </div>
 
@@ -329,13 +326,7 @@ const Page: FC = () => {
                   transition={{ delay: 0.2, duration: 0.5 }}
                 >
                   <motion.div whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }} transition={{ duration: 0.6 }}>
-                    <Image
-                      src="/Operation-save-my-CGPA-07.svg"
-                      alt="Operation Save My CGPA Logo"
-                      width={40}
-                      height={40}
-                      className="h-32 w-32 text-primary transition-transform duration-300"
-                    />
+                    <ThemeAwareLogo/>
                   </motion.div>
                   <Badge className="px-3 py-1 text-lg" variant="secondary">
                     University of Ilorin & Beyond
@@ -761,9 +752,7 @@ const Page: FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <div className="flex justify-center md:justify-start items-center gap-2">
-                <Image
-                  src="/Operation-save-my-CGPA-07.svg"
-                  alt="Operation Save My CGPA Logo"
+                <ThemeAwareLogo
                   width={30}
                   height={30}
                   className="h-15 w-15 text-primary"
