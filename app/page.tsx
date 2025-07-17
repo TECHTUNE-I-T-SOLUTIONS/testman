@@ -1,14 +1,10 @@
-The code is updated to include theme-aware logo, improved dark mode styling, and other requested functionalities.
-```
 
-```replit_final_file
 "use client"
 
 import { useState, useEffect } from "react"
 import type { FC } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import Image from "next/image"
 import CountUp from "react-countup"
 import { useInView } from "react-intersection-observer"
 
@@ -189,32 +185,32 @@ const Page: FC = () => {
                 height={30}
                 className="h-15 w-15"
               />
-              <span className="text-xl font-bold tracking-tight">Operation Save My CGPA</span>
+              <span className="text-xl font-bold tracking-tight text-foreground">Operation Save My CGPA</span>
             </div>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-6">
               <Link
                 href="#features"
-                className="text-sm font-medium hover:text-primary hover:text-gray-600 transition-colors"
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
               >
                 Features
               </Link>
               <Link
                 href="#about"
-                className="text-sm font-medium hover:text-primary hover:text-gray-600 transition-colors"
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
               >
                 About
               </Link>
               <Link
                 href="#faculties"
-                className="text-sm font-medium hover:text-primary hover:text-gray-600 transition-colors"
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
               >
                 Faculties
               </Link>
               <Link
                 href="#testimonials"
-                className="text-sm font-medium hover:text-primary hover:text-gray-600 transition-colors"
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
               >
                 Testimonials
               </Link>
@@ -256,7 +252,7 @@ const Page: FC = () => {
                 <nav className="flex flex-col space-y-3">
                   <Link
                     href="#features"
-                    className="flex items-center justify-between py-2 text-sm font-medium hover:text-primary transition-colors"
+                    className="flex items-center justify-between py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Features
@@ -264,7 +260,7 @@ const Page: FC = () => {
                   </Link>
                   <Link
                     href="#about"
-                    className="flex items-center justify-between py-2 text-sm font-medium hover:text-primary transition-colors"
+                    className="flex items-center justify-between py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     About
@@ -272,7 +268,7 @@ const Page: FC = () => {
                   </Link>
                   <Link
                     href="#faculties"
-                    className="flex items-center justify-between py-2 text-sm font-medium hover:text-primary transition-colors"
+                    className="flex items-center justify-between py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Faculties
@@ -280,7 +276,7 @@ const Page: FC = () => {
                   </Link>
                   <Link
                     href="#testimonials"
-                    className="flex items-center justify-between py-2 text-sm font-medium hover:text-primary transition-colors"
+                    className="flex items-center justify-between py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Testimonials
@@ -344,7 +340,7 @@ const Page: FC = () => {
 
                 {/* Heading */}
                 <motion.h1
-                  className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight"
+                  className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
@@ -372,7 +368,7 @@ const Page: FC = () => {
                   <Button size="lg" asChild>
                     <Link href="/auth/signup">Get Started</Link>
                   </Button>
-                  or
+                  <span className="text-muted-foreground">or</span>
                   <Button size="lg" variant="outline" asChild>
                     <Link href="/auth/login">Sign in</Link>
                   </Button>
@@ -404,19 +400,19 @@ const Page: FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-100 to-background"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="grid grid-cols-2 gap-6 p-8">
-                    <div className="bg-blue-100 rounded-xl p-6 flex flex-col items-center justify-center text-blue-600">
+                    <div className="bg-blue-100 dark:bg-blue-900/50 rounded-xl p-6 flex flex-col items-center justify-center text-blue-600 dark:text-blue-300">
                       <BookOpen className="h-16 w-16 mb-3" />
                       <span className="font-medium text-center">Daily Learning Materials</span>
                     </div>
-                    <div className="bg-green-100 rounded-xl p-6 flex flex-col items-center justify-center text-green-600">
+                    <div className="bg-green-100 dark:bg-green-900/50 rounded-xl p-6 flex flex-col items-center justify-center text-green-600 dark:text-green-300">
                       <FileText className="h-16 w-16 mb-3" />
                       <span className="font-medium text-center">Interactive Quizzes</span>
                     </div>
-                    <div className="bg-amber-100 rounded-xl p-6 flex flex-col items-center justify-center text-amber-600">
+                    <div className="bg-amber-100 dark:bg-amber-900/50 rounded-xl p-6 flex flex-col items-center justify-center text-amber-600 dark:text-amber-300">
                       <GraduationCap className="h-16 w-16 mb-3" />
                       <span className="font-medium text-center">Exam Preparation</span>
                     </div>
-                    <div className="bg-purple-100 rounded-xl p-6 flex flex-col items-center justify-center text-purple-600">
+                    <div className="bg-purple-100 dark:bg-purple-900/50 rounded-xl p-6 flex flex-col items-center justify-center text-purple-600 dark:text-purple-300">
                       <BarChart2 className="h-16 w-16 mb-3" />
                       <span className="font-medium text-center">Progress Tracking</span>
                     </div>
@@ -434,25 +430,25 @@ const Page: FC = () => {
               {/* Active Students */}
               <div className="flex flex-col items-center text-center p-4">
                 <Users className="h-8 w-8 text-primary mb-2" />
-                <div className="text-3xl font-bold">{inView && <CountUp end={100} duration={2} />}+</div>
+                <div className="text-3xl font-bold text-foreground">{inView && <CountUp end={100} duration={2} />}+</div>
                 <p className="text-sm text-muted-foreground">Active Students</p>
               </div>
               {/* Courses Covered */}
               <div className="flex flex-col items-center text-center p-4">
                 <BookOpen className="h-8 w-8 text-primary mb-2" />
-                <div className="text-3xl font-bold">{inView && <CountUp end={30} duration={2} />}+</div>
+                <div className="text-3xl font-bold text-foreground">{inView && <CountUp end={30} duration={2} />}+</div>
                 <p className="text-sm text-muted-foreground">Courses Covered</p>
               </div>
               {/* Grade Improvement */}
               <div className="flex flex-col items-center text-center p-4">
                 <Award className="h-8 w-8 text-primary mb-2" />
-                <div className="text-3xl font-bold">{inView && <CountUp end={85} duration={2} />}%</div>
+                <div className="text-3xl font-bold text-foreground">{inView && <CountUp end={85} duration={2} />}%</div>
                 <p className="text-sm text-muted-foreground">Grade Improvement</p>
               </div>
               {/* Quizzes Completed */}
               <div className="flex flex-col items-center text-center p-4">
                 <CheckCircle className="h-8 w-8 text-primary mb-2" />
-                <div className="text-3xl font-bold">{inView && <CountUp end={500} duration={2.5} />}+</div>
+                <div className="text-3xl font-bold text-foreground">{inView && <CountUp end={500} duration={2.5} />}+</div>
                 <p className="text-sm text-muted-foreground">Quizzes Completed</p>
               </div>
             </div>
@@ -464,7 +460,7 @@ const Page: FC = () => {
           <div className="w-full max-w-none px-4 lg:px-6 xl:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <Badge className="mb-4">Features</Badge>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Everything You Need to Excel</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-foreground">Everything You Need to Excel</h2>
               <p className="text-lg text-muted-foreground">
                 Our comprehensive suite of tools and resources designed to help you succeed in your academic journey.
               </p>
@@ -476,7 +472,7 @@ const Page: FC = () => {
                     <div className="rounded-full bg-primary/10 w-16 h-16 flex items-center justify-center mb-4">
                       {feature.icon}
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                    <h3 className="text-xl font-semibold mb-2 text-foreground">{feature.title}</h3>
                     <p className="text-muted-foreground">{feature.description}</p>
                   </CardContent>
                 </Card>
@@ -491,19 +487,19 @@ const Page: FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
                 <div className="grid grid-cols-2 gap-6">
-                  <div className="bg-blue-50 rounded-xl p-6 flex flex-col items-center justify-center text-blue-600 h-60">
+                  <div className="bg-blue-50 dark:bg-blue-900/50 rounded-xl p-6 flex flex-col items-center justify-center text-blue-600 dark:text-blue-300 h-60">
                     <BookOpen className="h-20 w-20 mb-4" />
                     <span className="font-medium text-lg text-center">Learn Anywhere</span>
                   </div>
-                  <div className="bg-green-50 rounded-xl p-6 flex flex-col items-center justify-center text-green-600 h-60">
+                  <div className="bg-green-50 dark:bg-green-900/50 rounded-xl p-6 flex flex-col items-center justify-center text-green-600 dark:text-green-300 h-60">
                     <Users className="h-20 w-20 mb-4" />
                     <span className="font-medium text-lg text-center">Study Together</span>
                   </div>
-                  <div className="bg-amber-50 rounded-xl p-6 flex flex-col items-center justify-center text-amber-600 h-60">
+                  <div className="bg-amber-50 dark:bg-amber-900/50 rounded-xl p-6 flex flex-col items-center justify-center text-amber-600 dark:text-amber-300 h-60">
                     <Award className="h-20 w-20 mb-4" />
                     <span className="font-medium text-lg text-center">Achieve Excellence</span>
                   </div>
-                  <div className="bg-purple-50 rounded-xl p-6 flex flex-col items-center justify-center text-purple-600 h-60">
+                  <div className="bg-purple-50 dark:bg-purple-900/50 rounded-xl p-6 flex flex-col items-center justify-center text-purple-600 dark:text-purple-300 h-60">
                     <Brain className="h-20 w-20 mb-4" />
                     <span className="font-medium text-lg text-center">Expand Knowledge</span>
                   </div>
@@ -512,7 +508,7 @@ const Page: FC = () => {
               <div className="space-y-6">
                 <div className="text-center lg:text-left">
                   <Badge>About Us</Badge>
-                  <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+                  <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
                     Our Mission is to Improve Academic Performance
                   </h2>
                   <p className="text-lg text-muted-foreground">
@@ -527,7 +523,7 @@ const Page: FC = () => {
                       <CheckCircle className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold">Daily Learning</h3>
+                      <h3 className="font-semibold text-foreground">Daily Learning</h3>
                       <p className="text-muted-foreground">
                         Consistent, bite-sized learning to build strong foundations.
                       </p>
@@ -538,7 +534,7 @@ const Page: FC = () => {
                       <CheckCircle className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold">Personalized Experience</h3>
+                      <h3 className="font-semibold text-foreground">Personalized Experience</h3>
                       <p className="text-muted-foreground">
                         Content tailored to your specific courses and learning style.
                       </p>
@@ -549,7 +545,7 @@ const Page: FC = () => {
                       <CheckCircle className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold">Community Support</h3>
+                      <h3 className="font-semibold text-foreground">Community Support</h3>
                       <p className="text-muted-foreground">
                         Connect with peers and mentors for collaborative learning.
                       </p>
@@ -571,7 +567,7 @@ const Page: FC = () => {
           <div className="w-full max-w-none px-4 lg:px-6 xl:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <Badge className="mb-4">Faculties</Badge>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-foreground">
                 Supporting All Academic Disciplines
               </h2>
               <p className="text-lg text-muted-foreground">
@@ -594,7 +590,7 @@ const Page: FC = () => {
           <div className="w-full max-w-none px-4 lg:px-6 xl:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <Badge className="mb-4">How It Works</Badge>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Simple Steps to Academic Success</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-foreground">Simple Steps to Academic Success</h2>
               <p className="text-lg text-muted-foreground">
                 Getting started with Operation Save My CGPA is easy. Follow these simple steps to begin your journey to
                 better grades.
@@ -608,7 +604,7 @@ const Page: FC = () => {
                   </span>
                   <Users className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Create Your Account</h3>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">Create Your Account</h3>
                 <p className="text-muted-foreground">
                   Sign up and create your profile with your faculty and department.
                 </p>
@@ -620,7 +616,7 @@ const Page: FC = () => {
                   </span>
                   <BookOpen className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Select Your Courses</h3>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">Select Your Courses</h3>
                 <p className="text-muted-foreground">
                   Choose the courses you&apos;re currently taking to personalize your experience.
                 </p>
@@ -632,7 +628,7 @@ const Page: FC = () => {
                   </span>
                   <Award className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Start Learning</h3>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">Start Learning</h3>
                 <p className="text-muted-foreground">
                   Access daily materials, take quizzes, and track your progress as you improve.
                 </p>
@@ -651,7 +647,7 @@ const Page: FC = () => {
           <div className="w-full max-w-none px-4 lg:px-6 xl:px-8">
             <div className="text-center mx-auto mb-16">
               <Badge className="mb-4">Short Guides</Badge>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">A peek into our Platform</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-foreground">A peek into our Platform</h2>
               <p className="text-lg text-muted-foreground">A guide into our platform</p>
               <EvidenceVideos />
             </div>
@@ -663,7 +659,7 @@ const Page: FC = () => {
           <div className="w-full max-w-none px-4 lg:px-6 xl:px-8">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <Badge className="mb-4">Testimonials</Badge>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">What Our Students Say</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-foreground">What Our Students Say</h2>
               <p className="text-lg text-muted-foreground">
                 Hear from students who have transformed their academic performance with Operation Save My CGPA.
               </p>
@@ -676,16 +672,16 @@ const Page: FC = () => {
                       <div
                         className={`rounded-full p-2 ${
                           index === 0
-                            ? "bg-blue-100 text-blue-600"
+                            ? "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300"
                             : index === 1
-                              ? "bg-green-100 text-green-600"
-                              : "bg-amber-100 text-amber-600"
+                              ? "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300"
+                              : "bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300"
                         }`}
                       >
                         <User className="h-8 w-8" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">{testimonial.name}</h3>
+                        <h3 className="font-semibold text-foreground">{testimonial.name}</h3>
                         <p className="text-sm text-muted-foreground">{testimonial.department}</p>
                       </div>
                     </div>
@@ -703,7 +699,7 @@ const Page: FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.0, ease: "easeOut" }}
           viewport={{ once: true }}
-          className="relative py-20 bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 text-primary-foreground overflow-hidden mx-4 lg:mx-6 xl:mx-8 rounded-lg shadow-xl"
+          className="relative py-20 bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 dark:from-gray-950 dark:via-gray-800 dark:to-gray-950 text-primary-foreground overflow-hidden mx-4 lg:mx-6 xl:mx-8 rounded-lg shadow-xl"
         >
           {/* Floating particles */}
           <canvas id="particle-canvas" className="absolute top-0 left-0 w-full h-full z-0" />
@@ -719,10 +715,37 @@ const Page: FC = () => {
               viewport={{ once: true }}
               className="text-center max-w-3xl mx-auto"
             >
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-white">
                 Ready to Boost Your Academic Performance?
               </h2>
-              <p className="text-xl opacity-90 mb-8">
+              <p className="text-xl opacity-90 mb-8 text-gray-200">
                 Join thousands of students who are already improving their grades with Operation Save My CGPA.
               </p>
-              {/* Buttons with hover effects */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Button size="lg" className="bg-white text-black hover:bg-gray-100" asChild>
+                  <Link href="/auth/signup">Get Started Free</Link>
+                </Button>
+                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-black" asChild>
+                  <Link href="/auth/login">Sign In</Link>
+                </Button>
+              </div>
+            </motion.div>
+          </div>
+        </motion.section>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t bg-background">
+        <div className="w-full max-w-none px-4 lg:px-6 xl:px-8 py-8">
+          <div className="text-center text-sm text-muted-foreground">
+            <p>&copy; 2024 Operation Save My CGPA. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+
+      <CookieNotice />
+    </div>
+  )
+}
+
+export default Page
