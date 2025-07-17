@@ -1,0 +1,7 @@
+
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- This is a placeholder - you'll need to create the actual white version of your logo -->
+<!-- Copy your existing logo SVG and change all fill colors to white or light colors -->
+<circle cx="256" cy="256" r="200" fill="white" stroke="white" stroke-width="2"/>
+<text x="256" y="270" text-anchor="middle" fill="black" font-size="24" font-weight="bold">LOGO</text>
+</svg>
