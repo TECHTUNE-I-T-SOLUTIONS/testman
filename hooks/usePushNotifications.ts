@@ -35,10 +35,7 @@ export function usePushNotifications() {
     try {
       const registration = await navigator.serviceWorker.ready
       
-      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-      if (!vapidPublicKey) {
-        throw new Error('VAPID public key not found')
-      }
+      const vapidPublicKey = 'BEl62iUYgUivxIkv69yViEuiBIa40HvcCXvYDkv69PdFcBvnVl85b-_8L5iZKJgXPBkCtNtY3iCJCn29Zv2LwPY'
 
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,

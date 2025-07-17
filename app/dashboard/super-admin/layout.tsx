@@ -58,13 +58,13 @@ export default function AdminLayout({
               <div className="absolute inset-0 rounded-full border-t-2 border-primary animate-spin" style={{ animationDuration: '3s' }}></div>
             </div>
           </div>
-          
+
           <h2 className="text-2xl font-bold text-center">Admin Dashboard</h2>
           <p className="text-center text-muted-foreground mb-4">Loading your admin panel...</p>
-          
+
           <div className="space-y-2">
             <Progress value={progress} className="h-1 w-full" />
-            
+
             <div className="grid grid-cols-3 gap-2">
               {[1, 2, 3].map((i) => (
                 <Card key={i} className="bg-muted/40">
@@ -75,7 +75,7 @@ export default function AdminLayout({
                 </Card>
               ))}
             </div>
-            
+
             <Card className="bg-muted/40">
               <CardContent className="p-4">
                 <div className="space-y-2">

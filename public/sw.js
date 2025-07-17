@@ -1,4 +1,3 @@
-
 const CACHE_NAME = 'savemycgpa-v1';
 const urlsToCache = [
   '/',
@@ -28,51 +27,68 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Push event
-self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : {};
-  const title = data.title || 'Save My CGPA';
-  const options = {
-    body: data.body || 'You have a new notification',
-    icon: data.icon || '/Operation-save-my-CGPA-09.svg',
-    badge: data.badge || '/Operation-save-my-CGPA-09.svg',
-    data: data.data || {},
-    requireInteraction: true,
-    actions: [
-      {
-        action: 'open',
-        title: 'Open App'
-      },
-      {
-        action: 'close',
-        title: 'Close'
+self.addEventListener('install', function(event) {
+  console.log('Service Worker installing...')
+  self.skipWaiting()
+})
+
+self.addEventListener('activate', function(event) {
+  console.log('Service Worker activating...')
+  event.waitUntil(self.clients.claim())
+})
+
+self.addEventListener('push', function(event) {
+  console.log('Push event received:', event)
+
+  if (event.data) {
+    try {
+      const data = event.data.json()
+      console.log('Push data:', data)
+
+      const options = {
+        body: data.body,
+        icon: data.icon || '/Operation-save-my-CGPA-09.svg',
+        badge: data.badge || '/Operation-save-my-CGPA-09.svg',
+        tag: 'savemycgpa-notification',
+        renotify: true,
+        requireInteraction: false,
+        data: {
+          url: data.url || '/',
+          timestamp: data.timestamp || Date.now()
+        }
       }
-    ]
-  };
+
+      event.waitUntil(
+        self.registration.showNotification(data.title || 'Save My CGPA', options)
+      )
+    } catch (error) {
+      console.error('Error parsing push data:', error)
+    }
+  }
+})
+
+self.addEventListener('notificationclick', function(event) {
+  console.log('Notification clicked:', event.notification)
+  event.notification.close()
+
+  const url = event.notification.data?.url || '/'
 
   event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-});
-
-// Notification click event
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-
-  if (event.action === 'open' || !event.action) {
-    const urlToOpen = event.notification.data.url || '/';
-    
-    event.waitUntil(
-      clients.matchAll({ type: 'window' }).then((clientList) => {
-        for (const client of clientList) {
-          if (client.url === urlToOpen && 'focus' in client) {
-            return client.focus();
-          }
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      // Check if there's already a window/tab open with the target URL
+      for (const client of clientList) {
+        if (client.url === url && 'focus' in client) {
+          return client.focus()
         }
-        if (clients.openWindow) {
-          return clients.openWindow(urlToOpen);
-        }
-      })
-    );
-  }
-});
+      }
+      // If not, open a new window/tab
+      if (clients.openWindow) {
+        return clients.openWindow(url)
+      }
+    })
+  )
+})
+
+self.addEventListener('notificationclose', function(event) {
+  console.log('Notification closed:', event.notification)
+})

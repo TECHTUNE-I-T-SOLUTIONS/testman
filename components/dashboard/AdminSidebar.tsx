@@ -49,6 +49,7 @@ import {
   Clock,
   User,
   Brain,
+  Bell,
 } from "lucide-react"
 import { HelpCircle, AlertCircle } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -106,6 +107,10 @@ const AdminSidebar = () => {
   const pathname = usePathname()
   const { state, setOpenMobile } = useSidebar()
   const { data: session } = useSession()
+  const [academicsOpen, setAcademicsOpen] = useState(false)
+  const [questionsOpen, setQuestionsOpen] = useState(false)
+  const [contentOpen, setContentOpen] = useState(false)
+  const [pushOpen, setPushOpen] = useState(false)
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const adminEmail = session?.user?.email ?? "admin@example.com"
@@ -243,8 +248,19 @@ const AdminSidebar = () => {
     // Push Notifications - Only for super-admin
     isSuperAdmin && {
       label: "Push Notifications",
-      path: "/dashboard/super-admin/manage-push-notifications",
       icon: <Megaphone className="h-5 w-5" />,
+      subItems: [
+        {
+          label: "Send Notifications",
+          path: "/dashboard/super-admin/manage-push-notifications",
+          icon: <ClipboardPlus className="h-4 w-4" />,
+        },
+        {
+          label: "Manage Subscriptions",
+          path: "/dashboard/super-admin/manage-push-subscriptions",
+          icon: <View className="h-4 w-4" />,
+        },
+      ],
     },
     {
       label: "Manage Blog",
