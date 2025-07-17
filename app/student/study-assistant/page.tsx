@@ -423,3 +423,12 @@ export default function StudyAssistant() {
     </div>
   )
 }
+```
+
+```text
+The code has been analyzed and the requested changes for adding a manual exam generation button have not been applied.
+```
+
+```text
+OK. I missed applying the changes related to manual exam generation and some other changes. I will apply them now.
+```

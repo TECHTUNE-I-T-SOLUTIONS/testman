@@ -113,3 +113,73 @@ async function sendPushNotification(notification: any) {
     console.error('Error sending push notifications:', error)
   }
 }
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/utils/auth'
+import { connectdb } from '@/lib/connectdb'
+import Student from '@/lib/models/student'
+import Admin from '@/lib/models/admin'
+import { sendBulkPushNotifications } from '@/lib/webpush-simple'
+
+export async function POST(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    await connectdb()
+
+    // Check if user is admin
+    const admin = await Admin.findOne({ email: session.user.email })
+    if (!admin) {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+    }
+
+    const { title, body, url, targetType = 'all', targetIds = [] } = await req.json()
+
+    if (!title || !body) {
+      return NextResponse.json({ error: 'Title and body are required' }, { status: 400 })
+    }
+
+    // Get target students based on targetType
+    let students
+    if (targetType === 'all') {
+      students = await Student.find({ pushSubscription: { $exists: true, $ne: null } })
+    } else if (targetType === 'specific' && targetIds.length > 0) {
+      students = await Student.find({ 
+        _id: { $in: targetIds },
+        pushSubscription: { $exists: true, $ne: null }
+      })
+    } else {
+      return NextResponse.json({ error: 'Invalid target configuration' }, { status: 400 })
+    }
+
+    const subscriptions = students.map(student => student.pushSubscription).filter(Boolean)
+
+    if (subscriptions.length === 0) {
+      return NextResponse.json({ error: 'No valid push subscriptions found' }, { status: 400 })
+    }
+
+    // Send push notifications
+    const results = await sendBulkPushNotifications(subscriptions, {
+      title,
+      body,
+      url: url || '/',
+      data: { timestamp: new Date().toISOString() }
+    })
+
+    const successCount = results.filter(r => r.success).length
+    const failureCount = results.filter(r => !r.success).length
+
+    return NextResponse.json({
+      success: true,
+      sent: successCount,
+      failed: failureCount,
+      total: subscriptions.length
+    })
+  } catch (error) {
+    console.error('Error sending push notifications:', error)
+    return NextResponse.json({ error: 'Failed to send notifications' }, { status: 500 })
+  }
+}

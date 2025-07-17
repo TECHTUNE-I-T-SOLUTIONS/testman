@@ -39,6 +39,10 @@ const StudentSchema = new Schema<IStudent>(
       type: Boolean,
       default: false
     },
+    pushSubscription: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
     createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true }

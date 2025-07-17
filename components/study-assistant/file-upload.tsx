@@ -174,28 +174,17 @@ export function FileUpload({ onFilesUpdated }: FileUploadProps) {
       const poll = async () => {
         if (attempts >= maxAttempts) {
           console.error(`⏰ Processing timed out for material: ${materialId}`)
-          setFiles((prevFiles) =>
-            prevFiles.map((f) =>
-              f.id === materialId
-                ? {
-                    ...f,
-                    processingStatus: "failed",
-                    extractedText: "Processing timed out.",
-                  }
-                : f,
-            ),
+          const updatedFiles = files.map((f) =>
+            f.id === materialId
+              ? {
+                  ...f,
+                  processingStatus: "failed" as const,
+                  extractedText: "Processing timed out.",
+                }
+              : f,
           )
-          onFilesUpdated(
-            files.map((f) =>
-              f.id === materialId
-                ? {
-                    ...f,
-                    processingStatus: "failed",
-                    extractedText: "Processing timed out.",
-                  }
-                : f,
-            ),
-          )
+          setFiles(updatedFiles)
+          onFilesUpdated(updatedFiles)
           toast({
             title: "Processing Timed Out",
             description: "The document took too long to process. Please try again.",
@@ -211,28 +200,18 @@ export function FileUpload({ onFilesUpdated }: FileUploadProps) {
           }
           const data = await response.json()
 
-          setFiles((prevFiles) =>
-            prevFiles.map((f) =>
-              f.id === materialId
-                ? {
-                    ...f,
-                    processingStatus: data.status,
-                    extractedText: data.extractedTextPreview,
-                  }
-                : f,
-            ),
+          const updatedFiles = files.map((f) =>
+            f.id === materialId
+              ? {
+                  ...f,
+                  processingStatus: data.status,
+                  extractedText: data.extractedTextPreview,
+                }
+              : f,
           )
-          onFilesUpdated(
-            files.map((f) =>
-              f.id === materialId
-                ? {
-                    ...f,
-                    processingStatus: data.status,
-                    extractedText: data.extractedTextPreview,
-                  }
-                : f,
-            ),
-          )
+          
+          setFiles(updatedFiles)
+          onFilesUpdated(updatedFiles)
 
           if (data.status === "completed") {
             toast({
@@ -252,28 +231,17 @@ export function FileUpload({ onFilesUpdated }: FileUploadProps) {
           }
         } catch (error) {
           console.error(`Error polling status for ${materialId}:`, error)
-          setFiles((prevFiles) =>
-            prevFiles.map((f) =>
-              f.id === materialId
-                ? {
-                    ...f,
-                    processingStatus: "failed",
-                    extractedText: "Error fetching status.",
-                  }
-                : f,
-            ),
+          const updatedFiles = files.map((f) =>
+            f.id === materialId
+              ? {
+                  ...f,
+                  processingStatus: "failed" as const,
+                  extractedText: "Error fetching status.",
+                }
+              : f,
           )
-          onFilesUpdated(
-            files.map((f) =>
-              f.id === materialId
-                ? {
-                    ...f,
-                    processingStatus: "failed",
-                    extractedText: "Error fetching status.",
-                  }
-                : f,
-            ),
-          )
+          setFiles(updatedFiles)
+          onFilesUpdated(updatedFiles)
           toast({
             title: "Processing Error",
             description: "Could not get document processing status.",
@@ -344,38 +312,40 @@ export function FileUpload({ onFilesUpdated }: FileUploadProps) {
         </div>
         <div
           {...getRootProps()}
-          className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 text-center transition-colors hover:border-primary"
+          className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 sm:p-6 lg:p-8 text-center transition-colors hover:border-primary cursor-pointer min-h-[120px] w-full"
         >
           <input {...getInputProps()} />
-          <UploadCloud className="mb-2 h-8 w-8 text-muted-foreground" />
+          <UploadCloud className="mb-2 h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
           {isDragActive ? (
-            <p>Drop the files here ...</p>
+            <p className="text-sm sm:text-base">Drop the files here ...</p>
           ) : (
-            <p>Drag &apos;n&apos; drop some files here, or click to select files</p>
+            <p className="text-sm sm:text-base px-2">Drag &apos;n&apos; drop some files here, or click to select files</p>
           )}
-          <span className="text-sm text-muted-foreground">PDF, TXT, JPG, PNG (Max 10MB)</span>
+          <span className="text-xs sm:text-sm text-muted-foreground mt-1">PDF, TXT, JPG, PNG (Max 10MB)</span>
         </div>
 
         {files.length > 0 && (
-          <div className="mt-4">
-            <h3 className="mb-2 text-lg font-semibold">Uploaded Files:</h3>
-            <ScrollArea className="h-[200px] w-full rounded-md border p-4">
-              <div className="grid gap-4">
+          <div className="mt-4 w-full">
+            <h3 className="mb-2 text-base sm:text-lg font-semibold">Uploaded Files:</h3>
+            <ScrollArea className="h-[200px] w-full rounded-md border p-2 sm:p-4">
+              <div className="grid gap-2 sm:gap-4">
                 {files.map((file) => (
-                  <div key={file.id} className="flex items-center gap-4 rounded-md border p-3">
-                    {getFileIcon(file.fileType)}
-                    <div className="flex-1">
-                      <p className="font-medium">{file.fileName}</p>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div key={file.id} className="flex items-start sm:items-center gap-2 sm:gap-4 rounded-md border p-2 sm:p-3">
+                    <div className="shrink-0">
+                      {getFileIcon(file.fileType)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm sm:text-base truncate">{file.fileName}</p>
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground flex-wrap">
                         {getStatusBadge(file.processingStatus)}
                         {file.processingStatus === "processing" && (
-                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                          <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-primary" />
                         )}
-                        {file.processingStatus === "completed" && <CheckCircle className="h-4 w-4 text-green-500" />}
-                        {file.processingStatus === "failed" && <XCircle className="h-4 w-4 text-red-500" />}
+                        {file.processingStatus === "completed" && <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />}
+                        {file.processingStatus === "failed" && <XCircle className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />}
                       </div>
                       {file.uploadProgress < 100 && file.processingStatus === "pending" && (
-                        <Progress value={file.uploadProgress} className="mt-2 h-2" />
+                        <Progress value={file.uploadProgress} className="mt-2 h-1 sm:h-2" />
                       )}
                       {file.extractedText && (
                         <p className="mt-1 text-xs text-muted-foreground line-clamp-2">Preview: {file.extractedText}</p>
@@ -387,8 +357,9 @@ export function FileUpload({ onFilesUpdated }: FileUploadProps) {
                         size="icon"
                         onClick={() => handleRetryProcessing(file.id, file.fileName, file.fileType)}
                         title="Retry Processing"
+                        className="shrink-0"
                       >
-                        <RefreshCcw className="h-4 w-4" />
+                        <RefreshCcw className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     )}
                   </div>

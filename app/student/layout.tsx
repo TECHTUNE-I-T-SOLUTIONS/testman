@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 import AppSidebar from "@/components/student/AppSidebar"
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { Sidebar, SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { LogOut, Loader2 } from "lucide-react"
@@ -11,6 +11,17 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { logoutStudent } from "@/utils/auth"
 import { useRouter } from "next/navigation"
 import { useSidebar } from "@/components/ui/sidebar"
+import { WebPushManager } from "@/components/web-push-manager"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useSession } from "next-auth/react"
 
 function MobileLogoutButton() {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -91,6 +102,8 @@ export default function StudentLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+    const { data: session } = useSession()
+
   const showSidebar =
     pathname.startsWith("/student") && !(pathname.startsWith("/student/exams/") && pathname.includes("/take"))
 
@@ -116,7 +129,31 @@ export default function StudentLayout({
                 <span className="font-medium">Student Portal</span>
               </div>
               <div className="flex items-center gap-2">
+                <WebPushManager />
                 <ThemeToggle />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src="/placeholder-avatar.jpg" alt="Student" />
+                        <AvatarFallback>
+                          {session?.user?.name
+                            ?.split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase() || "S"}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => logoutStudent()}>
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 {/* Mobile Logout Button */}
                 <MobileLogoutButton />
               </div>

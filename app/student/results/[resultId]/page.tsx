@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, CheckCircle, XCircle, FileText, Award, AlertCircle } from "lucide-react"
+import { ArrowLeft, CheckCircle, XCircle, FileText, Award, AlertCircle, BookOpen } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
