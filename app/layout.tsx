@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import NextAuthProvider from "@/components/NextAuthProvider";
 import CookieNotice from "@/components/CookieNotice";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
