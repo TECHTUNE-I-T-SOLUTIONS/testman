@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "sonner";
-import Script from "next/script"; // ✅ Needed for safely adding external scripts
+import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import NextAuthProvider from "@/components/NextAuthProvider";
 import CookieNotice from "@/components/CookieNotice";

@@ -112,11 +112,14 @@ export default function StudentLayout({
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <div className="flex items-center justify-between flex-1">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                 <span className="font-medium">Student Portal</span>
               </div>
-              {/* Mobile Logout Button */}
-              <MobileLogoutButton />
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+                {/* Mobile Logout Button */}
+                <MobileLogoutButton />
+              </div>
             </div>
           </header>
 

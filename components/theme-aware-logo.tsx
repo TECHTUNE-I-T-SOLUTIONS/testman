@@ -35,3 +35,38 @@ export function ThemeAwareLogo({ width = 32, height = 32, className = "" }: Them
     </div>
   )
 }
+"use client"
+
+import { useTheme } from "@/contexts/ThemeContext"
+import Image from "next/image"
+
+interface ThemeAwareLogoProps {
+  className?: string
+  width?: number
+  height?: number
+  alt?: string
+}
+
+export function ThemeAwareLogo({ 
+  className = "",
+  width = 120,
+  height = 40,
+  alt = "Operation Save My CGPA"
+}: ThemeAwareLogoProps) {
+  const { theme } = useTheme()
+  
+  // Determine which logo to use based on theme
+  const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const logoSrc = isDark ? "/darklogo.svg" : "/Operation-save-my-CGPA-07.svg"
+  
+  return (
+    <Image
+      src={logoSrc}
+      alt={alt}
+      width={width}
+      height={height}
+      className={className}
+      priority
+    />
+  )
+}

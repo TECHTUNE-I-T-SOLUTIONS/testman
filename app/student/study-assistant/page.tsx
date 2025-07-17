@@ -55,7 +55,7 @@ export default function StudyAssistant() {
   const [canUseAI, setCanUseAI] = useState(true)
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null)
   const [activeTab, setActiveTab] = useState("chat")
-  const [practiceExams, setPracticeExams] = useState([])
+  const [practiceExams, setPracticeExams] = useState<any[]>([])
   const [isGeneratingExam, setIsGeneratingExam] = useState(false)
   const router = useRouter()
 
@@ -93,10 +93,14 @@ export default function StudyAssistant() {
       const response = await fetch("/api/ai/practice-exam")
       if (response.ok) {
         const data = await response.json()
-        setPracticeExams(data.exams || [])
+        setPracticeExams(Array.isArray(data.exams) ? data.exams : [])
+      } else {
+        console.error("Failed to fetch practice exams:", response.status)
+        setPracticeExams([])
       }
     } catch (error) {
       console.error("Error fetching practice exams:", error)
+      setPracticeExams([])
     }
   }
 
