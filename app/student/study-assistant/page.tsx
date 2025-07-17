@@ -6,7 +6,7 @@ import { ChatInterface } from "@/components/study-assistant/chat-interface"
 import StudyModeSelector from "@/components/study-assistant/study-mode-selector"
 import { AIUsageBanner } from "@/components/study-assistant/ai-usage-banner"
 import { SessionHistory } from "@/components/study-assistant/session-history"
-import PracticeExamsList from "@/components/study-assistant/practice-exams-list"
+import { PracticeExamsList } from "@/components/study-assistant/practice-exams-list"
 import { AIFeaturesBanner } from "@/components/study-assistant/ai-features-banner"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -55,7 +55,7 @@ export default function StudyAssistant() {
   const [canUseAI, setCanUseAI] = useState(true)
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null)
   const [activeTab, setActiveTab] = useState("chat")
-  const [practiceExams, setPracticeExams] = useState<any[]>([])
+  const [practiceExams, setPracticeExams] = useState([])
   const [isGeneratingExam, setIsGeneratingExam] = useState(false)
   const router = useRouter()
 
@@ -93,14 +93,10 @@ export default function StudyAssistant() {
       const response = await fetch("/api/ai/practice-exam")
       if (response.ok) {
         const data = await response.json()
-        setPracticeExams(Array.isArray(data.exams) ? data.exams : [])
-      } else {
-        console.error("Failed to fetch practice exams:", response.status)
-        setPracticeExams([])
+        setPracticeExams(data.exams || [])
       }
     } catch (error) {
       console.error("Error fetching practice exams:", error)
-      setPracticeExams([])
     }
   }
 
@@ -159,7 +155,7 @@ export default function StudyAssistant() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           materialIds: files.map((f) => f.id),
-          sessionId: currentSession?._id || undefined,
+          sessionId: currentSession?.id || undefined,
         }),
       })
 
