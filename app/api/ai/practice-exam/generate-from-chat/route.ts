@@ -19,8 +19,8 @@ export async function POST(req: NextRequest) {
 
     const { sessionId, content, materialIds, examTitle } = await req.json()
 
-    if (!sessionId || !content) {
-      return NextResponse.json({ error: "Session ID and content are required" }, { status: 400 })
+    if (!content) {
+      return NextResponse.json({ error: "Content is required" }, { status: 400 })
     }
 
     // Get the chat session

@@ -70,10 +70,26 @@ export default function StudyModeSelector({ selectedMode, onModeChange, disabled
   const [showHelp, setShowHelp] = useState(false)
 
   const helpContent = {
-    chat: "💬 **Free Chat Mode**: Ask any academic question, get explanations, study tips, and general academic guidance. Perfect for open discussions and learning!",
-    questions: "❓ **Generate Questions Mode**: Upload your study materials and get practice questions automatically generated. Great for exam preparation!",
-    summary: "📄 **Summary Mode**: Get concise summaries of your uploaded materials with key points and important concepts highlighted.",
-    explain: "💡 **Explain Mode**: Get detailed explanations of complex concepts from your materials or ask specific questions for clarification."
+    chat: (
+      <span>
+        💬 <strong>Free Chat Mode</strong>: Ask any academic question, get explanations, study tips, and general academic guidance. Perfect for open discussions and learning!
+      </span>
+    ),
+    questions: (
+      <span>
+        ❓ <strong>Generate Questions Mode</strong>: Upload your study materials and get practice questions automatically generated. Great for exam preparation!
+      </span>
+    ),
+    summary: (
+      <span>
+        📄 <strong>Summary Mode</strong>: Get concise summaries of your uploaded materials with key points and important concepts highlighted.
+      </span>
+    ),
+    explain: (
+      <span>
+        💡 <strong>Explain Mode</strong>: Get detailed explanations of complex concepts from your materials or ask specific questions for clarification.
+      </span>
+    )
   }
 
   return (

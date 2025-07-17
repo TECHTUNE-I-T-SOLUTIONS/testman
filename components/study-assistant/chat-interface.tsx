@@ -64,6 +64,7 @@ export function ChatInterface({
   const [isLoading, setIsLoading] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const [isGeneratingExam, setIsGeneratingExam] = useState(false)
 
   useEffect(() => {
     if (currentSession) {
@@ -157,30 +158,48 @@ export function ChatInterface({
   }
 
   const handleGenerateExamFromChat = async () => {
-    if (!sessionId) {
-      toast.error("No active chat session to generate an exam from.")
+    if (messages.length === 0) {
+      toast.error("No chat content to generate exam from")
       return
     }
-    setIsLoading(true)
+
+    setIsGeneratingExam(true)
     try {
+      // Get educational content from the chat
+      const chatContent = messages
+        .map((msg) => `${msg.role === "user" ? "Student" : "Alex AI"}: ${msg.content}`)
+        .join("\n\n")
+
+      console.log("📝 Generating exam from chat content:", {
+        sessionId: currentSession?._id,
+        contentLength: chatContent.length,
+        messageCount: messages.length
+      })
+
       const response = await fetch("/api/ai/practice-exam/generate-from-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, questionCount: 10 }), // Default 10 questions
+        body: JSON.stringify({
+          content: chatContent,
+          sessionId: currentSession?._id || undefined,
+          studyMode: studyMode,
+        }),
       })
 
+      const data = await response.json()
+
       if (response.ok) {
-        toast.success("Practice exam generated from chat successfully!")
-        onPracticeExamGenerated() // Notify parent to refresh exams list and switch tab
+        toast.success("Practice exam generated from chat!")
+        onPracticeExamGenerated()
       } else {
-        const error = await response.json()
-        toast.error(error.error || "Failed to generate practice exam from chat.")
+        console.error("❌ Generate exam error:", data)
+        toast.error(data.error || "Failed to generate exam from chat")
       }
     } catch (error) {
-      console.error("Error generating exam from chat:", error)
-      toast.error("Error generating practice exam from chat.")
+      console.error("💥 Error generating exam from chat:", error)
+      toast.error("Failed to generate exam from chat")
     } finally {
-      setIsLoading(false)
+      setIsGeneratingExam(false)
     }
   }
 
@@ -257,7 +276,7 @@ export function ChatInterface({
                 className="flex items-center gap-2 bg-transparent"
               >
                 <BookOpen className="h-4 w-4" />
-                {isLoading ? "Generating..." : "Exam from Chat"}
+                {isLoading || isGeneratingExam ? "Generating..." : "Exam from Chat"}
               </Button>
               <Button
                 variant="outline"
