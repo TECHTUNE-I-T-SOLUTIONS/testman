@@ -1,7 +1,3 @@
-The container responsiveness in the study assistant component is updated to improve layout on different screen sizes.
-```
-
-```replit_final_file
 "use client"
 
 import { useState, useEffect } from "react"
@@ -14,8 +10,8 @@ import { PracticeExamsList } from "@/components/study-assistant/practice-exams-l
 import { AIFeaturesBanner } from "@/components/study-assistant/ai-features-banner"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Brain, ArrowLeft, TrendingUp, BookOpen, Sparkles, MessageCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Brain, TrendingUp, BookOpen, Sparkles, MessageCircle } from "lucide-react"
+// import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import type { HistoryChatSession } from "@/components/study-assistant/session-history"
@@ -61,6 +57,7 @@ export default function StudyAssistant() {
   const [activeTab, setActiveTab] = useState("chat")
   const [practiceExams, setPracticeExams] = useState([])
   const [isGeneratingExam, setIsGeneratingExam] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter()
 
   const mapSession = (hs: HistoryChatSession): ChatSession => ({

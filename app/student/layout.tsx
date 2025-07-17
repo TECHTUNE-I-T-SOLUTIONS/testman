@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 import AppSidebar from "@/components/student/AppSidebar"
-import { Sidebar, SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { LogOut, Loader2 } from "lucide-react"
