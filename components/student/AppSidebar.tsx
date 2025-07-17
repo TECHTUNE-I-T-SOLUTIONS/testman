@@ -7,21 +7,28 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
-  useSidebar,
-} from "../ui/sidebar"
-import { Button } from "../ui/button"
-import { Avatar, AvatarFallback } from "../ui/avatar"
-import { Badge } from "../ui/badge"
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from "@/components/ui/sidebar"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Home,
   BookOpenCheck,
-  NotebookPen,
   FileIcon as FileUser,
-  HomeIcon as House,
+  NotebookPen,
   LogOut,
   User,
   Loader2,
@@ -36,6 +43,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface Student {
   name: string
@@ -116,7 +124,7 @@ const AppSidebar = () => {
   }, [])
 
   const navItems = [
-    { label: "Dashboard", path: "/student", icon: House },
+    { label: "Dashboard", path: "/student", icon: Home },
     {
       label: "Take Exams",
       path: "/student/exams",
@@ -318,6 +326,13 @@ const AppSidebar = () => {
         <SidebarSeparator />
 
         <SidebarFooter className="p-4 border-t border-gray-100">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <div className="flex items-center justify-between p-2">
+                <ThemeToggle />
+              </div>
+            </SidebarMenuItem>
+          </SidebarMenu>
           <Button
             onClick={() => setShowLogoutConfirm(true)}
             disabled={isLoggingOut}

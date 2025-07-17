@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import Script from "next/script"; // ✅ Needed for safely adding external scripts
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import NextAuthProvider from "@/components/NextAuthProvider";
+import CookieNotice from "@/components/CookieNotice";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +24,7 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* ✅ OneSignal SDK script */}
         <Script
@@ -45,8 +48,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <main>{children}</main>
-        <Toaster />
+        <NextAuthProvider>
+          <ThemeProvider
+            defaultTheme="system"
+            storageKey="savemycgpa-ui-theme"
+          >
+            <main>{children}</main>
+            <Toaster />
+            <CookieNotice />
+          </ThemeProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );

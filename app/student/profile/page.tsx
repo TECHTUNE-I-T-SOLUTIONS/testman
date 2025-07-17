@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { PushNotificationButton } from "@/components/push-notification-button"
 
 interface Student {
   name: string

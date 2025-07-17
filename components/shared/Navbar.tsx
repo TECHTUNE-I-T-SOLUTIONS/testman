@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useState, useEffect } from 'react';
 import { getStudentFromToken } from "@/utils/auth"
 import Link from "next/link"
 import { X, Menu, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -51,6 +52,7 @@ export default function Navbar() {
 
         {/* Auth Buttons */}
         <div className="hidden md:flex items-center gap-3">
+          <ThemeToggle />
           {isLoggedIn ? (
             <Button asChild className="bg-gray-900 hover:bg-gray-800">
               <Link href="/student">Go to Dashboard</Link>
@@ -126,6 +128,7 @@ export default function Navbar() {
                   </Button>
                 </>
               )}
+               <ThemeToggle />
             </div>
           </div>
         </div>

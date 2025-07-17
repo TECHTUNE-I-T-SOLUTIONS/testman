@@ -51,6 +51,7 @@ import {
   Brain,
 } from "lucide-react"
 import { HelpCircle, AlertCircle } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const CustomSidebarTrigger = () => {
   const { state, toggleSidebar } = useSidebar()
@@ -443,24 +444,27 @@ const AdminSidebar = () => {
               </div>
             </div>
           )}
-          <Button
-            variant="outline"
-            className="w-full text-sm border-gray-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors bg-transparent"
-            disabled={isLoggingOut}
-            onClick={confirmLogout}
-          >
-            {isLoggingOut ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Logging out...
-              </>
-            ) : (
-              <>
-                <LogOut className="mr-2 h-4 w-4" />
-                {isCollapsed ? "" : "Sign Out"}
-              </>
-            )}
-          </Button>
+          <div className="flex items-center justify-between">
+            <Button
+              variant="outline"
+              className="w-full text-sm border-gray-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors bg-transparent"
+              disabled={isLoggingOut}
+              onClick={confirmLogout}
+            >
+              {isLoggingOut ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Logging out...
+                </>
+              ) : (
+                <>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  {isCollapsed ? "" : "Sign Out"}
+                </>
+              )}
+            </Button>
+            <ThemeToggle />
+          </div>
         </SidebarFooter>
       </Sidebar>
 
