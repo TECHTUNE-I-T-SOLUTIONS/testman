@@ -7,24 +7,12 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Home,
   BookOpenCheck,
@@ -48,6 +36,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Separator } from "@/components/ui/separator"
 import { useSidebar } from "@/components/ui/sidebar"
 
@@ -114,7 +103,8 @@ const AppSidebar = () => {
 
   useEffect(() => {
     fetchStudent()
-  }, [pathname])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Auto-close mobile sidebar when modals are shown
   useEffect(() => {
@@ -127,6 +117,7 @@ const AppSidebar = () => {
   useEffect(() => {
     const interval = setInterval(fetchStudent, 300000) // 5 minutes
     return () => clearInterval(interval)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const navItems = [

@@ -1,19 +1,18 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import AppSidebar from "@/components/student/AppSidebar"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { LogOut, Loader2 } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { logoutStudent } from "@/utils/auth"
+import { getStudentFromToken, logoutStudent } from "@/utils/auth"
 import { useRouter } from "next/navigation"
 import { useSidebar } from "@/components/ui/sidebar"
 import { WebPushManager } from "@/components/web-push-manager"
 import {
-  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -21,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useSession } from "next-auth/react"
+import { DropdownMenu } from "@radix-ui/react-dropdown-menu"
 import { User } from "lucide-react"
 
 function MobileLogoutButton() {
@@ -103,7 +102,29 @@ export default function StudentLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-  const { data: session } = useSession()
+  const [studentName, setStudentName] = useState<string | null>(null)
+
+  // Fetch student data for the header avatar
+  const fetchStudentName = async () => {
+    try {
+      const tokenStudent = await getStudentFromToken()
+      if (tokenStudent?.matricNumber) {
+        const encodedMatric = encodeURIComponent(tokenStudent.matricNumber)
+        const res = await fetch(`/api/students/${encodedMatric}`)
+        const data = await res.json()
+        if (res.ok) {
+          setStudentName(data.name)
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching student name for header:", error)
+    }
+  }
+
+  // Fetch student name on component mount
+  useEffect(() => {
+    fetchStudentName()
+  }, [])
 
   const showSidebar =
     pathname.startsWith("/student") && !(pathname.startsWith("/student/exams/") && pathname.includes("/take"))
@@ -137,12 +158,11 @@ export default function StudentLayout({
                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src="/placeholder-avatar.jpg" alt="Student" />
-                        <AvatarFallback>
-                          {session?.user?.name
+                        <AvatarFallback className="bg-gray-900 text-white font-semibold text-sm">
+                          {studentName
                             ?.split(" ")
                             .map((n) => n[0])
-                            .join("")
-                            .toUpperCase() || "S"}
+                            .join("") || "S"}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -157,7 +177,12 @@ export default function StudentLayout({
                       </a>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer" onClick={() => logoutStudent()}>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => {
+                        if (window.confirm("Are you sure you want to sign out?")) logoutStudent()
+                      }}
+                    >
                       Logout
                     </DropdownMenuItem>
                   </DropdownMenuContent>
