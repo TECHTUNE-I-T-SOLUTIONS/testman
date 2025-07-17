@@ -19,6 +19,7 @@ type ExamResultType = {
     studentAnswer: string
     correctAnswer: string
     isCorrect: boolean
+    explanation?: string
   }[]
 }
 
@@ -27,6 +28,7 @@ type AnswerType = {
   studentAnswer: string
   correctAnswer: string
   isCorrect: boolean
+  explanation?: string
 }
 
 export default function ExamResult() {
@@ -56,6 +58,7 @@ export default function ExamResult() {
             studentAnswer: a.studentAnswer,
             correctAnswer: a.correctAnswer,
             isCorrect: a.isCorrect,
+            explanation: a.explanation,
           })),
         }
         setResult(formattedData)
@@ -252,17 +255,25 @@ export default function ExamResult() {
                   <p className="text-gray-700 leading-relaxed">{answer.question}</p>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex items-start gap-2">
                       <span className="text-sm font-medium text-gray-600 min-w-[100px]">Your Answer:</span>
                       <span className={`text-sm ${answer.isCorrect ? "text-green-700" : "text-red-700"} font-medium`}>
                         {answer.studentAnswer}
                       </span>
                     </div>
-                    {!answer.isCorrect && (
-                      <div className="flex items-start gap-2">
-                        <span className="text-sm font-medium text-gray-600 min-w-[100px]">Correct Answer:</span>
-                        <span className="text-sm text-green-700 font-medium">{answer.correctAnswer}</span>
+                    
+                    <div className="flex items-start gap-2">
+                      <span className="text-sm font-medium text-gray-600 min-w-[100px]">Correct Answer:</span>
+                      <span className="text-sm text-green-700 font-medium">{answer.correctAnswer}</span>
+                    </div>
+
+                    {!answer.isCorrect && answer.explanation && (
+                      <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <span className="text-sm font-medium text-blue-700 min-w-[80px]">Explanation:</span>
+                          <span className="text-sm text-blue-700 leading-relaxed">{answer.explanation}</span>
+                        </div>
                       </div>
                     )}
                   </div>

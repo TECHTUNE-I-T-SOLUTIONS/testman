@@ -26,6 +26,7 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { PushNotificationButton } from "@/components/push-notification-button"
+import { Megaphone } from "lucide-react"
 
 interface Student {
   name: string
@@ -625,6 +626,24 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Push Notifications Card */}
+        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-full">
+                <Megaphone className="h-6 w-6 text-blue-700" />
+              </div>
+              <div>
+                <CardTitle className="text-xl text-slate-900">Notifications</CardTitle>
+                <p className="text-sm text-slate-600 mt-1">Manage your push notification preferences</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <PushNotificationButton />
           </CardContent>
         </Card>
 

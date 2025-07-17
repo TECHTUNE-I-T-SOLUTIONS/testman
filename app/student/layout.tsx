@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useSession } from "next-auth/react"
+import { User } from "lucide-react"
 
 function MobileLogoutButton() {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -102,7 +103,7 @@ export default function StudentLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-    const { data: session } = useSession()
+  const { data: session } = useSession()
 
   const showSidebar =
     pathname.startsWith("/student") && !(pathname.startsWith("/student/exams/") && pathname.includes("/take"))
@@ -148,6 +149,13 @@ export default function StudentLayout({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <a href="/student/profile" className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </a>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="cursor-pointer" onClick={() => logoutStudent()}>
                       Logout

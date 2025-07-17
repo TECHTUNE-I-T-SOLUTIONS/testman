@@ -240,6 +240,12 @@ const AdminSidebar = () => {
         { label: "View", path: "/dashboard/super-admin/announcements/view", icon: <View className="h-4 w-4" /> },
       ],
     },
+    // Push Notifications - Only for super-admin
+    isSuperAdmin && {
+      label: "Push Notifications",
+      path: "/dashboard/super-admin/manage-push-notifications",
+      icon: <Megaphone className="h-5 w-5" />,
+    },
     {
       label: "Manage Blog",
       icon: <Book className="h-5 w-5" />,
@@ -284,11 +290,11 @@ const AdminSidebar = () => {
   return (
     <>
       <MobileSidebarTrigger />
-      <Sidebar collapsible="icon" className="fixed border-r border-gray-200 bg-white">
+      <Sidebar collapsible="icon" className="fixed border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <CustomSidebarTrigger />
         <SidebarHeader
           className={cn(
-            "p-6 flex flex-col items-center relative border-b border-gray-100",
+            "p-6 flex flex-col items-center relative border-b border-gray-100 dark:border-gray-700",
             isCollapsed ? "pb-4" : "pb-6",
           )}
         >
@@ -308,9 +314,9 @@ const AdminSidebar = () => {
             </div>
             {!isCollapsed && (
               <div className="text-center space-y-2">
-                <h2 className="text-xl font-bold text-gray-900">Admin Portal</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Admin Portal</h2>
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-gray-700">{adminName}</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{adminName}</p>
                   <Badge className="bg-gray-900 text-white text-xs">
                     {displayRole === "Super-admin" ? "Super Admin" : displayRole}
                   </Badge>
@@ -337,8 +343,8 @@ const AdminSidebar = () => {
                       className={cn(
                         "transition-all duration-200 h-12 mb-1 rounded-lg relative",
                         isPathActive(item.path!)
-                          ? "bg-gray-900 text-white hover:bg-gray-800 shadow-sm"
-                          : "hover:bg-gray-50 text-gray-700",
+                          ? "bg-gray-900 dark:bg-gray-700 text-white hover:bg-gray-800 dark:hover:bg-gray-600 shadow-sm"
+                          : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
                       )}
                     >
                       <button
@@ -382,8 +388,8 @@ const AdminSidebar = () => {
                           tooltip={item.label}
                           className={cn(
                             "transition-all duration-200 h-12 mb-1 rounded-lg",
-                            openDropdowns[item.label] ? "bg-gray-100" : "hover:bg-gray-50",
-                            item.subItems?.some((subItem) => isPathActive(subItem.path)) && "text-gray-900 bg-gray-100",
+                            openDropdowns[item.label] ? "bg-gray-100 dark:bg-gray-800" : "hover:bg-gray-50 dark:hover:bg-gray-800",
+                            item.subItems?.some((subItem) => isPathActive(subItem.path)) && "text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800",
                           )}
                         >
                           <div className="flex items-center justify-between py-2 w-full">
@@ -431,14 +437,14 @@ const AdminSidebar = () => {
             })}
           </SidebarMenu>
         </UISidebarContent>
-        <SidebarFooter className="border-t border-gray-100 p-4 space-y-4">
+        <SidebarFooter className="border-t border-gray-100 dark:border-gray-700 p-4 space-y-4">
           {!isCollapsed && (
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                 <User className="h-3 w-3" />
                 <span>ID: {adminMatric}</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                 <Shield className="h-3 w-3" />
                 <span>Secure Session</span>
               </div>

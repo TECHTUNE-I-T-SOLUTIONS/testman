@@ -196,8 +196,8 @@ const AppSidebar = () => {
 
   return (
     <TooltipProvider>
-      <Sidebar collapsible="icon" className="border-r border-gray-200 bg-white">
-        <SidebarHeader className="border-b border-gray-100 p-6">
+      <Sidebar collapsible="icon" className="border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <SidebarHeader className="border-b border-gray-100 dark:border-gray-700 p-6">
           {/* Centered Student Info */}
           <div className="flex flex-col items-center text-center space-y-4">
             {/* Avatar with Online Status */}
@@ -216,8 +216,8 @@ const AppSidebar = () => {
             {/* Student Details - Only show when not collapsed */}
             {!isCollapsed && (
               <div className="space-y-2 w-full">
-                <h3 className="font-semibold text-gray-900 text-lg leading-tight">{student.name}</h3>
-                <p className="text-sm text-gray-600 font-mono">{student.matricNumber}</p>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg leading-tight">{student.name}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 font-mono">{student.matricNumber}</p>
 
                 {/* Status Badge with Premium/Freemium Icon */}
                 <div className="flex items-center justify-center gap-2">
@@ -273,9 +273,9 @@ const AppSidebar = () => {
 
           {/* Portal Title - Only show when not collapsed */}
           {!isCollapsed && (
-            <div className="mt-6 pt-6 border-t border-gray-100 text-center">
-              <h2 className="text-xl font-bold text-gray-900">Student Portal</h2>
-              <p className="text-sm text-gray-600 mt-1">Academic Management System</p>
+            <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700 text-center">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Student Portal</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Academic Management System</p>
             </div>
           )}
         </SidebarHeader>
@@ -293,9 +293,9 @@ const AppSidebar = () => {
                     tooltip={isCollapsed ? item.label : undefined}
                     className={cn(
                       "transition-all duration-200 h-12 mb-1 rounded-lg",
-                      isActive && "bg-gray-900 text-white hover:bg-gray-800 shadow-sm",
+                      isActive && "bg-gray-900 dark:bg-gray-700 text-white hover:bg-gray-800 dark:hover:bg-gray-600 shadow-sm",
                       isDisabled && "opacity-50 cursor-not-allowed",
-                      !isActive && !isDisabled && "hover:bg-gray-50 text-gray-700",
+                      !isActive && !isDisabled && "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
                     )}
                     onClick={() => handleNavClick(item)}
                   >
@@ -320,14 +320,14 @@ const AppSidebar = () => {
           </SidebarMenu>
 
           {!isCollapsed && (
-            <div className="mt-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
               <div className="flex items-start gap-3">
-                <Info className="h-5 w-5 text-gray-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-gray-700">
+                <Info className="h-5 w-5 text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-gray-700 dark:text-gray-300">
                   <p className="font-medium mb-2">Need Help?</p>
                   <button
                     onClick={() => setShowSidebarHelpModal(true)}
-                    className="text-gray-900 hover:text-gray-700 underline font-medium"
+                    className="text-gray-900 dark:text-gray-100 hover:text-gray-700 dark:hover:text-gray-300 underline font-medium"
                   >
                     View navigation guide
                   </button>
@@ -339,7 +339,7 @@ const AppSidebar = () => {
 
         <SidebarSeparator />
 
-        <SidebarFooter className="p-4 border-t border-gray-100">
+        <SidebarFooter className="p-4 border-t border-gray-100 dark:border-gray-700">
           <SidebarMenu>
             <SidebarMenuItem>
               <div className="flex items-center justify-between p-2">
