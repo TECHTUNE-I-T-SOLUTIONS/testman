@@ -24,7 +24,6 @@ import {
   Brain,
   User,
 } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -219,7 +218,6 @@ const Page: FC = () => {
 
             {/* Auth Buttons */}
             <div className="hidden md:flex items-center gap-2">
- <ThemeToggle />
               {isLoggedIn ? (
                 <Button asChild>
                   <Link href="/student">Go to Dashboard</Link>
@@ -300,7 +298,6 @@ const Page: FC = () => {
                       </Button>
                     </>
                   )}
- <ThemeToggle />
                 </div>
               </div>
             </div>

@@ -5,8 +5,8 @@ import { getStudentFromToken } from "@/utils/auth"
 import Link from "next/link"
 import { X, Menu, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { ThemeAwareLogo } from "@/components/theme-aware-logo"
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -24,8 +24,14 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <ThemeAwareLogo width={32} height={32} className="h-8 w-8" />
-          <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Operation Save My CGPA</span>
+          <Image
+            src="/Operation-save-my-CGPA-07.svg"
+            alt="Operation Save My CGPA Logo"
+            width={32}
+            height={32}
+            className="h-8 w-8"
+          />
+          <span className="text-xl font-bold tracking-tight text-gray-900">Operation Save My CGPA</span>
         </Link>
 
         {/* Desktop Navigation */}
