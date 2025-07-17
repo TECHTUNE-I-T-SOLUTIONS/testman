@@ -23,6 +23,7 @@ import {
   BookMarked,
   Brain,
   User,
+  MessageCircle,
 } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 
@@ -730,13 +731,13 @@ const Page: FC = () => {
                     <div className="space-y-3">
                       <div className="bg-gray-100 rounded-lg p-3">
                         <p className="text-sm text-gray-700">
-                          "Can you help me understand photosynthesis for my Biology exam?"
+                          &quot;Can you help me understand photosynthesis for my Biology exam?&quot;
                         </p>
                       </div>
                       
                       <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg p-3">
                         <p className="text-sm">
-                          "I'd be happy to help! Based on your uploaded materials, here's a simplified explanation with practice questions..."
+                          &quot;I&apos;d be happy to help! Based on your uploaded materials, here&apos;s a simplified explanation with practice questions...&quot;
                         </p>
                       </div>
                       
