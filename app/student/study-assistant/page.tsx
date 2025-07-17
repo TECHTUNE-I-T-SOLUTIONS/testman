@@ -131,7 +131,7 @@ export default function StudyAssistant() {
     setIsGeneratingExam(true)
     try {
       console.log("🔄 Starting exam generation for files:", files.map(f => f.id))
-      
+
       const response = await fetch("/api/ai/practice-exam/generate-from-materials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -193,7 +193,7 @@ export default function StudyAssistant() {
       isGeneratingExam,
       completedIds: completed.map(f => f.id)
     })
-    
+
     if (completed.length && !isGeneratingExam) {
       console.log(`🚀 Triggering auto exam generation for ${completed.length} files`)
       void generatePracticeExamFromMaterials(completed)

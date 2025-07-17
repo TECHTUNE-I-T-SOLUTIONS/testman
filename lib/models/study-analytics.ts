@@ -3,7 +3,7 @@ import mongoose, { Schema, type Document } from "mongoose"
 export interface IStudyAnalytics extends Document {
   studentId: mongoose.Types.ObjectId
   date: Date
-  studyMode: "questions" | "summary" | "explain" | "chat"
+  studyMode: "questions" | "summary" | "explain" | "chat" | "exam_generation" | "materials"
   timeSpent: number // in minutes
   materialsUploaded: number
   questionsGenerated: number
@@ -22,7 +22,7 @@ const StudyAnalyticsSchema = new Schema<IStudyAnalytics>(
     date: { type: Date, required: true },
     studyMode: {
       type: String,
-      enum: ["questions", "summary", "explain", "chat"],
+      enum: ["questions", "summary", "explain", "chat", "exam_generation", "materials"],
       required: true,
     },
     timeSpent: { type: Number, default: 0 },

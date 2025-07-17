@@ -62,6 +62,39 @@ export async function POST(req: NextRequest) {
     const subject = materials[0]?.subject || "General Study"
     console.log(`🧠 Generating practice exam from ${materials.length} materials…`)
 
+    /* ─ Create prompt for Gemini ──────────────────── */
+    const prompt = `You are Alex AI, an expert educational question generator for "Operation Save My CGPA" - helping University of Ilorin students excel academically.
+
+Generate 10-15 high-quality practice exam questions based on the following study materials. Return ONLY valid JSON format with no additional text or markdown formatting.
+
+REQUIRED JSON STRUCTURE:
+[
+  {
+    "questionText": "Your question here",
+    "questionType": "multiple-choice",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "correctAnswer": "Option A",
+    "explanation": "Why this answer is correct"
+  }
+]
+
+QUESTION TYPES TO USE:
+- multiple-choice (4 options each)
+- true-false
+- short-answer
+
+QUALITY REQUIREMENTS:
+- Questions must test understanding, not just memory
+- Include different difficulty levels (basic, intermediate, advanced)
+- Ensure clear, unambiguous wording
+- Provide detailed explanations
+- Focus on key concepts and practical applications
+
+STUDY MATERIALS:
+${combinedText}
+
+Generate questions that thoroughly cover the content above. Return ONLY the JSON array, no other text.`
+
     /* ─ Call Gemini with retry mechanism ──────────── */
     const model = genAI.getGenerativeModel({ 
       model: "gemini-1.5-flash",
@@ -214,7 +247,7 @@ async function updateStudyAnalyticsForExamGeneration(
     if (subject) updateData.$addToSet = { topicsStudied: subject }
 
     await StudyAnalytics.findOneAndUpdate(
-      { studentId, date: today, studyMode: "exam_generation" },
+      { studentId, date: today, studyMode: "questions" },
       updateData,
       { upsert: true, new: true },
     )
