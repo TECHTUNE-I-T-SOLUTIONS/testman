@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import { CheckCircle, XCircle, ArrowLeft, Brain, Clock, Trophy, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { cn } from "@/lib/utils"
 
 interface Question {
@@ -275,7 +276,7 @@ export default function PracticeExamPage() {
           // Pre-exam screen
           <Card className="max-w-2xl mx-auto">
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl">Ready to Start?</CardTitle>
+              <CardTitle className="text-2xl">😉 Ready to Start?</CardTitle>
               <CardDescription>
                 You have {exam.duration} minutes to complete {exam.questions.length} questions. Make sure you have a
                 stable internet connection.
@@ -283,12 +284,12 @@ export default function PracticeExamPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <h3 className="font-medium text-yellow-800 mb-2">Exam Instructions:</h3>
+                <h3 className="font-medium text-yellow-800 mb-2">⚠️ Exam Instructions:</h3>
                 <ul className="text-sm text-yellow-700 space-y-1">
-                  <li>• Answer all questions to the best of your ability</li>
-                  <li>• You can navigate between questions freely</li>
-                  <li>• The exam will auto-submit when time runs out</li>
-                  <li>• Make sure to submit before the timer reaches zero</li>
+                  <li>• ❔ Answer all questions to the best of your ability</li>
+                  <li>• 🧭 You can navigate between questions freely</li>
+                  <li>• 🏁 The exam will auto-submit when time runs out</li>
+                  <li>• ⌚ Make sure to submit before the timer reaches zero</li>
                 </ul>
               </div>
 
@@ -304,7 +305,7 @@ export default function PracticeExamPage() {
               </div>
 
               <Button onClick={startExam} className="w-full bg-green-600 hover:bg-green-700" size="lg">
-                Start Exam
+                💪 Start Exam
               </Button>
             </CardContent>
           </Card>

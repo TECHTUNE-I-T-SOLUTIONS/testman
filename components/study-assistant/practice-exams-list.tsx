@@ -59,7 +59,7 @@ export function PracticeExamsList({ exams, onRefresh, isGenerating }: PracticeEx
 
   // Filter and sort exams
   const filteredAndSortedExams = useMemo(() => {
-    let filtered = exams.filter(exam => {
+    const filtered = exams.filter(exam => {
       const matchesSearch = exam.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            exam.subject.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === "all" || exam.status === statusFilter
@@ -70,18 +70,21 @@ export function PracticeExamsList({ exams, onRefresh, isGenerating }: PracticeEx
 
     // Sort exams
     filtered.sort((a, b) => {
-      let aValue: any = a[sortBy as keyof PracticeExam]
-      let bValue: any = b[sortBy as keyof PracticeExam]
+      let aValue: string | number | undefined = a[sortBy as keyof PracticeExam]
+      let bValue: string | number | undefined = b[sortBy as keyof PracticeExam]
 
       if (sortBy === "createdAt" || sortBy === "completedAt") {
-        aValue = new Date(aValue).getTime()
-        bValue = new Date(bValue).getTime()
+        aValue = new Date(aValue || '').getTime()
+        bValue = new Date(bValue || '').getTime()
       }
 
       if (typeof aValue === "string") {
         aValue = aValue.toLowerCase()
-        bValue = bValue.toLowerCase()
+        bValue = (bValue as string)?.toLowerCase() ?? ''
       }
+
+      if (aValue === undefined) aValue = ''
+      if (bValue === undefined) bValue = ''
 
       if (sortOrder === "asc") {
         return aValue > bValue ? 1 : -1
