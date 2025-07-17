@@ -1,6 +1,5 @@
 "use client"
 
-import type React from "react"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 import AppSidebar from "@/components/student/AppSidebar"
@@ -8,6 +7,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { LogOut, Loader2 } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { logoutStudent } from "@/utils/auth"
 import { useRouter } from "next/navigation"
 import { useSidebar } from "@/components/ui/sidebar"

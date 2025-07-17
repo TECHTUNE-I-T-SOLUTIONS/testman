@@ -17,8 +17,4 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "corepack enable"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "yarn dev"
+args = "npm run dev"
