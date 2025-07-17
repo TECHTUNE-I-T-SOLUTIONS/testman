@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import { CheckCircle, XCircle, ArrowLeft, Brain, Clock, Trophy, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 
 interface Question {
   id: string

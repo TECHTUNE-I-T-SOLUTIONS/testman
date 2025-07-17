@@ -227,10 +227,10 @@ export function ChatInterface({
     if (currentSession) {
       return `Continuing session from ${new Date(currentSession.createdAt).toLocaleDateString()}`
     }
-    if (studyMode === "chat") return "Ask anything about your materials or general study topics."
-    if (studyMode === "questions") return "Ask for practice questions based on your materials."
-    if (studyMode === "summary") return "Get concise summaries of your uploaded content."
-    if (studyMode === "explain") return "Request explanations for complex concepts."
+    if (studyMode === "chat") return "Ask anything about your materials or general study topics. You can also request practice questions or summaries."
+    if (studyMode === "questions") return "Upload materials to generate practice questions automatically, or ask for specific questions."
+    if (studyMode === "summary") return "Upload materials to get concise summaries with key points and important concepts."
+    if (studyMode === "explain") return "Upload materials or ask questions to get detailed explanations of complex concepts."
     return "Your AI-powered study companion."
   }
 

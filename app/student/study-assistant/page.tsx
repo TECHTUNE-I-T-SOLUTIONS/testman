@@ -111,14 +111,32 @@ export default function StudyAssistant() {
 
     toast.success("Files uploaded successfully! Processing in background...")
 
-    // After 15 s, check if any of the files are already processed;
-    // if so, fire off practice‑exam generation.
-    setTimeout(() => {
+    // Check for completed files immediately and then periodically
+    const checkForCompletedFiles = () => {
       const completedFiles = files.filter((f) => f.processingStatus === "completed")
       if (completedFiles.length > 0) {
-        void generatePracticeExamFromMaterials(completedFiles) // fire‑and‑forget
+        void generatePracticeExamFromMaterials(completedFiles)
+        return true // Stop checking
       }
-    }, 15_000) // 15 seconds
+      return false // Continue checking
+    }
+
+    // Start checking after 3 seconds, then every 2 seconds for up to 30 seconds
+    let attempts = 0
+    const maxAttempts = 15
+    const checkInterval = setInterval(() => {
+      attempts++
+      if (checkForCompletedFiles() || attempts >= maxAttempts) {
+        clearInterval(checkInterval)
+      }
+    }, 2000)
+
+    // Initial check after 3 seconds
+    setTimeout(() => {
+      if (checkForCompletedFiles()) {
+        clearInterval(checkInterval)
+      }
+    }, 3000)
 
     // refresh study‑statistics in the background
     void fetchStudyStats()
