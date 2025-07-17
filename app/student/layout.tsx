@@ -46,14 +46,14 @@ function MobileLogoutButton() {
 
       {/* Mobile Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-20 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 space-y-6 z-20">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6 space-y-6 z-[101]">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto">
                 <LogOut className="h-8 w-8 text-red-600" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900">Sign Out</h2>
-              <p className="text-gray-600">Are you sure you want to sign out of your account?</p>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Sign Out</h2>
+              <p className="text-gray-600 dark:text-gray-300">Are you sure you want to sign out of your account?</p>
             </div>
             <div className="flex gap-3 pt-4">
               <Button

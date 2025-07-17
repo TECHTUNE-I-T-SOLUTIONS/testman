@@ -136,6 +136,7 @@ const AppSidebar = () => {
       path: "/student/exams",
       icon: BookOpenCheck,
       requiresActive: true,
+      hasNew: true,
     },
     {
       label: "Results",
@@ -301,7 +302,14 @@ const AppSidebar = () => {
                     <IconComponent className="h-5 w-5" />
                     {!isCollapsed && (
                       <div className="flex items-center justify-between flex-1">
-                        <span className="font-medium">{item.label}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{item.label}</span>
+                          {item.hasNew && (
+                            <Badge variant="destructive" className="text-xs px-1.5 py-0.5 h-5">
+                              New
+                            </Badge>
+                          )}
+                        </div>
                         {isDisabled && <AlertTriangle className="h-4 w-4 text-amber-500" />}
                       </div>
                     )}

@@ -364,16 +364,16 @@ const Page: FC = () => {
 
                 {/* Buttons */}
                 <motion.div
-                  className="flex flex-col sm:flex-row gap-3 pt-4 justify-center items-center z-10"
+                  className="flex flex-col sm:flex-row gap-3 pt-4 justify-center items-center relative z-10"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
                 >
-                  <Button size="lg" asChild>
+                  <Button size="lg" asChild className="relative z-10">
                     <Link href="/auth/signup">Get Started</Link>
                   </Button>
-                  or
-                  <Button size="lg" variant="outline" asChild>
+                  <span className="text-gray-500">or</span>
+                  <Button size="lg" variant="outline" asChild className="relative z-10">
                     <Link href="/auth/login">Sign in</Link>
                   </Button>
                 </motion.div>
@@ -654,6 +654,119 @@ const Page: FC = () => {
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">A peek into our Platform</h2>
               <p className="text-lg text-muted-foreground">A guide into our platform</p>
               <EvidenceVideos />
+            </div>
+          </div>
+        </section>
+
+        {/* AI Features Spotlight */}
+        <section className="py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
+          <div className="w-full max-w-none px-4 lg:px-6 xl:px-8">
+            <div className="text-center max-w-4xl mx-auto mb-16">
+              <Badge className="mb-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white">🚀 Latest Update</Badge>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                Introducing Alex AI Study Assistant
+              </h2>
+              <p className="text-lg text-muted-foreground mb-8">
+                Experience the power of artificial intelligence in your academic journey with our revolutionary AI study companion.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+              {/* AI Features List */}
+              <div className="space-y-6">
+                <div className="flex items-start gap-4 p-4 bg-white/70 backdrop-blur-sm rounded-xl border border-purple-100">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Brain className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Intelligent Study Materials Analysis</h3>
+                    <p className="text-gray-600 text-sm">Upload your notes, PDFs, and documents. Alex AI analyzes and creates personalized study content just for you.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 p-4 bg-white/70 backdrop-blur-sm rounded-xl border border-blue-100">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <FileText className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">AI-Generated Practice Exams</h3>
+                    <p className="text-gray-600 text-sm">Get custom practice tests generated from your own study materials with instant feedback and explanations.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 p-4 bg-white/70 backdrop-blur-sm rounded-xl border border-green-100">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <MessageCircle className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">24/7 AI Study Chat</h3>
+                    <p className="text-gray-600 text-sm">Ask questions, get explanations, and receive study guidance anytime. Alex AI is always ready to help.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 p-4 bg-white/70 backdrop-blur-sm rounded-xl border border-amber-100">
+                  <div className="p-2 bg-amber-100 rounded-lg">
+                    <BookMarked className="h-6 w-6 text-amber-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-2">Smart Summaries & Key Points</h3>
+                    <p className="text-gray-600 text-sm">Transform lengthy materials into concise, focused summaries that highlight the most important concepts.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Visual Demo */}
+              <div className="relative">
+                <div className="bg-gradient-to-br from-purple-100 to-blue-100 rounded-2xl p-8 border border-purple-200">
+                  <div className="bg-white rounded-xl p-6 shadow-lg">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                        <Brain className="h-4 w-4 text-white" />
+                      </div>
+                      <h4 className="font-semibold text-gray-900">Alex AI Assistant</h4>
+                      <Badge className="bg-green-100 text-green-700 text-xs">Online</Badge>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="bg-gray-100 rounded-lg p-3">
+                        <p className="text-sm text-gray-700">
+                          "Can you help me understand photosynthesis for my Biology exam?"
+                        </p>
+                      </div>
+                      
+                      <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg p-3">
+                        <p className="text-sm">
+                          "I'd be happy to help! Based on your uploaded materials, here's a simplified explanation with practice questions..."
+                        </p>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" className="text-xs">
+                          <FileText className="h-3 w-3 mr-1" />
+                          Generate Quiz
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-xs">
+                          <BookMarked className="h-3 w-3 mr-1" />
+                          Create Summary
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Floating Elements */}
+                <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-20 animate-pulse"></div>
+                <div className="absolute -bottom-4 -left-4 w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full opacity-20 animate-bounce"></div>
+              </div>
+            </div>
+
+            <div className="text-center mt-12">
+              <Button size="lg" asChild className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white">
+                <Link href="/auth/signup">Try Alex AI Now</Link>
+              </Button>
+              <p className="text-sm text-gray-600 mt-4">
+                Available in the Exams section after registration
+              </p>
             </div>
           </div>
         </section>
