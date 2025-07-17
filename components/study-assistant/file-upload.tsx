@@ -209,7 +209,7 @@ export function FileUpload({ onFilesUpdated }: FileUploadProps) {
                 }
               : f,
           )
-          
+
           setFiles(updatedFiles)
           onFilesUpdated(updatedFiles)
 

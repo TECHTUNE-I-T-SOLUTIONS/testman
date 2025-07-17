@@ -1,33 +1,31 @@
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/utils/auth'
 import { connectdb } from '@/lib/connectdb'
-import Student from '@/lib/models/student'
+import PushSubscription from '@/lib/models/push-subscription'
+import { getStudentFromToken } from '@/utils/auth'
+import { getServerSession } from 'next-auth/next'
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     await connectdb()
+
     const { endpoint } = await req.json()
 
-    // Find the student and remove their push subscription
-    const student = await Student.findOne({ email: session.user.email })
-    if (!student) {
-      return NextResponse.json({ error: 'Student not found' }, { status: 404 })
+    if (!endpoint) {
+      return NextResponse.json({ error: 'Endpoint is required' }, { status: 400 })
     }
 
-    // Remove push subscription
-    student.pushSubscription = null
-    await student.save()
+    // Find and deactivate the subscription
+    const subscription = await PushSubscription.findOne({ endpoint })
+    
+    if (subscription) {
+      subscription.isActive = false
+      await subscription.save()
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error removing push subscription:', error)
-    return NextResponse.json({ error: 'Failed to remove subscription' }, { status: 500 })
+    console.error('Error unsubscribing from push notifications:', error)
+    return NextResponse.json({ error: 'Failed to unsubscribe' }, { status: 500 })
   }
 }
