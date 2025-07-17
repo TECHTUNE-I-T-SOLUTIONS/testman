@@ -1,0 +1,11 @@
+OKAY!
+
+when i uploaded a document to be analysed and extracted to create exam or summarised or to be explained, on first upload, it analyses and extracts but then nothing else happens, it doesn't create the exam, it still doesn't work until i upload it again a second time. help me fix it. or on upload if the exam generation didn't happen, a button will be shown to generate the exams, so when the user clicks it, it'll generate the exams for them, or how best can we go about it? can you help me fix it to work on first upload?; the extraction, and exam generation, and taking, etc, happening one after another, no errors or issues.
+
+the upload materials component interface is not very responsive, the upload area is overflowing and not being contained/wrapped, help fix that too.
+
+also, do you know any free web push notifications i can integrate into the web project as well that can be controlled from the admin side? or that can be triggered (that is, we'll create another collection that'll be triggered by eventes in other collections like creating new exams, sessions, semesters, web updates, etc and the admin, by creating the pushes can send the pushes to all users of the website who are subscribed to the web push) i tried onesignal, it's an hassle, it wasn't very compactile with my project and it's not very easy to setup, if you know a very simple and effecient web push i can use as stated, help integrate it or if onesignal will do, help make it work well so that the admins can controll the push. help make these fixes.
+
+another thing is in the review page after the student have taken the exams and shows the results, and it shows the wrong answers, let it not just mark the wrong answers, let it show the correct answers too in the multiplechoice questions and why it is correct, the explanation is there already. and make sure all these are only shown to the respective students in the respective chats and all to avoid confusion. I'm loving this.
+so, if you can help fix all these at once, I'd love it. thanks a great deal.
+remember, do not remove things uncessarily, these codes work. just fix what needs to be fixed.
