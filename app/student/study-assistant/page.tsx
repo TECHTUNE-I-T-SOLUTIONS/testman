@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { FileUpload } from "@/components/study-assistant/file-upload"
 import { ChatInterface } from "@/components/study-assistant/chat-interface"
-import { StudyModeSelector } from "@/components/study-assistant/study-mode-selector"
+import StudyModeSelector from "@/components/study-assistant/study-mode-selector"
 import { AIUsageBanner } from "@/components/study-assistant/ai-usage-banner"
 import { SessionHistory } from "@/components/study-assistant/session-history"
 import { PracticeExamsList } from "@/components/study-assistant/practice-exams-list"
