@@ -33,12 +33,13 @@ import {
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Separator } from "@/components/ui/separator"
 import { useSidebar } from "@/components/ui/sidebar"
+import { useTheme } from "@/contexts/ThemeContext"
 
 interface Student {
   name: string
@@ -63,6 +64,19 @@ const AppSidebar = () => {
   const [showSidebarHelpModal, setShowSidebarHelpModal] = useState(false)
   const [student, setStudent] = useState<Student | null>(null)
   const [loading, setLoading] = useState(true)
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Compute avatarSrc based on theme and mounted
+  const avatarSrc = mounted
+    ? theme === "dark"
+      ? "/darkplaceholder-avatar.jpg"
+      : "/placeholder-avatar.jpg"
+    : "/placeholder-avatar.jpg";
 
   // Fetch student data and manage modal visibility
   const fetchStudent = async () => {
@@ -194,6 +208,16 @@ const AppSidebar = () => {
             {/* Avatar with Online Status */}
             <div className="relative">
               <Avatar className={cn("border-2 border-gray-200", isCollapsed ? "h-10 w-10" : "h-16 w-16")}>
+                {mounted && (
+                  <AvatarImage
+                    key={theme}
+                    src={avatarSrc}
+                    alt="Student"
+                    width={isCollapsed ? 40 : 64}
+                    height={isCollapsed ? 40 : 64}
+                    className="rounded-full"
+                  />
+                )}
                 <AvatarFallback className="bg-gray-900 text-white font-semibold text-xl">{firstInitial}</AvatarFallback>
               </Avatar>
               {student.loggedIn && (
@@ -330,11 +354,29 @@ const AppSidebar = () => {
 
         <SidebarSeparator />
 
-        <SidebarFooter className="p-4 border-t border-gray-100 dark:border-gray-700">
+        <SidebarFooter
+          className={cn(
+            "p-4 border-t border-gray-100 dark:border-gray-700 flex flex-col gap-2",
+            isCollapsed ? "items-center px-2 py-3" : "items-stretch"
+          )}
+        >
           <SidebarMenu>
             <SidebarMenuItem>
-              <div className="flex items-center justify-between p-2">
-                <ThemeToggle />
+              <div
+                className={cn(
+                  "flex items-center justify-between",
+                  isCollapsed
+                    ? "p-0 w-10 h-10 mx-auto"
+                    : "p-2"
+                )}
+              >
+                <ThemeToggle
+                  className={cn(
+                    isCollapsed
+                      ? "w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
+                      : ""
+                  )}
+                />
               </div>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -344,8 +386,12 @@ const AppSidebar = () => {
             variant="outline"
             size={isCollapsed ? "icon" : "default"}
             className={cn(
-              "border-gray-200 text-gray-700 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors",
-              isCollapsed ? "w-10 h-10" : "w-full justify-start h-11",
+              // Responsive, visible, and not bulging in collapsed mode
+              "transition-colors border-gray-200 dark:border-gray-700",
+              "hover:bg-red-50 hover:text-red-700 hover:border-red-200 dark:hover:bg-red-900 dark:hover:text-red-400 dark:hover:border-red-700",
+              isCollapsed
+                ? "w-10 h-10 mx-auto flex items-center justify-center p-0 text-gray-700 dark:text-gray-200"
+                : "w-full justify-start h-11 text-gray-700 dark:text-gray-200"
             )}
           >
             <LogOut className="h-4 w-4" />
@@ -476,7 +522,7 @@ const AppSidebar = () => {
               >
                 {isLoggingOut ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin text-gray-700 dark:text-gray-200" />
                     Signing Out...
                   </>
                 ) : (

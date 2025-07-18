@@ -1,11 +1,11 @@
 
 import { NextRequest, NextResponse } from "next/server"
 import PushNotification from "@/lib/models/push-notification"
-import connectDB from "@/lib/connectdb"
+import { connectdb } from "@/lib/connectdb"
 
 export async function GET(request: NextRequest) {
   try {
-    await connectDB()
+    await connectdb()
     
     const notifications = await PushNotification.find()
       .sort({ sentAt: -1 })

@@ -56,21 +56,21 @@ export default function Login() {
   }
 
   return (
-    <main className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4 relative">
+    <main className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 p-4 relative">
       {/* Professional Back Button - Top Left */}
       <Link
         href="/"
-        className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 transition-colors group"
+        className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 dark:text-slate-200 dark:hover:text-white transition-colors group"
       >
-        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-        <span className="text-sm font-medium">Back to Home</span>
+        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-slate-600 dark:text-slate-200" />
+        <span className="text-sm font-medium dark:text-slate-100">Back to Home</span>
       </Link>
 
-      <Card className="w-full max-w-md shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+      <Card className="w-full max-w-md shadow-xl border-0 bg-white/80 dark:bg-slate-900/90 backdrop-blur-sm">
         <CardHeader className="space-y-4 pb-8">
           <div className="text-center space-y-2">
-            <CardTitle className="text-3xl font-bold tracking-tight text-slate-900">Welcome Back</CardTitle>
-            <CardDescription className="text-slate-600 text-base">
+            <CardTitle className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Welcome Back</CardTitle>
+            <CardDescription className="text-slate-600 dark:text-slate-300 text-base">
               Sign in to access your CGPA dashboard
             </CardDescription>
           </div>
@@ -79,7 +79,7 @@ export default function Login() {
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="matricNumber" className="text-sm font-medium text-slate-700">
+              <Label htmlFor="matricNumber" className="text-sm font-medium text-slate-700 dark:text-slate-200">
                 Matric Number
               </Label>
               <Input
@@ -90,12 +90,12 @@ export default function Login() {
                 required
                 onChange={handleChange}
                 autoComplete="username"
-                className="h-11 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20"
+                className="h-11 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400 dark:focus:border-slate-500 dark:focus:ring-slate-500/20"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-slate-700">
+              <Label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-200">
                 Email Address
               </Label>
               <Input
@@ -106,12 +106,12 @@ export default function Login() {
                 required
                 onChange={handleChange}
                 autoComplete="email"
-                className="h-11 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20"
+                className="h-11 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400 dark:focus:border-slate-500 dark:focus:ring-slate-500/20"
               />
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="password" className="text-sm font-medium text-slate-700">
+              <Label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-slate-200">
                 Password
               </Label>
               <div className="relative">
@@ -123,24 +123,24 @@ export default function Login() {
                   required
                   onChange={handleChange}
                   autoComplete="current-password"
-                  className="h-11 pr-12 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20"
+                  className="h-11 pr-12 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400 dark:focus:border-slate-500 dark:focus:ring-slate-500/20"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-4 w-4 text-slate-500 dark:text-slate-200" /> : <Eye className="h-4 w-4 text-slate-500 dark:text-slate-200" />}
                 </Button>
               </div>
 
               <div className="flex justify-end">
                 <Link
                   href="/auth/forgot-password"
-                  className="text-sm text-slate-600 hover:text-slate-900 hover:underline transition-colors"
+                  className="text-sm text-slate-600 hover:text-slate-900 hover:underline transition-colors dark:text-slate-300 dark:hover:text-white"
                 >
                   Forgot your password?
                 </Link>
@@ -149,16 +149,16 @@ export default function Login() {
 
             <Button
               type="submit"
-              className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium transition-colors mt-8"
+              className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium transition-colors mt-8 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-900"
               disabled={loading}
             >
               {loading ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Signing in...
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white dark:border-slate-900/30 dark:border-t-slate-900 rounded-full animate-spin" />
+                  <span className="dark:text-slate-900">Signing in...</span>
                 </div>
               ) : (
-                "Sign In"
+                <span className="dark:text-slate-900 dark:font-semibold">Sign In</span>
               )}
             </Button>
           </form>
@@ -166,11 +166,11 @@ export default function Login() {
 
         <CardFooter className="pt-6">
           <div className="w-full text-center">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-600 dark:text-slate-300">
               Don&apos;t have an account?{" "}
               <Link
                 href="/auth/signup"
-                className="font-medium text-slate-900 hover:text-slate-700 hover:underline transition-colors"
+                className="font-medium text-slate-900 hover:text-slate-700 hover:underline transition-colors dark:text-white dark:hover:text-slate-200"
               >
                 Create one here
               </Link>

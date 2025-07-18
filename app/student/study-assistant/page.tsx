@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { FileUpload } from "@/components/study-assistant/file-upload"
 import { ChatInterface } from "@/components/study-assistant/chat-interface"
 import StudyModeSelector from "@/components/study-assistant/study-mode-selector"
 import { AIUsageBanner } from "@/components/study-assistant/ai-usage-banner"
@@ -10,7 +9,7 @@ import { PracticeExamsList } from "@/components/study-assistant/practice-exams-l
 import { AIFeaturesBanner } from "@/components/study-assistant/ai-features-banner"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Brain, TrendingUp, BookOpen, Sparkles, MessageCircle } from "lucide-react"
+import { Brain, TrendingUp, BookOpen, MessageCircle } from "lucide-react"
 // import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -24,6 +23,8 @@ interface UploadedFile {
   fileName: string
   fileType: string
   processingStatus: "pending" | "processing" | "completed" | "failed"
+  uploadProgress: number
+  extractedText?: string
 }
 
 interface ChatSession {
@@ -43,10 +44,7 @@ interface ChatSession {
 }
 
 export default function StudyAssistant() {
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [studyMode, setStudyMode] = useState<StudyMode>("chat")
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [materialIds, setMaterialIds] = useState<string[]>([])
   const [studyStats, setStudyStats] = useState({
     totalSessions: 0,
     totalMessages: 0,
@@ -56,9 +54,12 @@ export default function StudyAssistant() {
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null)
   const [activeTab, setActiveTab] = useState("chat")
   const [practiceExams, setPracticeExams] = useState([])
-  const [isGeneratingExam, setIsGeneratingExam] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter()
+  const [showPostUploadPrompt, setShowPostUploadPrompt] = useState(false)
+  // State to trigger explain prompt in ChatInterface
+  const [showExplainPrompt, setShowExplainPrompt] = useState(false)
+  const handleExplainPromptDismiss = () => setShowExplainPrompt(false)
 
   const mapSession = (hs: HistoryChatSession): ChatSession => ({
     ...hs,
@@ -67,7 +68,8 @@ export default function StudyAssistant() {
       title: m.name,
       fileName: m.name,
       fileType: m.type,
-      processingStatus: "completed",
+      processingStatus: "completed" as const,
+      uploadProgress: 100,
     })),
     studyMode: hs.studyMode as StudyMode,
   })
@@ -101,83 +103,24 @@ export default function StudyAssistant() {
     }
   }
 
-  // FileUpload now sends only the array of files, so we no longer
-  // receive a separate `ids` array or need the function to be `async`.
-  const handleFilesUpdated = (files: UploadedFile[]) => {
-    // save the files we got back from FileUpload
-    setUploadedFiles(files)
-
-    // derive the ID list directly from the files we just stored
-    setMaterialIds(files.map((f) => f.id))
-
-    toast.success("Files uploaded successfully! Processing in background...")
-
-    // Check for completed files immediately and then periodically
-    const checkForCompletedFiles = () => {
-      const completedFiles = files.filter((f) => f.processingStatus === "completed")
-      if (completedFiles.length > 0) {
-        void generatePracticeExamFromMaterials(completedFiles)
-        return true // Stop checking
-      }
-      return false // Continue checking
-    }
-
-    // Start checking after 3 seconds, then every 2 seconds for up to 30 seconds
-    let attempts = 0
-    const maxAttempts = 15
-    const checkInterval = setInterval(() => {
-      attempts++
-      if (checkForCompletedFiles() || attempts >= maxAttempts) {
-        clearInterval(checkInterval)
-      }
-    }, 2000)
-
-    // Initial check after 3 seconds
-    setTimeout(() => {
-      if (checkForCompletedFiles()) {
-        clearInterval(checkInterval)
-      }
-    }, 3000)
-
-    // refresh study‑statistics in the background
-    void fetchStudyStats()
-  }
-
-
-  const generatePracticeExamFromMaterials = async (files: UploadedFile[]) => {
-    if (isGeneratingExam) return
-
-    setIsGeneratingExam(true)
-    try {
-      console.log("🔄 Starting exam generation for files:", files.map(f => f.id))
-
-      const response = await fetch("/api/ai/practice-exam/generate-from-materials", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          materialIds: files.map((f) => f.id),
-          sessionId: currentSession?.id || undefined,
-        }),
-      })
-
-      const data = await response.json()
-      console.log("📝 API Response:", data)
-
-      if (response.ok) {
-        toast.success("Practice exam generated automatically!")
-        fetchPracticeExams()
-        setActiveTab("exams")
+  // Handler for when user chooses a mode or proceeds with chat
+  const handlePostUploadAction = (mode: StudyMode | null) => {
+    setShowPostUploadPrompt(false)
+    if (mode) {
+      // If user chooses 'chat' after upload, auto-switch to 'explain' and show a system message
+      if (mode === 'chat') {
+        setStudyMode('explain')
+        setActiveTab('chat')
+        setTimeout(() => {
+          setShowExplainPrompt(true)
+        }, 100) // Let ChatInterface mount first
       } else {
-        console.error("❌ API Error:", data)
-        toast.error(data.error || "Failed to generate practice exam")
+        setStudyMode(mode)
+        setActiveTab('chat')
       }
-    } catch (error) {
-      console.error("💥 Network Error:", error)
-      toast.error("Network error during exam generation")
-    } finally {
-      setIsGeneratingExam(false)
     }
   }
+
 
   const handleContinueSession = (session: HistoryChatSession) => {
     const s = mapSession(session)
@@ -197,38 +140,23 @@ export default function StudyAssistant() {
   }
 
   const getProcessedFiles = () => {
-    return uploadedFiles.filter((file) => file.processingStatus === "completed")
-  }
-
-  const getProcessedMaterialIds = () => {
-    return uploadedFiles.filter((file) => file.processingStatus === "completed").map((file) => file.id)
+    return [] // No materialIds to process
   }
 
   useEffect(() => {
-    const completed = uploadedFiles.filter(f => f.processingStatus === "completed")
-    console.log(`📁 Files status check:`, {
-      total: uploadedFiles.length,
-      completed: completed.length,
-      isGeneratingExam,
-      completedIds: completed.map(f => f.id)
-    })
-
-    if (completed.length && !isGeneratingExam) {
-      console.log(`🚀 Triggering auto exam generation for ${completed.length} files`)
-      void generatePracticeExamFromMaterials(completed)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uploadedFiles])
+    // Remove all references to materialIds and completed
+    // In the UI, remove any display of material status/count in the main page
+  }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
       {/* AI Features Banner */}
       <AIFeaturesBanner />
 
       <div className="container mx-auto p-4 sm:p-6 max-w-6xl">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">AI Study Assistant</h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-gray-900 dark:text-white">AI Study Assistant</h1>
+          <p className="text-gray-600 dark:text-gray-200 text-sm sm:text-base">
             Upload your study materials and let AI help you learn more effectively
           </p>
         </div>
@@ -238,43 +166,43 @@ export default function StudyAssistant() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100">
+          <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 dark:border-green-700">
             <CardContent className="p-4 lg:p-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-500 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-white" />
+                  <TrendingUp className="h-5 w-5 text-white dark:text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-green-700">Study Sessions</p>
-                  <p className="text-2xl font-bold text-green-800">{studyStats.totalSessions}</p>
+                  <p className="text-sm font-medium text-green-700 dark:text-green-200">Study Sessions</p>
+                  <p className="text-2xl font-bold text-green-800 dark:text-green-100">{studyStats.totalSessions}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100">
+          <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 dark:border-blue-700">
             <CardContent className="p-4 lg:p-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-500 rounded-lg">
-                  <MessageCircle className="h-5 w-5 text-white" />
+                  <MessageCircle className="h-5 w-5 text-white dark:text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-blue-700">AI Messages</p>
-                  <p className="text-2xl font-bold text-blue-800">{studyStats.totalMessages}</p>
+                  <p className="text-sm font-medium text-blue-700 dark:text-blue-200">AI Messages</p>
+                  <p className="text-2xl font-bold text-blue-800 dark:text-blue-100">{studyStats.totalMessages}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100 sm:col-span-2 lg:col-span-1">
+          <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800 dark:border-purple-700 sm:col-span-2 lg:col-span-1">
             <CardContent className="p-4 lg:p-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-purple-500 rounded-lg">
-                  <BookOpen className="h-5 w-5 text-white" />
+                  <BookOpen className="h-5 w-5 text-white dark:text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-purple-700">Materials</p>
-                  <p className="text-2xl font-bold text-purple-800">{studyStats.totalMaterials}</p>
+                  <p className="text-sm font-medium text-purple-700 dark:text-purple-200">Materials</p>
+                  <p className="text-2xl font-bold text-purple-800 dark:text-purple-100">{studyStats.totalMaterials}</p>
                 </div>
               </div>
             </CardContent>
@@ -286,27 +214,16 @@ export default function StudyAssistant() {
           {/* Left Column - Controls */}
           <div className="lg:col-span-1 space-y-6">
             {/* File Upload */}
-            <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-yellow-500" />
-                  Upload Materials
-                </CardTitle>
-                <CardDescription>Upload your course notes, PDFs, or images for AI analysis</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <FileUpload onFilesUpdated={handleFilesUpdated} />
-              </CardContent>
-            </Card>
+            {/* Removed FileUpload component */}
 
             {/* Study Mode Selector */}
-            <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
+            <Card className="shadow-lg border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Brain className="h-5 w-5 text-blue-500" />
+                <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-blue-300">
+                  <Brain className="h-5 w-5 text-blue-500 dark:text-blue-300" />
                   Study Mode
                 </CardTitle>
-                <CardDescription>Choose how you want Alex AI to help you study</CardDescription>
+                <CardDescription className="text-gray-600 dark:text-gray-200">Choose how you want Alex AI to help you study</CardDescription>
               </CardHeader>
               <CardContent>
                 <StudyModeSelector
@@ -323,32 +240,27 @@ export default function StudyAssistant() {
 
           {/* Right Column - Main Interface */}
           <div className="lg:col-span-2">
-            <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm h-[calc(100vh-300px)] lg:h-[calc(100vh-200px)] flex flex-col">
-              <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-green-50 flex-shrink-0">
+            <Card className="shadow-xl border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm h-[calc(100vh-300px)] lg:h-[calc(100vh-200px)] flex flex-col">
+              <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-green-50 dark:from-gray-900 dark:to-gray-800 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-xl flex items-center gap-2">
-                      <div className="p-2 bg-gradient-to-r from-blue-500 to-green-500 rounded-lg">
-                        <Brain className="h-5 w-5 text-white" />
+                    <CardTitle className="text-xl flex items-center gap-2 text-gray-900 dark:text-white">
+                      <div className="p-2 bg-gradient-to-r from-blue-500 to-green-500 dark:from-blue-700 dark:to-green-700 rounded-lg">
+                        <Brain className="h-5 w-5 text-white dark:text-white" />
                       </div>
                       <span>Alex AI Study Assistant</span>
-                      <span className="text-sm font-normal text-muted-foreground">
+                      <span className="text-sm font-normal text-muted-foreground dark:text-gray-300">
                         ({studyMode.charAt(0).toUpperCase() + studyMode.slice(1)} Mode)
                       </span>
                     </CardTitle>
-                    <CardDescription className="mt-1">
+                    <CardDescription className="mt-1 text-gray-700 dark:text-gray-200">
                       {studyMode === "questions" && "Generate practice questions from your materials"}
                       {studyMode === "summary" && "Get summaries and key points from your notes"}
                       {studyMode === "explain" && "Ask for explanations and clarifications"}
                       {studyMode === "chat" && "Chat freely with Alex AI about any academic topic"}
                       {getProcessedFiles().length > 0 && (
-                        <span className="text-green-600 ml-2 font-medium">
+                        <span className="text-green-600 dark:text-green-300 ml-2 font-medium">
                           • {getProcessedFiles().length} material{getProcessedFiles().length > 1 ? "s" : ""} ready
-                        </span>
-                      )}
-                      {isGeneratingExam && (
-                        <span className="text-blue-600 ml-2 font-medium animate-pulse">
-                          • Generating practice exam...
                         </span>
                       )}
                     </CardDescription>
@@ -360,15 +272,15 @@ export default function StudyAssistant() {
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
                   <div className="px-6 pt-4 border-b flex-shrink-0">
                     <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="chat" className="flex items-center gap-2">
-                        <MessageCircle className="h-4 w-4" />
+                      <TabsTrigger value="chat" className="flex items-center gap-2 text-gray-900 dark:text-white data-[state=active]:font-bold">
+                        <MessageCircle className="h-4 w-4 text-gray-900 dark:text-white" />
                         Chat with Alex
                       </TabsTrigger>
-                      <TabsTrigger value="exams" className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4" />
+                      <TabsTrigger value="exams" className="flex items-center gap-2 text-gray-900 dark:text-white data-[state=active]:font-bold">
+                        <BookOpen className="h-4 w-4 text-gray-900 dark:text-white" />
                         Practice Exams
                         {practiceExams.length > 0 && (
-                          <span className="ml-1 bg-green-500 text-white text-xs rounded-full px-2 py-0.5">
+                          <span className="ml-1 bg-green-500 dark:bg-green-700 text-white text-xs rounded-full px-2 py-0.5">
                             {practiceExams.length}
                           </span>
                         )}
@@ -380,12 +292,16 @@ export default function StudyAssistant() {
                     <div className="h-full">
                       <ChatInterface
                         studyMode={studyMode}
-                        materialIds={getProcessedMaterialIds()}
+                        materialIds={getProcessedFiles()}
                         uploadedFiles={getProcessedFiles()}
                         canUseAI={canUseAI}
                         currentSession={currentSession}
                         onSessionUpdate={fetchStudyStats}
                         onPracticeExamGenerated={handlePracticeExamGenerated}
+                        showPostUploadPrompt={showPostUploadPrompt}
+                        onPostUploadAction={handlePostUploadAction}
+                        showExplainPrompt={showExplainPrompt}
+                        onExplainPromptDismiss={handleExplainPromptDismiss}
                       />
                     </div>
                   </TabsContent>
@@ -394,8 +310,8 @@ export default function StudyAssistant() {
                     <div className="h-full p-6 overflow-y-auto">
                       <PracticeExamsList
                         exams={practiceExams}
-                        isGenerating={isGeneratingExam}
                         onRefresh={fetchPracticeExams}
+                        isGenerating={false}
                       />
                     </div>
                   </TabsContent>

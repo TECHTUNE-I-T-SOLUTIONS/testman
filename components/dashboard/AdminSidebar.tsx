@@ -17,7 +17,7 @@ import {
   SidebarMenuSubButton,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
@@ -49,10 +49,12 @@ import {
   Clock,
   User,
   Brain,
-  Bell,
 } from "lucide-react"
 import { HelpCircle, AlertCircle } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useTheme } from "@/contexts/ThemeContext";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import Image from "next/image";
 
 const CustomSidebarTrigger = () => {
   const { state, toggleSidebar } = useSidebar()
@@ -107,10 +109,19 @@ const AdminSidebar = () => {
   const pathname = usePathname()
   const { state, setOpenMobile } = useSidebar()
   const { data: session } = useSession()
-  const [academicsOpen, setAcademicsOpen] = useState(false)
-  const [questionsOpen, setQuestionsOpen] = useState(false)
-  const [contentOpen, setContentOpen] = useState(false)
-  const [pushOpen, setPushOpen] = useState(false)
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Compute avatarSrc based on theme and mounted
+  const avatarSrc = mounted
+    ? theme === "dark"
+      ? "/darkplaceholder-avatar.jpg"
+      : "/placeholder-avatar.jpg"
+    : "/placeholder-avatar.jpg";
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const adminEmail = session?.user?.email ?? "admin@example.com"
@@ -318,6 +329,16 @@ const AdminSidebar = () => {
           <div className="w-full flex flex-col items-center space-y-4">
             <div className="relative">
               <Avatar className={cn("border-2 border-gray-200", isCollapsed ? "h-10 w-10" : "h-16 w-16")}>
+                {mounted && (
+                  <AvatarImage
+                    key={theme}
+                    src={avatarSrc}
+                    alt="Student"
+                    width={isCollapsed ? 40 : 64}
+                    height={isCollapsed ? 40 : 64}
+                    className="rounded-full"
+                  />
+                )}
                 <AvatarFallback className="bg-gray-900 text-white font-semibold text-lg">
                   {adminName
                     .split(" ")

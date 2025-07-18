@@ -1,5 +1,6 @@
 
 import webpush from 'web-push'
+import type { PushSubscription as WebPushSubscription } from 'web-push'
 
 const vapidKeys = {
   publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '',
@@ -21,8 +22,9 @@ export interface NotificationPayload {
   data?: any
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function sendNotification(
-  subscription: PushSubscription,
+  subscription: WebPushSubscription,
   payload: NotificationPayload
 ) {
   try {

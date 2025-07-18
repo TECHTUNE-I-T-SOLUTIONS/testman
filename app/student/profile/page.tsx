@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { PushNotificationButton } from "@/components/push-notification-button"
 import { Megaphone } from "lucide-react"
+import { useTheme } from "@/contexts/ThemeContext"
 
 interface Student {
   name: string
@@ -72,6 +73,7 @@ export default function ProfilePage() {
   const [isEditingInstitutionalInfo, setIsEditingInstitutionalInfo] = useState(false)
   const [countryCode, setCountryCode] = useState("+234")
   const [localNumber, setLocalNumber] = useState("")
+  useTheme()
 
   // Get student from token and fetch their data
   useEffect(() => {
@@ -321,32 +323,32 @@ export default function ProfilePage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
           <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-900 rounded-full animate-spin mx-auto" />
-          <p className="text-slate-600">Loading your profile...</p>
+          <p className="text-slate-600 dark:text-gray-300">Loading your profile...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-neutral-950 text-gray-900 dark:text-white transition-colors duration-300">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Student Profile</h1>
-        <p className="text-slate-600">Manage your personal information and academic details</p>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Student Profile</h1>
+        <p className="text-slate-600 dark:text-gray-300">Manage your personal information and academic details</p>
       </div>
 
       <div className="grid gap-8 max-w-4xl mx-auto">
         {/* Personal Information Card */}
-        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+        <Card className="shadow-xl border-0 bg-white/80 dark:bg-neutral-900 dark:border-neutral-800 backdrop-blur-sm transition-colors duration-300">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-slate-100 rounded-full">
-                  <UserCircle2 className="h-6 w-6 text-slate-700" />
+                <div className="p-2 bg-slate-100 dark:bg-neutral-800 rounded-full">
+                  <UserCircle2 className="h-6 w-6 text-slate-700 dark:text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl text-slate-900">Personal Information</CardTitle>
-                  <p className="text-sm text-slate-600 mt-1">Your basic profile details</p>
+                  <CardTitle className="text-xl text-slate-900 dark:text-white">Personal Information</CardTitle>
+                  <p className="text-sm text-slate-600 dark:text-gray-300 mt-1">Your basic profile details</p>
                 </div>
               </div>
               {!isEditingInstitutionalInfo ? (
@@ -354,7 +356,7 @@ export default function ProfilePage() {
                   variant="outline"
                   size="sm"
                   onClick={() => setIsEditingInstitutionalInfo(true)}
-                  className="border-slate-200 text-slate-700 hover:bg-slate-50"
+                  className="border-slate-200 dark:border-neutral-700 text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors duration-300"
                 >
                   <Edit3 className="h-4 w-4 mr-2" />
                   Edit
@@ -365,7 +367,7 @@ export default function ProfilePage() {
                     size="sm"
                     onClick={handleSaveInstitutionalInfo}
                     disabled={savingInstitutionalInfo}
-                    className="bg-slate-900 hover:bg-slate-800 text-white"
+                    className="bg-slate-900 dark:bg-neutral-800 hover:bg-slate-800 dark:hover:bg-neutral-700 text-white"
                   >
                     <Save className="h-4 w-4 mr-2" />
                     {savingInstitutionalInfo ? "Saving..." : "Save"}
@@ -379,7 +381,7 @@ export default function ProfilePage() {
                       setSelectedDepartment(student.department?._id || "")
                       setSelectedLevel(student.level?._id || "")
                     }}
-                    className="border-slate-200 text-slate-700 hover:bg-slate-50"
+                    className="border-slate-200 dark:border-neutral-700 text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors duration-300"
                   >
                     <X className="h-4 w-4 mr-2" />
                     Cancel
@@ -392,31 +394,31 @@ export default function ProfilePage() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-white">
                   <UserCircle2 className="h-4 w-4" />
                   Full Name
                 </div>
-                <p className="text-slate-900 bg-slate-50 p-3 rounded-lg">{student.name}</p>
+                <p className="text-slate-900 dark:text-white bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg">{student.name}</p>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-white">
                   <Hash className="h-4 w-4" />
                   Matric Number
                 </div>
-                <p className="text-slate-900 bg-slate-50 p-3 rounded-lg">{student.matricNumber}</p>
+                <p className="text-slate-900 dark:text-white bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg">{student.matricNumber}</p>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-white">
                   <Mail className="h-4 w-4" />
                   Email Address
                 </div>
-                <p className="text-slate-900 bg-slate-50 p-3 rounded-lg">{student.email}</p>
+                <p className="text-slate-900 dark:text-white bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg">{student.email}</p>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-white">
                   <Phone className="h-4 w-4" />
                   Phone Number
                 </div>
@@ -426,7 +428,7 @@ export default function ProfilePage() {
                       <select
                         value={countryCode}
                         onChange={(e) => setCountryCode(e.target.value)}
-                        className="text-slate-900 text-sm rounded-lg px-3 py-2 border border-slate-200 bg-white"
+                        className="text-slate-900 dark:text-white text-sm rounded-lg px-3 py-2 border border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-800"
                       >
                         <option value="+234">🇳🇬 +234</option>
                         <option value="+1">🇺🇸 +1</option>
@@ -438,22 +440,22 @@ export default function ProfilePage() {
                         value={localNumber}
                         onChange={(e) => setLocalNumber(e.target.value.replace(/\D/g, ""))}
                         placeholder="Enter phone number"
-                        className="flex-1 border-slate-200 focus:border-slate-400"
+                        className="flex-1 border-slate-200 dark:border-neutral-700 focus:border-slate-400 dark:focus:border-neutral-500 dark:bg-neutral-800 dark:text-white"
                       />
-                      <Button size="sm" onClick={handleUpdatePhoneNumber} className="bg-slate-900 hover:bg-slate-800">
+                      <Button size="sm" onClick={handleUpdatePhoneNumber} className="bg-slate-900 dark:bg-neutral-800 hover:bg-slate-800 dark:hover:bg-neutral-700 text-white">
                         Save
                       </Button>
                     </>
                   ) : (
                     <>
-                      <p className="text-slate-900 bg-slate-50 p-3 rounded-lg flex-1">
+                      <p className="text-slate-900 dark:text-white bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg flex-1">
                         {student.phoneNumber || "Not provided"}
                       </p>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setEditingPhone(true)}
-                        className="border-slate-200 text-slate-700 hover:bg-slate-50"
+                        className="border-slate-200 dark:border-neutral-700 text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors duration-300"
                       >
                         Edit
                       </Button>
@@ -464,88 +466,88 @@ export default function ProfilePage() {
             </div>
 
             {/* Academic Information */}
-            <div className="border-t border-slate-200 pt-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                <GraduationCap className="h-5 w-5" />
+            <div className="border-t border-slate-200 dark:border-neutral-700 pt-6">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 dark:text-white" />
                 Academic Information
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                  <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-white">
                     <Building className="h-4 w-4" />
                     Faculty
                   </div>
                   {isEditingInstitutionalInfo ? (
                     <Select onValueChange={setSelectedFaculty} value={selectedFaculty}>
-                      <SelectTrigger className="border-slate-200 focus:border-slate-400">
+                      <SelectTrigger className="border-slate-200 dark:border-neutral-700 focus:border-slate-400 dark:focus:border-neutral-500 dark:bg-neutral-800 dark:text-white">
                         <SelectValue placeholder="Select Faculty" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="dark:bg-neutral-900 dark:text-white">
                         {faculties.map((faculty) => (
-                          <SelectItem key={faculty._id} value={faculty._id}>
+                          <SelectItem key={faculty._id} value={faculty._id} className="dark:text-white">
                             {faculty.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   ) : (
-                    <p className="text-slate-900 bg-slate-50 p-3 rounded-lg">{student.faculty?.name || "N/A"}</p>
+                    <p className="text-slate-900 dark:text-white bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg">{student.faculty?.name || "N/A"}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                  <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-white">
                     <Users className="h-4 w-4" />
                     Department
                   </div>
                   {isEditingInstitutionalInfo ? (
                     <Select onValueChange={setSelectedDepartment} value={selectedDepartment}>
-                      <SelectTrigger className="border-slate-200 focus:border-slate-400">
+                      <SelectTrigger className="border-slate-200 dark:border-neutral-700 focus:border-slate-400 dark:focus:border-neutral-500 dark:bg-neutral-800 dark:text-white">
                         <SelectValue placeholder="Select Department" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="dark:bg-neutral-900 dark:text-white">
                         {departments.map((dept) => (
-                          <SelectItem key={dept._id} value={dept._id}>
+                          <SelectItem key={dept._id} value={dept._id} className="dark:text-white">
                             {dept.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   ) : (
-                    <p className="text-slate-900 bg-slate-50 p-3 rounded-lg">{student.department?.name || "N/A"}</p>
+                    <p className="text-slate-900 dark:text-white bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg">{student.department?.name || "N/A"}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                  <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-white">
                     <GraduationCap className="h-4 w-4" />
                     Level
                   </div>
                   {isEditingInstitutionalInfo ? (
                     <Select onValueChange={setSelectedLevel} value={selectedLevel}>
-                      <SelectTrigger className="border-slate-200 focus:border-slate-400">
+                      <SelectTrigger className="border-slate-200 dark:border-neutral-700 focus:border-slate-400 dark:focus:border-neutral-500 dark:bg-neutral-800 dark:text-white">
                         <SelectValue placeholder="Select Level" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="dark:bg-neutral-900 dark:text-white">
                         {levels.map((level) => (
-                          <SelectItem key={level._id} value={level._id}>
+                          <SelectItem key={level._id} value={level._id} className="dark:text-white">
                             {level.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   ) : (
-                    <p className="text-slate-900 bg-slate-50 p-3 rounded-lg">{student.level?.name || "N/A"}</p>
+                    <p className="text-slate-900 dark:text-white bg-slate-50 dark:bg-neutral-800 p-3 rounded-lg">{student.level?.name || "N/A"}</p>
                   )}
                 </div>
               </div>
 
               <div className="mt-4 flex items-center gap-2">
                 <div className={`w-3 h-3 rounded-full ${student.isActive ? "bg-green-500" : "bg-red-500"}`} />
-                <span className="text-sm text-slate-600">
+                <span className="text-sm text-slate-600 dark:text-gray-300">
                   Account Status:{" "}
-                  <span className={student.isActive ? "text-green-600" : "text-red-600"}>
+                  <span className={student.isActive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
                     {student.isActive ? "Active" : "Inactive"}
                   </span>
                 </span>
@@ -555,15 +557,15 @@ export default function ProfilePage() {
         </Card>
 
         {/* Courses Card */}
-        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+        <Card className="shadow-xl border-0 bg-white/80 dark:bg-neutral-900 dark:border-neutral-800 backdrop-blur-sm transition-colors duration-300">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-full">
-                <BookOpen className="h-6 w-6 text-blue-700" />
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                <BookOpen className="h-6 w-6 text-blue-700 dark:text-blue-200" />
               </div>
               <div>
-                <CardTitle className="text-xl text-slate-900">Course Information</CardTitle>
-                <p className="text-sm text-slate-600 mt-1">Your relevant courses and search for others</p>
+                <CardTitle className="text-xl text-slate-900 dark:text-white">Course Information</CardTitle>
+                <p className="text-sm text-slate-600 dark:text-gray-300 mt-1">Your relevant courses and search for others</p>
               </div>
             </div>
           </CardHeader>
@@ -572,26 +574,26 @@ export default function ProfilePage() {
             {/* Relevant Courses */}
             <div>
               <button
-                className="flex items-center justify-between w-full p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                className="flex items-center justify-between w-full p-4 bg-slate-50 dark:bg-neutral-800 rounded-lg hover:bg-slate-100 dark:hover:bg-neutral-700 transition-colors"
                 onClick={() => setShowRelevant(!showRelevant)}
               >
                 <div className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-slate-700" />
-                  <span className="font-medium text-slate-900">Your Faculty Courses ({relevantCourses.length})</span>
+                  <BookOpen className="h-5 w-5 text-slate-700 dark:text-white" />
+                  <span className="font-medium text-slate-900 dark:text-white">Your Faculty Courses ({relevantCourses.length})</span>
                 </div>
                 {showRelevant ? (
-                  <ChevronUp className="h-5 w-5 text-slate-500" />
+                  <ChevronUp className="h-5 w-5 text-slate-500 dark:text-gray-300" />
                 ) : (
-                  <ChevronDown className="h-5 w-5 text-slate-500" />
+                  <ChevronDown className="h-5 w-5 text-slate-500 dark:text-gray-300" />
                 )}
               </button>
 
               {showRelevant && (
                 <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
                   {relevantCourses.map((course) => (
-                    <div key={course._id} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                      <div className="font-medium text-slate-900">{course.code}</div>
-                      <div className="text-sm text-slate-600">{course.name}</div>
+                    <div key={course._id} className="p-3 bg-slate-50 dark:bg-neutral-800 rounded-lg border border-slate-200 dark:border-neutral-700">
+                      <div className="font-medium text-slate-900 dark:text-white">{course.code}</div>
+                      <div className="text-sm text-slate-600 dark:text-gray-300">{course.name}</div>
                     </div>
                   ))}
                 </div>
@@ -601,25 +603,25 @@ export default function ProfilePage() {
             {/* Search Other Courses */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Search className="h-5 w-5 text-slate-700" />
-                <h3 className="font-medium text-slate-900">Search Other Courses</h3>
+                <Search className="h-5 w-5 text-slate-700 dark:text-white" />
+                <h3 className="font-medium text-slate-900 dark:text-white">Search Other Courses</h3>
               </div>
               <Input
                 type="text"
                 placeholder="Search by course name or code..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="border-slate-200 focus:border-slate-400"
+                className="border-slate-200 dark:border-neutral-700 focus:border-slate-400 dark:focus:border-neutral-500 dark:bg-neutral-800 dark:text-white"
               />
               {searchTerm && (
                 <div className="space-y-2 max-h-60 overflow-y-auto">
                   {filteredSearchResults.length === 0 ? (
-                    <p className="text-center text-slate-500 py-4">No courses found matching your search.</p>
+                    <p className="text-center text-slate-500 dark:text-gray-400 py-4">No courses found matching your search.</p>
                   ) : (
                     filteredSearchResults.map((course) => (
-                      <div key={course._id} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                        <div className="font-medium text-slate-900">{course.code}</div>
-                        <div className="text-sm text-slate-600">{course.name}</div>
+                      <div key={course._id} className="p-3 bg-slate-50 dark:bg-neutral-800 rounded-lg border border-slate-200 dark:border-neutral-700">
+                        <div className="font-medium text-slate-900 dark:text-white">{course.code}</div>
+                        <div className="text-sm text-slate-600 dark:text-gray-300">{course.name}</div>
                       </div>
                     ))
                   )}
@@ -630,15 +632,15 @@ export default function ProfilePage() {
         </Card>
 
         {/* Push Notifications Card */}
-        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+        <Card className="shadow-xl border-0 bg-white/80 dark:bg-neutral-900 dark:border-neutral-800 backdrop-blur-sm transition-colors duration-300">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-full">
-                <Megaphone className="h-6 w-6 text-blue-700" />
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                <Megaphone className="h-6 w-6 text-blue-700 dark:text-blue-200" />
               </div>
               <div>
-                <CardTitle className="text-xl text-slate-900">Notifications</CardTitle>
-                <p className="text-sm text-slate-600 mt-1">Manage your push notification preferences</p>
+                <CardTitle className="text-xl text-slate-900 dark:text-white">Notifications</CardTitle>
+                <p className="text-sm text-slate-600 dark:text-gray-300 mt-1">Manage your push notification preferences</p>
               </div>
             </div>
           </CardHeader>
@@ -648,15 +650,15 @@ export default function ProfilePage() {
         </Card>
 
         {/* Security Card */}
-        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+        <Card className="shadow-xl border-0 bg-white/80 dark:bg-neutral-900 dark:border-neutral-800 backdrop-blur-sm transition-colors duration-300">
           <CardHeader className="pb-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-100 rounded-full">
-                <KeyRound className="h-6 w-6 text-red-700" />
+              <div className="p-2 bg-red-100 dark:bg-red-900 rounded-full">
+                <KeyRound className="h-6 w-6 text-red-700 dark:text-red-300" />
               </div>
               <div>
-                <CardTitle className="text-xl text-slate-900">Security Settings</CardTitle>
-                <p className="text-sm text-slate-600 mt-1">Update your password and security preferences</p>
+                <CardTitle className="text-xl text-slate-900 dark:text-white">Security Settings</CardTitle>
+                <p className="text-sm text-slate-600 dark:text-gray-300 mt-1">Update your password and security preferences</p>
               </div>
             </div>
           </CardHeader>
@@ -672,32 +674,32 @@ export default function ProfilePage() {
                   setNewPassword(pwd)
                   evaluatePassword(pwd)
                 }}
-                className="border-slate-200 focus:border-slate-400"
+                className="border-slate-200 dark:border-neutral-700 focus:border-slate-400 dark:focus:border-neutral-500 dark:bg-neutral-800 dark:text-white"
               />
 
               {newPassword && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-slate-700">Password Strength:</span>
+                    <span className="text-sm font-medium text-slate-700 dark:text-white">Password Strength:</span>
                     <span
                       className={`text-sm font-medium ${
                         passwordStrength === "Very Strong"
-                          ? "text-green-600"
+                          ? "text-green-600 dark:text-green-400"
                           : passwordStrength === "Strong"
-                            ? "text-green-500"
+                            ? "text-green-500 dark:text-green-300"
                             : passwordStrength === "Medium"
-                              ? "text-yellow-600"
-                              : "text-red-600"
+                              ? "text-yellow-600 dark:text-yellow-400"
+                              : "text-red-600 dark:text-red-400"
                       }`}
                     >
                       {passwordStrength}
                     </span>
                   </div>
                   {passwordFeedback.length > 0 && (
-                    <ul className="text-sm text-red-600 space-y-1">
+                    <ul className="text-sm text-red-600 dark:text-red-400 space-y-1">
                       {passwordFeedback.map((msg, idx) => (
                         <li key={idx} className="flex items-center gap-2">
-                          <div className="w-1 h-1 bg-red-600 rounded-full" />
+                          <div className="w-1 h-1 bg-red-600 dark:bg-red-400 rounded-full" />
                           {msg}
                         </li>
                       ))}
@@ -709,7 +711,7 @@ export default function ProfilePage() {
               <Button
                 onClick={() => setShowPasswordConfirmModal(true)}
                 disabled={!newPassword || passwordStrength === "Weak"}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white"
+                className="w-full bg-slate-900 dark:bg-red-700 hover:bg-slate-800 dark:hover:bg-red-800 text-white"
               >
                 Update Password
               </Button>
@@ -721,13 +723,13 @@ export default function ProfilePage() {
       {/* Password Confirmation Modal */}
       {showPasswordConfirmModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 space-y-4">
+          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl w-full max-w-md p-6 space-y-4 transition-colors duration-300">
             <div className="text-center space-y-2">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-                <KeyRound className="h-6 w-6 text-red-600" />
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto">
+                <KeyRound className="h-6 w-6 text-red-600 dark:text-red-300" />
               </div>
-              <h2 className="text-xl font-semibold text-slate-900">Confirm Password Change</h2>
-              <p className="text-sm text-slate-600">
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Confirm Password Change</h2>
+              <p className="text-sm text-slate-600 dark:text-gray-300">
                 Changing your password will immediately log you out. You&apos;ll need to sign in again with your new
                 password.
               </p>
@@ -736,7 +738,7 @@ export default function ProfilePage() {
               <Button
                 variant="outline"
                 onClick={() => setShowPasswordConfirmModal(false)}
-                className="flex-1 border-slate-200 text-slate-700 hover:bg-slate-50"
+                className="flex-1 border-slate-200 dark:border-neutral-700 text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors duration-300"
               >
                 Cancel
               </Button>
@@ -745,7 +747,7 @@ export default function ProfilePage() {
                   setShowPasswordConfirmModal(false)
                   handleChangePassword()
                 }}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                className="flex-1 bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-800 text-white"
               >
                 Change Password
               </Button>
@@ -757,9 +759,9 @@ export default function ProfilePage() {
       {/* Logout Loading Modal */}
       {isLoggingOut && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-2xl p-6 text-center space-y-4">
-            <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-900 rounded-full animate-spin mx-auto" />
-            <p className="text-slate-900 font-medium">Logging you out...</p>
+          <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl p-6 text-center space-y-4 transition-colors duration-300">
+            <div className="w-8 h-8 border-4 border-slate-300 dark:border-neutral-700 border-t-slate-900 dark:border-t-white rounded-full animate-spin mx-auto" />
+            <p className="text-slate-900 dark:text-white font-medium">Logging you out...</p>
           </div>
         </div>
       )}

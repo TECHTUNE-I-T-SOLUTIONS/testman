@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,7 +28,7 @@ export default function ManagePushSubscriptionsPage() {
   const [totalPages, setTotalPages] = useState(1)
   const itemsPerPage = 10
 
-  const fetchSubscriptions = async () => {
+  const fetchSubscriptions = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(`/api/push/subscriptions?page=${currentPage}&limit=${itemsPerPage}&search=${searchTerm}`)
@@ -45,11 +45,11 @@ export default function ManagePushSubscriptionsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [currentPage, searchTerm, itemsPerPage])
 
   useEffect(() => {
     fetchSubscriptions()
-  }, [currentPage, searchTerm])
+  }, [currentPage, searchTerm, fetchSubscriptions])
 
   const handleToggleSubscription = async (subscriptionId: string, isActive: boolean) => {
     try {
