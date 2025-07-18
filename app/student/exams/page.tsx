@@ -121,7 +121,7 @@ export default function Exams() {
   }
 
   return (
-    <div className="container max-w-6xl mx-auto py-10 px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <h1 className="text-3xl text-center font-bold mb-2">Take an Exam</h1>
       <p className="text-center text-muted-foreground mb-8">
         Select a course and start your assessment or use AI to study your own materials

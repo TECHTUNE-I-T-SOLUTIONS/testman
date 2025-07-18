@@ -1,11 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronDown, ChevronUp, HelpCircle, Search } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import Navbar from "@/components/shared/Navbar"
+import { useTheme } from "@/contexts/ThemeContext"
+
+export function useThemeAwareStyles() {
+  const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  return { theme, mounted }
+}
 
 const faqs = [
   {
@@ -75,6 +85,9 @@ export default function FAQPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
+  // Theme-aware styles
+  const { mounted } = useThemeAwareStyles();
+
   const categories = Array.from(new Set(faqs.map((faq) => faq.category)))
 
   const filteredFaqs = faqs.filter((faq) => {
@@ -89,35 +102,40 @@ export default function FAQPage() {
     setOpenIndex(index === openIndex ? null : index)
   }
 
+  // Wait for mount to avoid hydration mismatch
+  if (!mounted) return null;
+
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         {/* Hero Section */}
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
           <div className="container mx-auto px-4 py-16 text-center">
             <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="p-3 bg-gray-900 rounded-full">
-                <HelpCircle className="h-8 w-8 text-white" />
+              <div className="p-3 bg-gray-900 dark:bg-white rounded-full transition-colors duration-300">
+                <HelpCircle className="h-8 w-8 text-white dark:text-gray-900" />
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Frequently Asked Questions</h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
+                Frequently Asked Questions
+              </h1>
             </div>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-200 max-w-3xl mx-auto transition-colors duration-300">
               Find answers to common questions about Operation Save My CGPA. Can&apos;t find what you&apos;re looking for?
-              <span className="text-gray-900 font-medium"> Contact our support team.</span>
+              <span className="text-gray-900 dark:text-white font-medium"> Contact our support team.</span>
             </p>
           </div>
         </div>
 
         {/* Search and Filter Section */}
         <div className="container mx-auto px-4 py-8">
-          <Card className="mb-8">
+          <Card className="mb-8 bg-white dark:bg-gray-800 transition-colors duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Search className="h-5 w-5" />
                 Search & Filter
               </CardTitle>
-              <CardDescription>Search through our FAQ or filter by category to find what you need</CardDescription>
+              <CardDescription className="dark:text-gray-200">Search through our FAQ or filter by category to find what you need</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="relative">
@@ -127,14 +145,16 @@ export default function FAQPage() {
                   placeholder="Search questions and answers..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-white dark:bg-gray-900 dark:text-white transition-colors"
                 />
               </div>
               <div className="flex flex-wrap gap-2">
                 <Badge
                   variant={selectedCategory === null ? "default" : "secondary"}
                   className={`cursor-pointer transition-colors ${
-                    selectedCategory === null ? "bg-gray-900 hover:bg-gray-800" : "hover:bg-gray-200"
+                    selectedCategory === null
+                      ? "bg-gray-900 dark:bg-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200"
+                      : "hover:bg-gray-200 dark:hover:bg-gray-700"
                   }`}
                   onClick={() => setSelectedCategory(null)}
                 >
@@ -145,7 +165,9 @@ export default function FAQPage() {
                     key={category}
                     variant={selectedCategory === category ? "default" : "secondary"}
                     className={`cursor-pointer transition-colors ${
-                      selectedCategory === category ? "bg-gray-900 hover:bg-gray-800" : "hover:bg-gray-200"
+                      selectedCategory === category
+                        ? "bg-gray-900 dark:bg-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200"
+                        : "hover:bg-gray-200 dark:hover:bg-gray-700"
                     }`}
                     onClick={() => setSelectedCategory(category)}
                   >
@@ -159,23 +181,23 @@ export default function FAQPage() {
           {/* FAQ Results */}
           <div className="space-y-4">
             {filteredFaqs.length === 0 ? (
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 transition-colors duration-300">
                 <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                   <HelpCircle className="h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No FAQs Found</h3>
-                  <p className="text-gray-600 max-w-md">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No FAQs Found</h3>
+                  <p className="text-gray-600 dark:text-gray-200 max-w-md">
                     Try adjusting your search terms or removing filters to find what you&apos;re looking for.
                   </p>
                 </CardContent>
               </Card>
             ) : (
               filteredFaqs.map((faq, index) => (
-                <Card key={index} className="overflow-hidden transition-shadow hover:shadow-md">
+                <Card key={index} className="overflow-hidden transition-shadow hover:shadow-md bg-white dark:bg-gray-800 transition-colors duration-300">
                   <button
                     onClick={() => toggleFAQ(index)}
-                    className="w-full text-left focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-inset"
+                    className="w-full text-left focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white focus:ring-inset"
                   >
-                    <CardHeader className="hover:bg-gray-50 transition-colors">
+                    <CardHeader className="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
                       <div className="flex justify-between items-start gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
@@ -183,13 +205,13 @@ export default function FAQPage() {
                               {faq.category}
                             </Badge>
                           </div>
-                          <CardTitle className="text-lg font-medium text-gray-900 text-left">{faq.question}</CardTitle>
+                          <CardTitle className="text-lg font-medium text-gray-900 dark:text-white text-left">{faq.question}</CardTitle>
                         </div>
                         <div className="flex-shrink-0">
                           {openIndex === index ? (
-                            <ChevronUp className="h-5 w-5 text-gray-500" />
+                            <ChevronUp className="h-5 w-5 text-gray-500 dark:text-gray-300" />
                           ) : (
-                            <ChevronDown className="h-5 w-5 text-gray-500" />
+                            <ChevronDown className="h-5 w-5 text-gray-500 dark:text-gray-300" />
                           )}
                         </div>
                       </div>
@@ -197,8 +219,8 @@ export default function FAQPage() {
                   </button>
                   {openIndex === index && (
                     <CardContent className="pt-0 pb-6">
-                      <div className="pl-4 border-l-2 border-gray-200">
-                        <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
+                      <div className="pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                        <p className="text-gray-700 dark:text-gray-200 leading-relaxed">{faq.answer}</p>
                       </div>
                     </CardContent>
                   )}
@@ -208,16 +230,16 @@ export default function FAQPage() {
           </div>
 
           {/* Still Need Help Section */}
-          <Card className="mt-12 bg-gray-900 text-white">
+          <Card className="mt-12 bg-gray-900 dark:bg-white text-white dark:text-gray-900 transition-colors duration-300">
             <CardContent className="text-center py-12">
               <h3 className="text-2xl font-bold mb-4">Still need help?</h3>
-              <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
+              <p className="text-gray-300 dark:text-gray-700 mb-6 max-w-2xl mx-auto">
                 Can&apos;t find the answer you&apos;re looking for? Our support team is here to help you succeed.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
                   href="/contact"
-                  className="inline-flex items-center justify-center px-6 py-3 bg-white text-gray-900 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                  className="inline-flex items-center justify-center px-6 py-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
                   Contact Support
                 </a>
@@ -225,7 +247,7 @@ export default function FAQPage() {
                   href="https://wa.me/2348083191228"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-6 py-3 border border-gray-600 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                  className="inline-flex items-center justify-center px-6 py-3 border border-gray-600 dark:border-gray-300 text-white dark:text-gray-900 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
                 >
                   WhatsApp Chat
                 </a>

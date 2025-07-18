@@ -1,29 +1,37 @@
 "use client"
 
-import { useTheme } from "next-themes"
+import { useTheme } from "@/contexts/ThemeContext"
+import { useState, useEffect } from "react"
 import Image from "next/image"
+import type { ComponentProps } from "react"
 
-interface ThemeAwareLogoProps {
-  className?: string
-  width?: number
-  height?: number
-}
-
-export function ThemeAwareLogo({ 
-  className = "",
-  width = 120,
-  height = 40,
-}: ThemeAwareLogoProps) {
+export default function ThemeAwareLogo(props: ComponentProps<typeof Image>) {
   const { theme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Compute logoSrc based on theme and mounted
+  const logoSrc = mounted
+    ? theme === "dark"
+      ? "/darklogo.svg"
+      : "/Operation-save-my-CGPA-07.svg"
+    : "/Operation-save-my-CGPA-07.svg";
+
+  if (!mounted) return null
+
+  const { width, height, className, ...rest } = props
   return (
     <Image
-      src={theme === "dark" ? "/darklogo.svg" : "/Operation-save-my-CGPA-07.svg"}
-      alt="Operation Save My CGPA Logo"
-      width={width}
-      height={height}
+      key={theme}
+      src={logoSrc}
+      alt="Logo"
+      width={width || 40}
+      height={height || 40}
       className={className}
-      priority
+      {...rest}
     />
   )
 }

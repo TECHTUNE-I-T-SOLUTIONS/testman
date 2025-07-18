@@ -24,6 +24,7 @@ export interface IChatSession extends Document {
   totalMessages: number
   createdAt: Date
   updatedAt: Date
+  extractedContent?: string
 }
 
 const MessageSchema = new Schema<IMessage>({
@@ -53,6 +54,7 @@ const ChatSessionSchema = new Schema<IChatSession>(
     isActive: { type: Boolean, default: true },
     lastActivity: { type: Date, default: Date.now },
     totalMessages: { type: Number, default: 0 },
+    extractedContent: { type: String },
   },
   { timestamps: true },
 )

@@ -2,6 +2,18 @@
 
 import type { FC } from "react";
 import Image from "next/image";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useEffect, useState } from "react";
+
+// Theme-aware hook (same as in support/faq/contact)
+function useThemeAwareStyles() {
+  const { theme } = useTheme(); // Call useTheme unconditionally
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  return { theme, mounted };
+}
 
 type VideoCardProps = {
   title: string;
@@ -9,8 +21,8 @@ type VideoCardProps = {
 };
 
 const VideoCard: React.FC<VideoCardProps> = ({ title, videoUrl }) => (
-  <div className="bg-transparent p-4 rounded-lg shadow-lg hover:shadow-2xl transition-shadow">
-    <h3 className="text-xl text-center font-semibold text-gray-800 mb-4">{title}</h3>
+  <div className="bg-white dark:bg-[#23232a] p-4 rounded-lg shadow-lg hover:shadow-2xl transition-shadow border border-gray-100 dark:border-[#23232a]">
+    <h3 className="text-xl text-center font-semibold text-gray-800 dark:text-gray-100 mb-4">{title}</h3>
     <div className="flex justify-center items-center">
       <Image
         src={videoUrl}
@@ -25,6 +37,11 @@ const VideoCard: React.FC<VideoCardProps> = ({ title, videoUrl }) => (
 );
 
 const EvidenceVideos: FC = () => {
+  const { mounted } = useThemeAwareStyles();
+
+  // Wait for mount to avoid hydration mismatch
+  if (!mounted) return null;
+
   // You can replace the URLs below with actual paths to the gifs/videos
   const videos = [
     {

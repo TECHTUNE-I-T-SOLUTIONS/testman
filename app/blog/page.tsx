@@ -178,17 +178,17 @@ export default function BlogPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
         {/* Hero Section */}
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
           <div className="container mx-auto px-4 py-16 text-center">
             <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="p-3 bg-gray-900 rounded-full">
+              <div className="p-3 bg-gray-900 dark:bg-gray-800 rounded-full">
                 <BookOpen className="h-8 w-8 text-white" />
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Latest Blog Posts</h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">Latest Blog Posts</h1>
             </div>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               Stay updated with the latest insights, tips, and stories from the Operation Save My CGPA community.
             </p>
           </div>
@@ -196,23 +196,23 @@ export default function BlogPage() {
 
         <div className="container mx-auto px-4 py-12">
           {/* Search and Filter */}
-          <Card className="mb-8">
+          <Card className="mb-8 dark:bg-gray-900 dark:border-gray-800">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 dark:text-white">
                 <Filter className="h-5 w-5" />
                 Search & Filter
               </CardTitle>
-              <CardDescription>Find the blog posts you&apos;re looking for</CardDescription>
+              <CardDescription className="dark:text-gray-300">Find the blog posts you&apos;re looking for</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                 <Input
                   type="text"
                   placeholder="Search blog posts..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400"
                 />
               </div>
             </CardContent>
@@ -222,24 +222,24 @@ export default function BlogPage() {
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Card key={i} className="animate-pulse">
-                  <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+                <Card key={i} className="animate-pulse dark:bg-gray-900 dark:border-gray-800">
+                  <div className="h-48 bg-gray-200 dark:bg-gray-800 rounded-t-lg"></div>
                   <CardContent className="p-6">
-                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded mb-4 w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded mb-4 w-3/4"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : filteredBlogs.length === 0 ? (
-            <Card>
+            <Card className="dark:bg-gray-900 dark:border-gray-800">
               <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                 <BookOpen className="h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Blog Posts Found</h3>
-                <p className="text-gray-600 max-w-md">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Blog Posts Found</h3>
+                <p className="text-gray-600 dark:text-gray-300 max-w-md">
                   {searchQuery ? "Try adjusting your search terms." : "No blog posts are available at the moment."}
                 </p>
               </CardContent>
@@ -249,7 +249,7 @@ export default function BlogPage() {
               {filteredBlogs.map((blog) => (
                 <Card
                   key={blog._id}
-                  className="group hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden"
+                  className="group hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden dark:bg-gray-900 dark:border-gray-800"
                   onClick={() => setSelectedBlog(blog)}
                 >
                   {/* Media */}
@@ -270,19 +270,19 @@ export default function BlogPage() {
                   )}
 
                   <CardContent className="p-6">
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-3">
                       <Calendar className="h-4 w-4" />
                       <span>{formatDate(blog.createdAt)}</span>
                     </div>
 
-                    <h2 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-gray-700 transition-colors">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
                       {blog.title}
                     </h2>
 
-                    <p className="text-gray-600 text-sm line-clamp-3 mb-4">{stripHtml(blog.content)}</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 mb-4">{stripHtml(blog.content)}</p>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
+                      <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                         <div className="flex items-center gap-1">
                           <Heart className="h-4 w-4" />
                           <span>{blog.likes}</span>
@@ -309,10 +309,10 @@ export default function BlogPage() {
           {/* Blog Modal */}
           {selectedBlog && (
             <Dialog open={!!selectedBlog} onOpenChange={() => setSelectedBlog(null)}>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto dark:bg-gray-900 dark:border-gray-800">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold pr-8">{selectedBlog.title}</DialogTitle>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <DialogTitle className="text-2xl font-bold pr-8 dark:text-white">{selectedBlog.title}</DialogTitle>
+                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                     <Calendar className="h-4 w-4" />
                     <span>{formatDate(selectedBlog.createdAt)}</span>
                   </div>
@@ -344,16 +344,16 @@ export default function BlogPage() {
 
                   {/* Content */}
                   <div
-                    className="prose prose-gray max-w-none"
+                    className="prose prose-gray max-w-none dark:prose-invert"
                     dangerouslySetInnerHTML={{ __html: selectedBlog.content }}
                   />
 
                   {/* Actions */}
-                  <div className="flex items-center gap-4 pt-6 border-t border-gray-200">
+                  <div className="flex items-center gap-4 pt-6 border-t border-gray-200 dark:border-gray-800">
                     <Button
                       onClick={() => handleLike(selectedBlog._id)}
                       variant="outline"
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 dark:border-gray-700 dark:text-white"
                     >
                       <Heart className="h-4 w-4" />
                       Like ({selectedBlog.likes})
@@ -364,25 +364,25 @@ export default function BlogPage() {
                         <Button
                           onClick={() => handleShare(selectedBlog._id)}
                           variant="outline"
-                          className="flex items-center gap-2"
+                          className="flex items-center gap-2 dark:border-gray-700 dark:text-white"
                         >
                           <Share2 className="h-4 w-4" />
                           Share ({selectedBlog.shares})
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => shareToPlatform(selectedBlog, "whatsapp")}>
+                      <DropdownMenuContent className="dark:bg-gray-900 dark:border-gray-800">
+                        <DropdownMenuItem onClick={() => shareToPlatform(selectedBlog, "whatsapp")} className="dark:text-white">
                           <FaWhatsapp className="mr-2 h-4 w-4" />
                           WhatsApp
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => shareToPlatform(selectedBlog, "facebook")}>
+                        <DropdownMenuItem onClick={() => shareToPlatform(selectedBlog, "facebook")} className="dark:text-white">
                           <FaFacebook className="mr-2 h-4 w-4" />
                           Facebook
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => shareToPlatform(selectedBlog, "x")}>
+                        <DropdownMenuItem onClick={() => shareToPlatform(selectedBlog, "x")} className="dark:text-white">
                           <FaTwitter className="mr-2 h-4 w-4" />X (Twitter)
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => shareToPlatform(selectedBlog, "copy")}>
+                        <DropdownMenuItem onClick={() => shareToPlatform(selectedBlog, "copy")} className="dark:text-white">
                           <FaCopy className="mr-2 h-4 w-4" />
                           Copy Link
                         </DropdownMenuItem>
@@ -402,18 +402,18 @@ export default function BlogPage() {
                         }
                       }}
                       variant="outline"
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 dark:border-gray-700 dark:text-white"
                     >
                       <ExternalLink className="h-4 w-4" />
                       Share via Device
                     </Button>
                   </div>
 
-                  <Separator />
+                  <Separator className="dark:bg-gray-800" />
 
                   {/* Comments Section */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <h3 className="text-lg font-semibold flex items-center gap-2 dark:text-white">
                       <MessageCircle className="h-5 w-5" />
                       Comments ({selectedBlog.comments.length})
                     </h3>
@@ -421,12 +421,12 @@ export default function BlogPage() {
                     {/* Comments List */}
                     <div className="space-y-4 max-h-60 overflow-y-auto">
                       {selectedBlog.comments.length === 0 ? (
-                        <p className="text-gray-500 text-center py-8">No comments yet. Be the first to comment!</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-center py-8">No comments yet. Be the first to comment!</p>
                       ) : (
                         selectedBlog.comments.map((comment, idx) => (
-                          <div key={idx} className="flex gap-3 p-4 bg-gray-50 rounded-lg">
+                          <div key={idx} className="flex gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <Avatar className="h-8 w-8">
-                              <AvatarFallback className="text-xs">
+                              <AvatarFallback className="text-xs dark:bg-gray-700 dark:text-white">
                                 {comment.user
                                   .split(" ")
                                   .map((n) => n[0])
@@ -436,12 +436,12 @@ export default function BlogPage() {
                             </Avatar>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="font-medium text-sm">{comment.user}</span>
-                                <span className="text-xs text-gray-500">
+                                <span className="font-medium text-sm dark:text-white">{comment.user}</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
                                   {new Date(comment.createdAt).toLocaleString()}
                                 </span>
                               </div>
-                              <p className="text-sm text-gray-700">{comment.text}</p>
+                              <p className="text-sm text-gray-700 dark:text-gray-200">{comment.text}</p>
                             </div>
                           </div>
                         ))
@@ -455,12 +455,12 @@ export default function BlogPage() {
                           placeholder="Write a comment..."
                           value={newComment}
                           onChange={(e) => setNewComment(e.target.value)}
-                          className="min-h-[80px]"
+                          className="min-h-[80px] dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-400"
                         />
                         <Button
                           onClick={handleCommentSubmit}
                           disabled={!newComment.trim()}
-                          className="bg-gray-900 hover:bg-gray-800"
+                          className="bg-gray-900 hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-white"
                         >
                           <Send className="h-4 w-4 mr-2" />
                           Submit Comment

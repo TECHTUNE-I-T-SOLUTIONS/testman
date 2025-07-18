@@ -6,9 +6,8 @@ import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
 import { 
   ArrowLeft, 
@@ -187,21 +186,23 @@ export default function ForgotPasswordPage() {
   }
 
   const getChannelIcon = (channelType: string) => {
+    // Make icons visible in both light and dark mode
+    const iconClass = "h-4 w-4 text-blue-600 dark:text-blue-300"
     switch (channelType) {
       case "email":
       case "email2":
-        return <Mail className="h-4 w-4" />
+        return <Mail className={iconClass} />
       case "sms":
-        return <Smartphone className="h-4 w-4" />
+        return <Smartphone className={iconClass} />
       case "whatsapp":
-        return <MessageSquare className="h-4 w-4" />
+        return <MessageSquare className={iconClass} />
       default:
-        return <Mail className="h-4 w-4" />
+        return <Mail className={iconClass} />
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-[#0a1120] dark:via-[#181c2a] dark:to-[#1a223a] flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -212,19 +213,19 @@ export default function ForgotPasswordPage() {
         <div className="mb-6">
           <Link
             href="/auth/login"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white transition-colors"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 text-blue-600 dark:text-blue-300" />
             Back to Login
           </Link>
         </div>
 
-        <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
+        <Card className="shadow-2xl border-0 bg-white/95 dark:bg-[#232a3b]/95 backdrop-blur-sm">
           <CardHeader className="text-center space-y-2 pb-6">
-            <div className="mx-auto w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mb-4">
-              <Shield className="h-6 w-6 text-white" />
+            <div className="mx-auto w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-700 dark:to-indigo-800 rounded-full flex items-center justify-center mb-4">
+              <Shield className="h-6 w-6 text-white dark:text-blue-200" />
             </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">
+            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
               {!otpSent 
                 ? "Reset Password" 
                 : !otpVerified 
@@ -232,7 +233,7 @@ export default function ForgotPasswordPage() {
                 : "Create New Password"
               }
             </CardTitle>
-            <CardDescription className="text-gray-600">
+            <CardDescription className="text-gray-600 dark:text-gray-300">
               {!otpSent 
                 ? "Choose your preferred method to receive a verification code"
                 : !otpVerified 
@@ -247,7 +248,7 @@ export default function ForgotPasswordPage() {
               <>
                 {/* Channel Selection */}
                 <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-700">Delivery Method</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Delivery Method</label>
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       { key: "email", label: "Email", description: "Primary email" },
@@ -271,7 +272,9 @@ export default function ForgotPasswordPage() {
                         }}
                         className={cn(
                           "h-auto p-3 flex flex-col items-center gap-1",
-                          channel === option.key && "bg-gradient-to-r from-blue-500 to-indigo-600"
+                          channel === option.key
+                            ? "bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-700 dark:to-indigo-800 text-white"
+                            : "dark:bg-[#232a3b] dark:text-gray-200"
                         )}
                       >
                         {getChannelIcon(option.key)}
@@ -279,14 +282,14 @@ export default function ForgotPasswordPage() {
                       </Button>
                     ))}
                   </div>
-                  <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-200">
+                  <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-[#2d2320] p-2 rounded-lg border border-amber-200 dark:border-amber-700">
                     Note: SMS service might be temporarily unavailable. Email is recommended.
                   </p>
                 </div>
 
                 {/* Contact Input */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
                     {channel.includes("email") ? "Email Address" : "Phone Number"}
                   </label>
                   <Input
@@ -294,18 +297,18 @@ export default function ForgotPasswordPage() {
                     placeholder={`Enter your ${channel.includes("email") ? "email address" : "phone number"}`}
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
-                    className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                    className="h-12 border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:bg-[#181c2a] dark:text-white"
                   />
                 </div>
 
                 <Button 
                   onClick={sendOtp} 
-                  className="w-full h-12 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium"
+                  className="w-full h-12 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 dark:from-blue-700 dark:to-indigo-800 dark:hover:from-blue-800 dark:hover:to-indigo-900 text-white font-medium"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <>
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin text-white" />
                       Sending...
                     </>
                   ) : (
@@ -320,16 +323,16 @@ export default function ForgotPasswordPage() {
               <>
                 {/* OTP Input */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Verification Code</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Verification Code</label>
                   <Input
                     type="text"
                     placeholder="Enter 6-digit code"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    className="h-12 text-center text-lg tracking-widest border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                    className="h-12 text-center text-lg tracking-widest border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:bg-[#181c2a] dark:text-white"
                     maxLength={6}
                   />
-                  <p className="text-xs text-gray-500 text-center">
+                  <p className="text-xs text-gray-500 dark:text-gray-300 text-center">
                     Code sent to {channel.includes("email") ? "your email" : "your phone"}
                   </p>
                 </div>
@@ -337,18 +340,18 @@ export default function ForgotPasswordPage() {
                 {/* Timer/Resend */}
                 <div className="text-center">
                   {!canResend ? (
-                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                      <Clock className="h-4 w-4" />
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-300">
+                      <Clock className="h-4 w-4 text-blue-600 dark:text-blue-300" />
                       <span>Resend code in {Math.floor(timer / 60)}:{('0' + (timer % 60)).slice(-2)}</span>
                     </div>
                   ) : (
                     <Button
                       variant="link"
                       onClick={handleResend}
-                      className="text-blue-600 hover:text-blue-700"
+                      className="text-blue-600 hover:text-blue-700 dark:text-blue-300 dark:hover:text-blue-400"
                       disabled={isLoading}
                     >
-                      <RefreshCw className="mr-1 h-3 w-3" />
+                      <RefreshCw className="mr-1 h-3 w-3 text-blue-600 dark:text-blue-300" />
                       Resend Code
                     </Button>
                   )}
@@ -356,17 +359,17 @@ export default function ForgotPasswordPage() {
 
                 <Button 
                   onClick={verifyOtp} 
-                  className="w-full h-12 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium"
+                  className="w-full h-12 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 dark:from-blue-700 dark:to-indigo-800 dark:hover:from-blue-800 dark:hover:to-indigo-900 text-white font-medium"
                   disabled={isLoading || otp.length !== 6}
                 >
                   {isLoading ? (
                     <>
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin text-white" />
                       Verifying...
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      <CheckCircle2 className="mr-2 h-4 w-4 text-white" />
                       Verify Code
                     </>
                   )}
@@ -377,43 +380,43 @@ export default function ForgotPasswordPage() {
                 {/* Password Reset */}
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">New Password</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-200">New Password</label>
                     <Input
                       type="password"
                       placeholder="Enter new password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                      className="h-12 border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:bg-[#181c2a] dark:text-white"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">Confirm Password</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Confirm Password</label>
                     <Input
                       type="password"
                       placeholder="Confirm new password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                      className="h-12 border-gray-200 dark:border-gray-700 focus:border-blue-500 focus:ring-blue-500 dark:bg-[#181c2a] dark:text-white"
                     />
                   </div>
-                  <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
+                  <div className="text-xs text-gray-500 dark:text-gray-300 bg-gray-50 dark:bg-[#232a3b] p-3 rounded-lg">
                     Password must contain at least 6 characters including uppercase, lowercase, number, and special character.
                   </div>
                 </div>
 
                 <Button 
                   onClick={resetPassword} 
-                  className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium"
+                  className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 dark:from-green-700 dark:to-emerald-800 dark:hover:from-green-800 dark:hover:to-emerald-900 text-white font-medium"
                   disabled={isLoading || newPassword !== confirmPassword || newPassword.length < 6}
                 >
                   {isLoading ? (
                     <>
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin text-white" />
                       Updating...
                     </>
                   ) : (
                     <>
-                      <Shield className="mr-2 h-4 w-4" />
+                      <Shield className="mr-2 h-4 w-4 text-white" />
                       Update Password
                     </>
                   )}
@@ -422,12 +425,12 @@ export default function ForgotPasswordPage() {
             )}
 
             {/* Footer Link */}
-            <div className="text-center pt-4 border-t border-gray-100">
-              <p className="text-sm text-gray-600">
+            <div className="text-center pt-4 border-t border-gray-100 dark:border-gray-700">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Remember your password?{" "}
                 <Link
                   href="/auth/login"
-                  className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                  className="text-blue-600 hover:text-blue-700 dark:text-blue-300 dark:hover:text-blue-400 font-medium transition-colors"
                 >
                   Sign in here
                 </Link>

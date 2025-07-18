@@ -117,46 +117,50 @@ export default function Results() {
     if (percentage >= 80) {
       return {
         label: "Excellent",
-        color: "bg-green-50 text-green-700 border-green-200",
-        icon: <Award className="h-4 w-4" />,
+        color:
+          "bg-green-50 text-green-700 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-700",
+        icon: <Award className="h-4 w-4 text-green-700 dark:text-green-200" />,
       }
     } else if (percentage >= 70) {
       return {
         label: "Good",
-        color: "bg-blue-50 text-blue-700 border-blue-200",
-        icon: <Award className="h-4 w-4" />,
+        color:
+          "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700",
+        icon: <Award className="h-4 w-4 text-blue-700 dark:text-blue-200" />,
       }
     } else if (percentage >= 50) {
       return {
         label: "Average",
-        color: "bg-yellow-50 text-yellow-700 border-yellow-200",
-        icon: <Award className="h-4 w-4" />,
+        color:
+          "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700",
+        icon: <Award className="h-4 w-4 text-yellow-700 dark:text-yellow-200" />,
       }
     } else {
       return {
         label: "Needs Improvement",
-        color: "bg-red-50 text-red-700 border-red-200",
-        icon: <AlertCircle className="h-4 w-4" />,
+        color:
+          "bg-red-50 text-red-700 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-700",
+        icon: <AlertCircle className="h-4 w-4 text-red-700 dark:text-red-200" />,
       }
     }
   }
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-gray-900 rounded-lg">
-              <BarChart2 className="h-6 w-6 text-white" />
+            <div className="p-2 bg-gray-900 dark:bg-gray-100 rounded-lg">
+              <BarChart2 className="h-6 w-6 text-white dark:text-gray-900" />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">Exam Results</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Exam Results</h1>
           </div>
-          <p className="text-gray-600">View and track your examination performance</p>
+          <p className="text-gray-600 dark:text-gray-300">View and track your examination performance</p>
         </div>
-        <Button variant="outline" asChild className="border-gray-200 bg-transparent">
-          <Link href="/student" className="flex items-center gap-2">
-            <Home className="h-4 w-4" />
+        <Button variant="outline" asChild className="border-gray-200 dark:border-gray-700 bg-transparent">
+          <Link href="/student" className="flex items-center gap-2 text-gray-900 dark:text-white">
+            <Home className="h-4 w-4 text-gray-900 dark:text-white" />
             Back to Dashboard
           </Link>
         </Button>
@@ -164,83 +168,83 @@ export default function Results() {
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-4">
-        <Card className="border-gray-200">
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <FileText className="h-4 w-4" />
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-200 flex items-center gap-2">
+              <FileText className="h-4 w-4 text-gray-600 dark:text-gray-200" />
               Total Exams
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-gray-900">{stats.totalExams}</div>
-            <p className="text-xs text-gray-500 mt-1">Exams completed</p>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalExams}</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Exams completed</p>
           </CardContent>
         </Card>
-        <Card className="border-gray-200">
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-200 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-gray-600 dark:text-gray-200" />
               Average Score
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-gray-900">{stats.averageScore.toFixed(1)}%</div>
-            <p className="text-xs text-gray-500 mt-1">Across all exams</p>
+            <div className="text-3xl font-bold text-gray-900 dark:text-white">{stats.averageScore.toFixed(1)}%</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Across all exams</p>
           </CardContent>
         </Card>
-        <Card className="border-gray-200">
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <Award className="h-4 w-4" />
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-200 flex items-center gap-2">
+              <Award className="h-4 w-4 text-green-600 dark:text-green-300" />
               Highest Score
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">{stats.highestScore.toFixed(1)}%</div>
-            <p className="text-xs text-gray-500 mt-1">Your best performance</p>
+            <div className="text-3xl font-bold text-green-600 dark:text-green-300">{stats.highestScore.toFixed(1)}%</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Your best performance</p>
           </CardContent>
         </Card>
-        <Card className="border-gray-200">
+        <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <AlertCircle className="h-4 w-4" />
+            <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-200 flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-300" />
               Lowest Score
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-600">{stats.lowestScore.toFixed(1)}%</div>
-            <p className="text-xs text-gray-500 mt-1">Area for improvement</p>
+            <div className="text-3xl font-bold text-red-600 dark:text-red-300">{stats.lowestScore.toFixed(1)}%</div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Area for improvement</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Results Section */}
-      <Card className="border-gray-200">
+      <Card className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <CardHeader>
-          <CardTitle className="text-xl text-gray-900">Results History</CardTitle>
-          <CardDescription>View and search your past exam results</CardDescription>
+          <CardTitle className="text-xl text-gray-900 dark:text-white">Results History</CardTitle>
+          <CardDescription className="dark:text-gray-300">View and search your past exam results</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Search and Filter */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-300" />
               <Input
                 placeholder="Search by exam title or course..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 border-gray-200"
+                className="pl-10 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
               />
             </div>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
-              <TabsList className="grid w-full grid-cols-3 bg-gray-100">
-                <TabsTrigger value="all" className="data-[state=active]:bg-white">
+              <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-700">
+                <TabsTrigger value="all" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white">
                   All
                 </TabsTrigger>
-                <TabsTrigger value="passed" className="data-[state=active]:bg-white">
+                <TabsTrigger value="passed" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white">
                   Passed
                 </TabsTrigger>
-                <TabsTrigger value="failed" className="data-[state=active]:bg-white">
+                <TabsTrigger value="failed" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white">
                   Failed
                 </TabsTrigger>
               </TabsList>
@@ -251,34 +255,34 @@ export default function Results() {
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <Card key={i} className="border-gray-200">
+                <Card key={i} className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                   <CardHeader className="pb-3">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-1/2 mt-2" />
+                    <Skeleton className="h-5 w-3/4 dark:bg-gray-700" />
+                    <Skeleton className="h-4 w-1/2 mt-2 dark:bg-gray-700" />
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-between mb-4">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-6 w-24" />
+                      <Skeleton className="h-4 w-32 dark:bg-gray-700" />
+                      <Skeleton className="h-6 w-24 dark:bg-gray-700" />
                     </div>
-                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-full dark:bg-gray-700" />
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : error ? (
-            <Alert variant="destructive" className="border-red-200">
-              <AlertCircle className="h-4 w-4" />
+            <Alert variant="destructive" className="border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-200">
+              <AlertCircle className="h-4 w-4 text-red-700 dark:text-red-200" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           ) : results.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="p-4 bg-gray-100 rounded-full mb-4">
-                <FileText className="h-8 w-8 text-gray-400" />
+              <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full mb-4">
+                <FileText className="h-8 w-8 text-gray-400 dark:text-gray-200" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Results Found</h3>
-              <p className="text-gray-600 max-w-md">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Results Found</h3>
+              <p className="text-gray-600 dark:text-gray-300 max-w-md">
                 {searchQuery || activeTab !== "all"
                   ? "Try adjusting your search or filter criteria."
                   : "You haven't taken any exams yet."}
@@ -292,12 +296,12 @@ export default function Results() {
                 const formattedPercentage = Number.parseFloat(percentage.toFixed(1))
                 const scoreStatus = getScoreStatus(formattedPercentage)
                 return (
-                  <Card key={result._id} className="border-gray-200 hover:shadow-md transition-shadow">
+                  <Card key={result._id} className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:shadow-md transition-shadow">
                     <CardHeader className="pb-3">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <CardTitle className="text-lg text-gray-900 mb-1">{result.examTitle}</CardTitle>
-                          <CardDescription className="text-gray-600">{result.course}</CardDescription>
+                          <CardTitle className="text-lg text-gray-900 dark:text-white mb-1">{result.examTitle}</CardTitle>
+                          <CardDescription className="text-gray-600 dark:text-gray-300">{result.course}</CardDescription>
                         </div>
                         <Badge variant="outline" className={scoreStatus.color}>
                           <div className="flex items-center gap-1">
@@ -309,35 +313,35 @@ export default function Results() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="flex items-center text-sm text-gray-600">
-                          <FileText className="h-4 w-4 mr-2 text-gray-400" />
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                          <FileText className="h-4 w-4 mr-2 text-gray-400 dark:text-gray-200" />
                           <span>
                             Score:{" "}
-                            <span className="font-medium text-gray-900">
+                            <span className="font-medium text-gray-900 dark:text-white">
                               {result.score}/{result.totalQuestions}
                             </span>
                           </span>
                         </div>
-                        <div className="flex items-center text-sm text-gray-600">
-                          <Clock className="h-4 w-4 mr-2 text-gray-400" />
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                          <Clock className="h-4 w-4 mr-2 text-gray-400 dark:text-gray-200" />
                           <span>
-                            Duration: <span className="font-medium text-gray-900">{result.duration} min</span>
+                            Duration: <span className="font-medium text-gray-900 dark:text-white">{result.duration} min</span>
                           </span>
                         </div>
-                        <div className="flex items-center text-sm text-gray-600">
-                          <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                          <Calendar className="h-4 w-4 mr-2 text-gray-400 dark:text-gray-200" />
                           <span>
-                            Date: <span className="font-medium text-gray-900">{formatDate(result.date || "")}</span>
+                            Date: <span className="font-medium text-gray-900 dark:text-white">{formatDate(result.date || "")}</span>
                           </span>
                         </div>
                       </div>
 
                       <div>
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm text-gray-600">Score Percentage</span>
-                          <span className="text-sm font-medium text-gray-900">{formattedPercentage}%</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-300">Score Percentage</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">{formattedPercentage}%</span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                           <div
                             className={`h-2 rounded-full transition-all duration-300 ${
                               formattedPercentage >= 80
@@ -358,7 +362,7 @@ export default function Results() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="border-gray-200 hover:bg-gray-50 bg-transparent"
+                            className="border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 bg-transparent text-gray-900 dark:text-white"
                           >
                             View Details
                           </Button>
@@ -374,37 +378,37 @@ export default function Results() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <CardFooter className="flex justify-between pt-6 border-t border-gray-100">
+          <CardFooter className="flex justify-between pt-6 border-t border-gray-100 dark:border-gray-700">
             <Button
               variant="outline"
               onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
               disabled={page === 1 || loading}
-              className="border-gray-200"
+              className="border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
             >
               {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin text-gray-900 dark:text-white" />
               ) : (
                 <>
-                  <ChevronLeft className="h-4 w-4 mr-2" />
+                  <ChevronLeft className="h-4 w-4 mr-2 text-gray-900 dark:text-white" />
                   Previous
                 </>
               )}
             </Button>
-            <div className="text-sm text-gray-600 flex items-center">
+            <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center">
               Page {page} of {totalPages}
             </div>
             <Button
               variant="outline"
               onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={page === totalPages || loading}
-              className="border-gray-200"
+              className="border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
             >
               {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin text-gray-900 dark:text-white" />
               ) : (
                 <>
                   Next
-                  <ChevronRight className="h-4 w-4 ml-2" />
+                  <ChevronRight className="h-4 w-4 ml-2 text-gray-900 dark:text-white" />
                 </>
               )}
             </Button>

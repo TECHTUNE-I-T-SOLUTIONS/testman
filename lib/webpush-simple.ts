@@ -1,4 +1,5 @@
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const webpush = require('web-push');
 
 // VAPID keys - you should generate these once and store them securely
@@ -16,10 +17,12 @@ export interface PushNotificationPayload {
   icon?: string;
   badge?: string;
   url?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: any;
 }
 
 export async function sendPushNotification(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   subscription: any,
   payload: PushNotificationPayload
 ) {
@@ -43,6 +46,7 @@ export async function sendPushNotification(
 }
 
 export async function sendBulkPushNotifications(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   subscriptions: any[],
   payload: PushNotificationPayload
 ) {

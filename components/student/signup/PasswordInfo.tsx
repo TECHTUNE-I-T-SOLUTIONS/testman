@@ -113,22 +113,26 @@ const PasswordInfoForm = () => {
     <>
       <CardHeader className="space-y-4 pb-8">
         <div className="text-center space-y-2">
-          <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">Create Password</CardTitle>
-          <CardDescription className="text-slate-600">Choose a strong password to secure your account</CardDescription>
+          <CardTitle className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            Create Password
+          </CardTitle>
+          <CardDescription className="text-slate-600 dark:text-slate-200">
+            Choose a strong password to secure your account
+          </CardDescription>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-6 pb-8">
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <p className="text-sm text-amber-800">
-            <strong>Account Status:</strong> Your account will be inactive after registration. Contact admin or purchase
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg dark:bg-amber-900/30 dark:border-amber-400">
+          <p className="text-sm text-amber-800 dark:text-amber-200">
+            <strong className="dark:text-amber-100">Account Status:</strong> Your account will be inactive after registration. Contact admin or purchase
             premium access to activate.
           </p>
         </div>
 
         <div className="grid gap-5">
           <div className="space-y-3">
-            <Label htmlFor="password" className="text-sm font-medium text-slate-700">
+            <Label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-slate-100">
               Password
             </Label>
             <div className="relative">
@@ -142,13 +146,13 @@ const PasswordInfoForm = () => {
                 placeholder="Create a strong password"
                 required
                 autoComplete="new-password"
-                className="h-11 pr-12 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20"
+                className="h-11 pr-12 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20 dark:border-slate-600 dark:focus:border-slate-400 dark:bg-slate-900 dark:text-white"
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
@@ -158,18 +162,18 @@ const PasswordInfoForm = () => {
 
             {/* Password Requirements */}
             <div className="space-y-2">
-              <p className="text-xs font-medium text-slate-600">Password must contain:</p>
+              <p className="text-xs font-medium text-slate-600 dark:text-slate-200">Password must contain:</p>
               <div className="grid grid-cols-1 gap-1">
                 {passwordRequirements.map((req, index) => {
                   const isValid = req.regex.test(password.password)
                   return (
                     <div key={index} className="flex items-center gap-2 text-xs">
                       {isValid ? (
-                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        <CheckCircle className="w-3 h-3 text-green-500 dark:text-green-400" />
                       ) : (
-                        <XCircle className="w-3 h-3 text-slate-300" />
+                        <XCircle className="w-3 h-3 text-slate-300 dark:text-slate-600" />
                       )}
-                      <span className={isValid ? "text-green-600" : "text-slate-500"}>{req.text}</span>
+                      <span className={isValid ? "text-green-600 dark:text-green-400" : "text-slate-500 dark:text-slate-400"}>{req.text}</span>
                     </div>
                   )
                 })}
@@ -177,14 +181,14 @@ const PasswordInfoForm = () => {
             </div>
 
             {errors.password && (
-              <p className="text-red-600 text-sm" aria-live="polite">
+              <p className="text-red-600 dark:text-red-400 text-sm" aria-live="polite">
                 {errors.password}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirm_password" className="text-sm font-medium text-slate-700">
+            <Label htmlFor="confirm_password" className="text-sm font-medium text-slate-700 dark:text-slate-100">
               Confirm Password
             </Label>
             <Input
@@ -197,10 +201,10 @@ const PasswordInfoForm = () => {
               placeholder="Confirm your password"
               required
               autoComplete="new-password"
-              className="h-11 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20"
+              className="h-11 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20 dark:border-slate-600 dark:focus:border-slate-400 dark:bg-slate-900 dark:text-white"
             />
             {errors.confirm_password && (
-              <p className="text-red-600 text-sm" aria-live="polite">
+              <p className="text-red-600 dark:text-red-400 text-sm" aria-live="polite">
                 {errors.confirm_password}
               </p>
             )}
@@ -212,7 +216,7 @@ const PasswordInfoForm = () => {
             type="button"
             variant="outline"
             onClick={() => setStep(2)}
-            className="h-11 px-8 border-slate-200 text-slate-700 hover:bg-slate-50"
+            className="h-11 px-8 border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-white dark:hover:bg-slate-800"
           >
             Back
           </Button>
@@ -220,12 +224,12 @@ const PasswordInfoForm = () => {
             type="button"
             onClick={handleSubmit}
             disabled={loading}
-            className="h-11 px-8 bg-slate-900 hover:bg-slate-800 text-white font-medium"
+            className="h-11 px-8 bg-slate-900 hover:bg-slate-800 text-white font-medium dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
           >
             {loading ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Creating Account...
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin dark:border-slate-900/30 dark:border-t-slate-900" />
+                <span className="dark:text-slate-900">Creating Account...</span>
               </div>
             ) : (
               "Create Account"

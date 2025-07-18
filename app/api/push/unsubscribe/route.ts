@@ -2,7 +2,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { connectdb } from '@/lib/connectdb'
 import PushSubscription from '@/lib/models/push-subscription'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getStudentFromToken } from '@/utils/auth'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getServerSession } from 'next-auth/next'
 
 export async function POST(req: NextRequest) {

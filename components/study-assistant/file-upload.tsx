@@ -23,165 +23,37 @@ interface UploadedFile {
 }
 
 interface FileUploadProps {
+  files: UploadedFile[]
+  setFiles: (files: UploadedFile[]) => void
   onFilesUpdated: (files: UploadedFile[]) => void
 }
 
-export function FileUpload({ onFilesUpdated }: FileUploadProps) {
+export function FileUpload({ files, setFiles, onFilesUpdated }: FileUploadProps) {
   const { toast } = useToast()
-  const [files, setFiles] = useState<UploadedFile[]>([])
   const [subject, setSubject] = useState("")
 
-  const onDrop = useCallback(
-    async (acceptedFiles: File[]) => {
-      if (acceptedFiles.length === 0) {
-        toast({
-          title: "No files selected",
-          description: "Please select a file to upload.",
-          variant: "default",
-        })
-        return
-      }
-
-      const newFilesToAdd: UploadedFile[] = acceptedFiles.map((file) => ({
-        id: Math.random().toString(36).substring(2, 15), // Temporary ID
-        title: file.name.split(".")[0],
-        fileName: file.name,
-        fileType: file.type,
-        processingStatus: "pending",
-        uploadProgress: 0,
-      }))
-
-      setFiles((prevFiles) => [...prevFiles, ...newFilesToAdd])
-      onFilesUpdated([...files, ...newFilesToAdd]) // Immediately update parent
-
-      for (const file of acceptedFiles) {
-        await uploadFile(file, newFilesToAdd.find((f) => f.fileName === file.name)?.id || "")
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [toast, onFilesUpdated, files],
-  )
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
-
-  const uploadFile = async (file: File, tempId: string) => {
-    const formData = new FormData()
-    formData.append("file", file)
-    formData.append("subject", subject)
-
-    try {
-      const xhr = new XMLHttpRequest()
-      xhr.open("POST", "/api/study-materials/upload", true)
-
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percentCompleted = Math.round((event.loaded * 100) / event.total)
-          setFiles((prevFiles) =>
-            prevFiles.map((f) => (f.id === tempId ? { ...f, uploadProgress: percentCompleted } : f)),
-          )
-        }
-      }
-
-      xhr.onload = async () => {
-        if (xhr.status === 200) {
-          const response = JSON.parse(xhr.responseText)
-          const materialId = response.material.id
-
-          setFiles((prevFiles) =>
-            prevFiles.map((f) =>
-              f.id === tempId
-                ? {
-                    ...f,
-                    id: materialId, // Update with actual ID from backend
-                    processingStatus: "pending",
-                    uploadProgress: 100,
-                  }
-                : f,
-            ),
-          )
-          toast({
-            title: "Upload Successful",
-            description: `${file.name} uploaded. Processing started...`,
-            variant: "default",
-          })
-          pollProcessingStatus(materialId)
-        } else {
-          const errorData = JSON.parse(xhr.responseText)
-          setFiles((prevFiles) =>
-            prevFiles.map((f) =>
-              f.id === tempId
-                ? { ...f, processingStatus: "failed", uploadProgress: 100, extractedText: errorData.error }
-                : f,
-            ),
-          )
-          toast({
-            title: "Upload Failed",
-            description: errorData.error || `Failed to upload ${file.name}.`,
-            variant: "destructive",
-          })
-        }
-        onFilesUpdated(files.map((f) => (f.id === tempId ? { ...f, uploadProgress: 100 } : f)))
-      }
-
-      xhr.onerror = () => {
-        setFiles((prevFiles) =>
-          prevFiles.map((f) =>
-            f.id === tempId
-              ? { ...f, processingStatus: "failed", uploadProgress: 100, extractedText: "Network error" }
-              : f,
-          ),
-        )
-        toast({
-          title: "Upload Failed",
-          description: `Network error during upload of ${file.name}.`,
-          variant: "destructive",
-        })
-        onFilesUpdated(files.map((f) => (f.id === tempId ? { ...f, uploadProgress: 100 } : f)))
-      }
-
-      xhr.send(formData)
-    } catch (error) {
-      console.error("Error during file upload:", error)
-      setFiles((prevFiles) =>
-        prevFiles.map((f) =>
-          f.id === tempId
-            ? { ...f, processingStatus: "failed", uploadProgress: 100, extractedText: "Client-side error" }
-            : f,
-        ),
-      )
-      toast({
-        title: "Upload Failed",
-        description: `An unexpected error occurred during upload of ${file.name}.`,
-        variant: "destructive",
-      })
-      onFilesUpdated(files.map((f) => (f.id === tempId ? { ...f, uploadProgress: 100 } : f)))
-    }
-  }
-
+  // pollProcessingStatus: add explicit types and cast processingStatus
   const pollProcessingStatus = useCallback(
     async (materialId: string) => {
-      /* NEW: skip temp ids (they're < 24 chars) */
       if (materialId.length !== 24) {
         console.log(`⏭️ Skipping polling for temp ID: ${materialId}`)
         return
       }
-
       console.log(`🔄 Starting to poll processing status for: ${materialId}`)
       let attempts = 0
-      const maxAttempts = 60 // Poll for up to 5 minutes (5 seconds * 60 attempts)
-      const pollInterval = 5000 // 5 seconds
-
+      const maxAttempts = 60
+      const pollInterval = 5000
       const poll = async () => {
         if (attempts >= maxAttempts) {
           console.error(`⏰ Processing timed out for material: ${materialId}`)
-          const updatedFiles = files.map((f) =>
+          const updatedFiles = files.map((f: UploadedFile) =>
             f.id === materialId
               ? {
                   ...f,
-                  processingStatus: "failed" as const,
-                  extractedText: "Processing timed out.",
+                  processingStatus: "failed" as UploadedFile['processingStatus'],
+                  extractedText: "Processing timed out."
                 }
-              : f,
+              : f
           )
           setFiles(updatedFiles)
           onFilesUpdated(updatedFiles)
@@ -192,27 +64,23 @@ export function FileUpload({ onFilesUpdated }: FileUploadProps) {
           })
           return
         }
-
         try {
           const response = await fetch(`/api/study-materials/status?materialId=${materialId}`)
           if (!response.ok) {
             throw new Error("Failed to fetch processing status")
           }
           const data = await response.json()
-
-          const updatedFiles = files.map((f) =>
+          const updatedFiles = files.map((f: UploadedFile) =>
             f.id === materialId
               ? {
                   ...f,
-                  processingStatus: data.status,
-                  extractedText: data.extractedTextPreview,
+                  processingStatus: data.status as UploadedFile['processingStatus'],
+                  extractedText: data.extractedTextPreview
                 }
-              : f,
+              : f
           )
-
           setFiles(updatedFiles)
           onFilesUpdated(updatedFiles)
-
           if (data.status === "completed") {
             toast({
               title: "Processing Complete",
@@ -231,14 +99,14 @@ export function FileUpload({ onFilesUpdated }: FileUploadProps) {
           }
         } catch (error) {
           console.error(`Error polling status for ${materialId}:`, error)
-          const updatedFiles = files.map((f) =>
+          const updatedFiles = files.map((f: UploadedFile) =>
             f.id === materialId
               ? {
                   ...f,
-                  processingStatus: "failed" as const,
-                  extractedText: "Error fetching status.",
+                  processingStatus: "failed" as UploadedFile['processingStatus'],
+                  extractedText: "Error fetching status."
                 }
-              : f,
+              : f
           )
           setFiles(updatedFiles)
           onFilesUpdated(updatedFiles)
@@ -251,24 +119,142 @@ export function FileUpload({ onFilesUpdated }: FileUploadProps) {
       }
       poll()
     },
-    [toast, onFilesUpdated, files],
+    [toast, onFilesUpdated, files, setFiles]
   )
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleRetryProcessing = async (fileId: string, fileName: string, fileType: string) => {
-    const fileToRetry = files.find((f) => f.id === fileId)
-    if (!fileToRetry) return
+  // 1. uploadFile as useCallback, above onDrop
+  const uploadFile = useCallback(async (file: File, tempId: string) => {
+    const formData = new FormData()
+    formData.append("file", file)
+    formData.append("subject", subject)
 
-    setFiles((prevFiles) =>
-      prevFiles.map((f) => (f.id === fileId ? { ...f, processingStatus: "processing", extractedText: "" } : f)),
-    )
+    try {
+      const xhr = new XMLHttpRequest()
+      xhr.open("POST", "/api/study-materials/upload", true)
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentCompleted = Math.round((event.loaded * 100) / event.total)
+          const updatedFiles = files.map((f: UploadedFile) => (f.id === tempId ? { ...f, uploadProgress: percentCompleted } : f))
+          setFiles(updatedFiles)
+          onFilesUpdated(updatedFiles)
+        }
+      }
+
+      xhr.onload = async () => {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText)
+          const materialId = response.material.id
+          const updatedFiles = files.map((f: UploadedFile) =>
+            f.id === tempId
+              ? {
+                  ...f,
+                  id: materialId,
+                  processingStatus: "pending" as UploadedFile['processingStatus'],
+                  uploadProgress: 100,
+                }
+              : f
+          )
+          setFiles(updatedFiles)
+          onFilesUpdated(updatedFiles)
+          toast({
+            title: "Upload Successful",
+            description: `${file.name} uploaded. Processing started...`,
+            variant: "default",
+          })
+          pollProcessingStatus(materialId)
+        } else {
+          const errorData = JSON.parse(xhr.responseText)
+          const updatedFiles = files.map((f: UploadedFile) =>
+            f.id === tempId
+              ? { ...f, processingStatus: "failed" as UploadedFile['processingStatus'], uploadProgress: 100, extractedText: errorData.error }
+              : f
+          )
+          setFiles(updatedFiles)
+          onFilesUpdated(updatedFiles)
+          toast({
+            title: "Upload Failed",
+            description: errorData.error || `Failed to upload ${file.name}.`,
+            variant: "destructive",
+          })
+        }
+      }
+
+      xhr.onerror = () => {
+        const updatedFiles = files.map((f: UploadedFile) =>
+          f.id === tempId
+            ? { ...f, processingStatus: "failed" as UploadedFile['processingStatus'], uploadProgress: 100, extractedText: "Network error" }
+            : f
+        )
+        setFiles(updatedFiles)
+        onFilesUpdated(updatedFiles)
+        toast({
+          title: "Upload Failed",
+          description: `Network error during upload of ${file.name}.`,
+          variant: "destructive",
+        })
+      }
+
+      xhr.send(formData)
+    } catch (error) {
+      console.error("Error during file upload:", error)
+      const updatedFiles = files.map((f: UploadedFile) =>
+        f.id === tempId
+          ? { ...f, processingStatus: "failed" as UploadedFile['processingStatus'], uploadProgress: 100, extractedText: "Client-side error" }
+          : f
+      )
+      setFiles(updatedFiles)
+      onFilesUpdated(updatedFiles)
+      toast({
+        title: "Upload Failed",
+        description: `An unexpected error occurred during upload of ${file.name}.`,
+        variant: "destructive",
+      })
+    }
+  }, [files, setFiles, onFilesUpdated, subject, toast, pollProcessingStatus])
+
+  // 2. onDrop uses uploadFile in deps
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      if (acceptedFiles.length === 0) {
+        toast({
+          title: "No files selected",
+          description: "Please select a file to upload.",
+          variant: "default",
+        })
+        return
+      }
+      const newFilesToAdd: UploadedFile[] = acceptedFiles.map((file: File) => ({
+        id: Math.random().toString(36).substring(2, 15),
+        title: file.name.split(".")[0],
+        fileName: file.name,
+        fileType: file.type,
+        processingStatus: "pending" as UploadedFile['processingStatus'],
+        uploadProgress: 0,
+      }))
+      const updatedFiles = [...files, ...newFilesToAdd]
+      setFiles(updatedFiles)
+      onFilesUpdated(updatedFiles)
+      for (const file of acceptedFiles) {
+        await uploadFile(file, newFilesToAdd.find((f: UploadedFile) => f.fileName === file.name)?.id || "")
+      }
+    },
+    [toast, onFilesUpdated, files, setFiles, uploadFile]
+  )
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
+
+  // In handleRetryProcessing, add explicit types
+  const handleRetryProcessing = async (fileId: string, fileName: string) => {
+    const fileToRetry = files.find((f: UploadedFile) => f.id === fileId)
+    if (!fileToRetry) return
+    const updatedFiles = files.map((f: UploadedFile) => (f.id === fileId ? { ...f, processingStatus: "processing" as UploadedFile['processingStatus'], extractedText: "" } : f))
+    setFiles(updatedFiles)
+    onFilesUpdated(updatedFiles)
     toast({
       title: "Retrying Processing",
       description: `Attempting to re-process ${fileName}...`,
     })
-
-    // In a real scenario, you'd re-upload the file or trigger a re-processing API endpoint
-    // For this example, we'll simulate by re-polling after a short delay
     setTimeout(() => pollProcessingStatus(fileId), 2000)
   }
 
@@ -355,7 +341,7 @@ export function FileUpload({ onFilesUpdated }: FileUploadProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleRetryProcessing(file.id, file.fileName, file.fileType)}
+                        onClick={() => handleRetryProcessing(file.id, file.fileName)}
                         title="Retry Processing"
                         className="shrink-0"
                       >

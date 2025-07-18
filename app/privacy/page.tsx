@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import Navbar from "@/components/shared/Navbar"
+import { useTheme } from "@/contexts/ThemeContext"
 
 const privacyData = [
   {
@@ -92,7 +93,10 @@ const privacyData = [
 
 export default function PrivacyPolicyPage() {
   const [show, setShow] = useState(false)
+  useTheme()
 
+  // Theme-based classes (using Tailwind dark: variants for consistency)
+  // See FAQ and Support pages for reference
   useEffect(() => {
     const timeout = setTimeout(() => setShow(true), 100)
     return () => clearTimeout(timeout)
@@ -101,32 +105,38 @@ export default function PrivacyPolicyPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-neutral-950 transition-colors duration-300">
         {/* Hero Section */}
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white border-b border-gray-200 dark:bg-neutral-900 dark:border-neutral-800 transition-colors duration-300">
           <div className="container mx-auto px-4 py-16">
             <div
               className={`transform transition-all duration-700 ease-in-out ${
                 show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
               }`}
             >
-              <Button variant="outline" asChild className="mb-8 bg-transparent">
+              <Button
+                variant="outline"
+                asChild
+                className="mb-8 bg-transparent border-gray-300 text-gray-900 hover:bg-gray-100 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 transition-colors duration-300"
+              >
                 <Link href="/" className="flex items-center gap-2">
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-4 w-4 text-gray-900 dark:text-white" />
                   Back to Home
                 </Link>
               </Button>
 
               <div className="text-center">
                 <div className="flex items-center justify-center gap-3 mb-6">
-                  <div className="p-3 bg-gray-900 rounded-full">
+                  <div className="p-3 bg-gray-900 rounded-full dark:bg-neutral-800 transition-colors duration-300">
                     <Shield className="h-8 w-8 text-white" />
                   </div>
-                  <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Privacy Policy</h1>
+                  <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
+                    Privacy Policy
+                  </h1>
                 </div>
-                <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                <p className="text-xl text-gray-600 dark:text-neutral-300 max-w-4xl mx-auto leading-relaxed transition-colors duration-300">
                   This Privacy Policy explains how we handle your information at{" "}
-                  <span className="font-semibold text-gray-900">Operation Save My CGPA</span>. Your privacy is very
+                  <span className="font-semibold text-gray-900 dark:text-white">Operation Save My CGPA</span>. Your privacy is very
                   important to us, and we&apos;re committed to protecting your personal data while providing you with the
                   best educational experience.
                 </p>
@@ -142,18 +152,18 @@ export default function PrivacyPolicyPage() {
             }`}
           >
             {/* Last Updated */}
-            <Card className="mb-8 bg-green-50 border-green-200">
+            <Card className="mb-8 bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-900 transition-colors duration-300">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-green-800">
-                    <FileText className="h-5 w-5" />
+                  <div className="flex items-center gap-2 text-green-800 dark:text-green-200">
+                    <FileText className="h-5 w-5 dark:text-green-200" />
                     <span className="font-medium">Last updated: {new Date().toLocaleDateString()}</span>
                   </div>
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                     Current Version
                   </Badge>
                 </div>
-                <p className="text-green-700 mt-2 text-sm">
+                <p className="text-green-700 dark:text-green-300 mt-2 text-sm transition-colors duration-300">
                   This policy is effective immediately and applies to all users of our platform.
                 </p>
               </CardContent>
@@ -164,23 +174,31 @@ export default function PrivacyPolicyPage() {
               {privacyData.map((section, index) => {
                 const IconComponent = section.icon
                 return (
-                  <Card key={index} className="hover:shadow-md transition-shadow">
+                  <Card
+                    key={index}
+                    className="hover:shadow-md transition-shadow bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 transition-colors duration-300"
+                  >
                     <CardHeader>
                       <CardTitle className="flex items-center gap-3">
-                        <div className="p-2 bg-gray-100 rounded-lg">
-                          <IconComponent className="h-5 w-5 text-gray-600" />
+                        <div className="p-2 bg-gray-100 rounded-lg dark:bg-neutral-800 transition-colors duration-300">
+                          <IconComponent className="h-5 w-5 text-gray-600 dark:text-white" />
                         </div>
-                        <span className="text-xl">
+                        <span className="text-xl text-gray-900 dark:text-white transition-colors duration-300">
                           {index + 1}. {section.title}
                         </span>
                       </CardTitle>
-                      <CardDescription className="text-base">{section.content}</CardDescription>
+                      <CardDescription className="text-base text-gray-600 dark:text-neutral-300 transition-colors duration-300">
+                        {section.content}
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-2">
                         {section.details.map((detail, detailIndex) => (
-                          <li key={detailIndex} className="flex items-start gap-2 text-gray-700">
-                            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <li
+                            key={detailIndex}
+                            className="flex items-start gap-2 text-gray-700 dark:text-neutral-200 transition-colors duration-300"
+                          >
+                            <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-neutral-500 rounded-full mt-2 flex-shrink-0"></div>
                             <span className="text-sm leading-relaxed">{detail}</span>
                           </li>
                         ))}
@@ -191,20 +209,22 @@ export default function PrivacyPolicyPage() {
               })}
             </div>
 
-            <Separator className="my-12" />
+            <Separator className="my-12 bg-gray-200 dark:bg-neutral-800 transition-colors duration-300" />
 
             {/* Additional Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <Card>
+              <Card className="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 transition-colors duration-300">
                 <CardHeader>
-                  <CardTitle className="text-lg">Policy Updates</CardTitle>
+                  <CardTitle className="text-lg text-gray-900 dark:text-white transition-colors duration-300">
+                    Policy Updates
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                  <p className="text-sm leading-relaxed mb-3 text-gray-700 dark:text-neutral-200 transition-colors duration-300">
                     This Privacy Policy may be updated periodically to reflect changes in our practices or legal
                     requirements. We will notify users of significant changes through:
                   </p>
-                  <ul className="text-sm text-gray-600 space-y-1">
+                  <ul className="text-sm text-gray-600 dark:text-neutral-400 space-y-1 transition-colors duration-300">
                     <li>• Email notifications to registered users</li>
                     <li>• Platform announcements and notifications</li>
                     <li>• Updates on our website and social media</li>
@@ -212,12 +232,14 @@ export default function PrivacyPolicyPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 transition-colors duration-300">
                 <CardHeader>
-                  <CardTitle className="text-lg">International Users</CardTitle>
+                  <CardTitle className="text-lg text-gray-900 dark:text-white transition-colors duration-300">
+                    International Users
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 text-sm leading-relaxed">
+                  <p className="text-sm leading-relaxed text-gray-700 dark:text-neutral-200 transition-colors duration-300">
                     Our platform is accessible globally, and we comply with international privacy laws including GDPR
                     for European users and other applicable data protection regulations. Data may be processed in
                     different countries while maintaining the same level of protection.
@@ -227,22 +249,39 @@ export default function PrivacyPolicyPage() {
             </div>
 
             {/* Related Policies */}
-            <Card className="mb-8">
+            <Card className="mb-8 bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 transition-colors duration-300">
               <CardHeader>
-                <CardTitle>Related Policies</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-gray-900 dark:text-white transition-colors duration-300">
+                  Related Policies
+                </CardTitle>
+                <CardDescription className="text-gray-600 dark:text-neutral-300 transition-colors duration-300">
                   For complete information about our practices, please also review these related documents
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-3">
-                  <Button variant="outline" asChild size="sm">
+                  <Button
+                    variant="outline"
+                    asChild
+                    size="sm"
+                    className="border-gray-300 text-gray-900 hover:bg-gray-100 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 transition-colors duration-300"
+                  >
                     <Link href="/terms">Terms of Service</Link>
                   </Button>
-                  <Button variant="outline" asChild size="sm">
+                  <Button
+                    variant="outline"
+                    asChild
+                    size="sm"
+                    className="border-gray-300 text-gray-900 hover:bg-gray-100 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 transition-colors duration-300"
+                  >
                     <Link href="/cookies">Cookies Policy</Link>
                   </Button>
-                  <Button variant="outline" asChild size="sm">
+                  <Button
+                    variant="outline"
+                    asChild
+                    size="sm"
+                    className="border-gray-300 text-gray-900 hover:bg-gray-100 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800 transition-colors duration-300"
+                  >
                     <Link href="/contact">Contact Us</Link>
                   </Button>
                 </div>
@@ -250,24 +289,28 @@ export default function PrivacyPolicyPage() {
             </Card>
 
             {/* Contact Section */}
-            <Card className="bg-gray-900 text-white">
+            <Card className="bg-gray-900 text-white dark:bg-neutral-900 dark:text-white border border-gray-900 dark:border-neutral-800 transition-colors duration-300">
               <CardContent className="text-center py-8">
                 <div className="flex items-center justify-center gap-2 mb-4">
-                  <Phone className="h-6 w-6" />
+                  <Phone className="h-6 w-6 text-white" />
                   <h3 className="text-xl font-bold">Privacy Questions or Concerns?</h3>
                 </div>
-                <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
+                <p className="mb-6 max-w-2xl mx-auto text-gray-300 dark:text-neutral-300 transition-colors duration-300">
                   If you have questions about this Privacy Policy, want to exercise your privacy rights, or have
                   concerns about how we handle your data, please contact our privacy team.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button asChild variant="secondary">
+                  <Button
+                    asChild
+                    variant="secondary"
+                    className="bg-green-900 text-green-200 hover:bg-green-800 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800 transition-colors duration-300"
+                  >
                     <Link href="/contact">Contact Privacy Team</Link>
                   </Button>
                   <Button
                     asChild
                     variant="outline"
-                    className="border-gray-600 text-white hover:bg-gray-800 bg-transparent"
+                    className="border-gray-600 text-white hover:bg-gray-800 bg-transparent dark:border-neutral-600 dark:text-white dark:hover:bg-neutral-800 transition-colors duration-300"
                   >
                     <a href="https://wa.me/2348083191228" target="_blank" rel="noopener noreferrer">
                       WhatsApp Support
