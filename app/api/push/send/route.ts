@@ -4,7 +4,7 @@ import { authOptions } from '../../../api/auth/[...nextauth]/route'
 import { connectdb } from '@/lib/connectdb'
 import Admin from '@/lib/models/admin'
 import PushSubscription from '@/lib/models/push-subscription'
-import webpush from '@/lib/webpush-simple'
+import { sendPushNotification } from '@/lib/webpush-simple'
 
 export async function POST(req: NextRequest) {
   try {
@@ -47,24 +47,21 @@ export async function POST(req: NextRequest) {
     }
 
     // Send notifications
-    const payload = JSON.stringify({
-      title,
-      body,
-      icon: '/favicon.ico',
-      badge: '/favicon.ico',
-      url: url || '/',
-      timestamp: Date.now()
-    })
-
     const results = await Promise.allSettled(
       subscriptions.map(async (sub) => {
         try {
-          await webpush.sendNotification(
+          await sendPushNotification(
             {
               endpoint: sub.endpoint,
               keys: sub.keys
             },
-            payload
+            {
+              title,
+              body,
+              icon: '/favicon.ico',
+              badge: '/favicon.ico',
+              url: url || '/'
+            }
           )
 
           // Update last used date
@@ -72,16 +69,19 @@ export async function POST(req: NextRequest) {
           await sub.save()
 
           return { success: true, userId: sub.userId }
-        } catch (error) {
+        } catch (error: unknown) {
           console.error(`Failed to send to ${sub.userId}:`, error)
 
           // If subscription is invalid, mark as inactive
-          if (error.statusCode === 410 || error.statusCode === 404) {
-            sub.isActive = false
-            await sub.save()
+          if (error && typeof error === 'object' && 'statusCode' in error) {
+            const statusCode = (error as { statusCode: number }).statusCode
+            if (statusCode === 410 || statusCode === 404) {
+              sub.isActive = false
+              await sub.save()
+            }
           }
 
-          return { success: false, userId: sub.userId, error: error.message }
+          return { success: false, userId: sub.userId, error: error instanceof Error ? error.message : 'Unknown error' }
         }
       })
     )

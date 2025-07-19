@@ -126,7 +126,7 @@ export function WebPushManager() {
       className="flex items-center gap-2"
     >
       {isSubscribed ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
-      {isLoading ? 'Loading...' : isSubscribed ? 'Unsubscribe' : 'Enable Notifications'}
+      {isLoading ? 'Loading...' : isSubscribed ? 'Unsubscribe' : 'Enable'}
     </Button>
   )
 }

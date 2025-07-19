@@ -15,7 +15,8 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { History, MessageCircle, Download, Trash2, Play, Calendar, FileText } from "lucide-react"
 import { toast } from "sonner"
-import type { StudyMode } from "@/app/student/study-assistant/page"
+
+type StudyMode = "flashcards" | "quiz" | "summary" | "chat" // Replace with actual modes as needed
 
 interface ChatSession {
   id: string

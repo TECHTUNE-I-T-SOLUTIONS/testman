@@ -1,4 +1,5 @@
 import mongoose, { Schema, type Document } from "mongoose"
+import "./study-material"
 
 export interface IMessage {
   id: string

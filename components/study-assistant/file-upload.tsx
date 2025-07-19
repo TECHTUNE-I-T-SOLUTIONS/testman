@@ -12,13 +12,13 @@ import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-interface UploadedFile {
+export interface UploadedFile {
   id: string
   title: string
   fileName: string
   fileType: string
   processingStatus: "pending" | "processing" | "completed" | "failed"
-  uploadProgress: number
+  uploadProgress?: number
   extractedText?: string // To show a preview of extracted text
 }
 
@@ -330,8 +330,8 @@ export function FileUpload({ files, setFiles, onFilesUpdated }: FileUploadProps)
                         {file.processingStatus === "completed" && <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />}
                         {file.processingStatus === "failed" && <XCircle className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />}
                       </div>
-                      {file.uploadProgress < 100 && file.processingStatus === "pending" && (
-                        <Progress value={file.uploadProgress} className="mt-2 h-1 sm:h-2" />
+                      {(file.uploadProgress ?? 0) < 100 && file.processingStatus === "pending" && (
+                        <Progress value={file.uploadProgress ?? 0} className="mt-2 h-1 sm:h-2" />
                       )}
                       {file.extractedText && (
                         <p className="mt-1 text-xs text-muted-foreground line-clamp-2">Preview: {file.extractedText}</p>

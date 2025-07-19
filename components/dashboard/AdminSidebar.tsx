@@ -56,6 +56,16 @@ import { useTheme } from "@/contexts/ThemeContext";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Image from "next/image";
 
+// Tooltip component for collapsed sidebar actions
+const Tooltip = ({ children, label }: { children: React.ReactNode; label: string }) => (
+  <div className="group relative flex items-center">
+    {children}
+    <span className="pointer-events-none absolute left-full ml-2 z-50 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+      {label}
+    </span>
+  </div>
+);
+
 const CustomSidebarTrigger = () => {
   const { state, toggleSidebar } = useSidebar()
   return (
@@ -63,7 +73,7 @@ const CustomSidebarTrigger = () => {
       variant="ghost"
       size="icon"
       onClick={toggleSidebar}
-      className="h-8 w-8 rounded-full absolute right-[-12px] top-4 bg-white border border-gray-200 shadow-sm z-10 hidden md:flex hover:bg-gray-50"
+      className="h-8 w-8 rounded-full absolute right-[-12px] top-4 bg-white text-black dark:text-white dark:bg-black border border-gray-200 shadow-sm z-10 hidden md:flex hover:bg-gray-50"
     >
       {state === "collapsed" ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
       <span className="sr-only">Toggle Sidebar</span>
@@ -92,7 +102,7 @@ const MobileSidebarTrigger = () => {
       variant="ghost"
       size="icon"
       onClick={() => setOpenMobile(true)}
-      className="fixed top-4 left-4 z-50 md:hidden bg-white border border-gray-200 shadow-sm hover:bg-gray-50"
+      className="fixed top-4 left-4 z-50 md:hidden bg-white dark:bg-black border border-gray-200 dark:border-gray-700 shadow-sm hover:bg-gray-50"
     >
       <Menu className="h-5 w-5" />
       <span className="sr-only">Open Menu</span>
@@ -211,10 +221,24 @@ const AdminSidebar = () => {
     // NEW: AI Access Management - Only for super-admin
     isSuperAdmin && {
       label: "AI Access Management",
-      path: "/dashboard/super-admin/manage-ai-access",
       icon: <Brain className="h-5 w-5" />,
-      badge: "NEW",
-      badgeColor: "bg-green-500",
+      subItems: [
+        {
+          label: "Manage AI Access",
+          path: "/dashboard/super-admin/manage-ai-access",
+          icon: <Users className="h-4 w-4" />,
+        },
+        {
+          label: "AI Exams",
+          path: "/dashboard/super-admin/ai-exams",
+          icon: <NotepadTextDashed className="h-4 w-4" />,
+        },
+        {
+          label: "AI Exam Results",
+          path: "/dashboard/super-admin/ai-exam-results",
+          icon: <ClipboardList className="h-4 w-4" />,
+        },
+      ],
     },
     isSuperAdmin && {
       label: "Manage Notes",
@@ -317,16 +341,25 @@ const AdminSidebar = () => {
   return (
     <>
       <MobileSidebarTrigger />
-      <Sidebar collapsible="icon" className="fixed border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+      <Sidebar
+        collapsible="icon"
+        className={cn(
+          "fixed border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900",
+          isCollapsed
+            ? "w-[72px] md:w-[72px] min-w-[72px] max-w-[72px] transition-all duration-200"
+            : "w-[270px] md:w-[270px] min-w-[270px] max-w-[270px] transition-all duration-200"
+        )}
+      >
         <CustomSidebarTrigger />
         <SidebarHeader
           className={cn(
             "p-6 flex flex-col items-center relative border-b border-gray-100 dark:border-gray-700",
             isCollapsed ? "pb-4" : "pb-6",
+            isCollapsed && "px-2"
           )}
         >
           {/* Admin Avatar and Info */}
-          <div className="w-full flex flex-col items-center space-y-4">
+          <div className={cn("w-full flex flex-col items-center space-y-4", isCollapsed && "space-y-2")}>
             <div className="relative">
               <Avatar className={cn("border-2 border-gray-200", isCollapsed ? "h-10 w-10" : "h-16 w-16")}>
                 {mounted && (
@@ -367,7 +400,12 @@ const AdminSidebar = () => {
           </div>
         </SidebarHeader>
         <SidebarSeparator />
-        <UISidebarContent className="px-3 py-4">
+        <UISidebarContent
+          className={cn(
+            "py-4",
+            isCollapsed ? "px-1" : "px-3"
+          )}
+        >
           <SidebarMenu>
             {navItems.map((item, index) => {
               if (!item.subItems) {
@@ -382,6 +420,7 @@ const AdminSidebar = () => {
                         isPathActive(item.path!)
                           ? "bg-gray-900 dark:bg-gray-700 text-white hover:bg-gray-800 dark:hover:bg-gray-600 shadow-sm"
                           : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
+                        isCollapsed && "justify-center px-0"
                       )}
                     >
                       <button
@@ -389,23 +428,14 @@ const AdminSidebar = () => {
                           router.push(item.path!)
                           setOpenMobile(false)
                         }}
-                        className="flex items-center py-2 w-full relative"
+                        className={cn(
+                          "flex items-center py-2 w-full relative",
+                          isCollapsed ? "justify-center px-0" : ""
+                        )}
                       >
                         <div className={cn("text-current", isCollapsed ? "mx-auto" : "mr-3")}>{item.icon}</div>
                         {!isCollapsed && <span className="font-medium">{item.label}</span>}
                         {/* NEW Badge */}
-                        {item.badge && !isCollapsed && (
-                          <div className="ml-auto">
-                            <Badge className={cn("text-xs px-2 py-0.5 text-white", item.badgeColor || "bg-blue-500")}>
-                              {item.badge}
-                            </Badge>
-                          </div>
-                        )}
-                        {item.badge && isCollapsed && (
-                          <div className="absolute -top-1 -right-1">
-                            <div className={cn("w-2 h-2 rounded-full", item.badgeColor || "bg-blue-500")} />
-                          </div>
-                        )}
                       </button>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -427,10 +457,14 @@ const AdminSidebar = () => {
                             "transition-all duration-200 h-12 mb-1 rounded-lg",
                             openDropdowns[item.label] ? "bg-gray-100 dark:bg-gray-800" : "hover:bg-gray-50 dark:hover:bg-gray-800",
                             item.subItems?.some((subItem) => isPathActive(subItem.path)) && "text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800",
+                            isCollapsed && "justify-center px-0"
                           )}
                         >
-                          <div className="flex items-center justify-between py-2 w-full">
-                            <div className="flex items-center">
+                          <div className={cn(
+                            "flex items-center justify-between py-2 w-full",
+                            isCollapsed ? "justify-center" : ""
+                          )}>
+                            <div className={cn("flex items-center", isCollapsed ? "justify-center w-full" : "")}>
                               <div className={cn("text-current", isCollapsed ? "mx-auto" : "mr-3")}>{item.icon}</div>
                               {!isCollapsed && <span className="font-medium">{item.label}</span>}
                             </div>
@@ -474,7 +508,12 @@ const AdminSidebar = () => {
             })}
           </SidebarMenu>
         </UISidebarContent>
-        <SidebarFooter className="border-t border-gray-100 dark:border-gray-700 p-4 space-y-4">
+        <SidebarFooter
+          className={cn(
+            "border-t border-gray-100 dark:border-gray-700 p-4 space-y-4",
+            isCollapsed && "px-2 py-3"
+          )}
+        >
           {!isCollapsed && (
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
@@ -487,26 +526,60 @@ const AdminSidebar = () => {
               </div>
             </div>
           )}
-          <div className="flex items-center justify-between">
-            <Button
-              variant="outline"
-              className="w-full text-sm border-gray-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors bg-transparent"
-              disabled={isLoggingOut}
-              onClick={confirmLogout}
-            >
-              {isLoggingOut ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Logging out...
-                </>
-              ) : (
-                <>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  {isCollapsed ? "" : "Sign Out"}
-                </>
-              )}
-            </Button>
-            <ThemeToggle />
+          <div
+            className={cn(
+              "flex items-center",
+              isCollapsed ? "flex-col gap-2 w-full" : "justify-between"
+            )}
+          >
+            {isCollapsed ? (
+              <>
+                <Tooltip label="Sign Out">
+                  <Button
+                    variant="outline"
+                    className="w-10 h-10 p-0 border-gray-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors bg-transparent flex items-center justify-center"
+                    disabled={isLoggingOut}
+                    onClick={confirmLogout}
+                  >
+                    {isLoggingOut ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <LogOut className="h-5 w-5" />
+                    )}
+                    <span className="sr-only">Sign Out</span>
+                  </Button>
+                </Tooltip>
+                <Tooltip label="Toggle Theme">
+                  <div>
+                    <ThemeToggle
+                      className="w-10 h-10 p-0 flex items-center justify-center"
+                    />
+                  </div>
+                </Tooltip>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  className="w-full text-sm border-gray-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition-colors bg-transparent"
+                  disabled={isLoggingOut}
+                  onClick={confirmLogout}
+                >
+                  {isLoggingOut ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Logging out...
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </>
+                  )}
+                </Button>
+                <ThemeToggle />
+              </>
+            )}
           </div>
         </SidebarFooter>
       </Sidebar>

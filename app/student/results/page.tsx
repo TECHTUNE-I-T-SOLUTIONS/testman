@@ -33,6 +33,8 @@ type ExamResult = {
   totalQuestions: number
   date?: string
   duration?: number
+  percentage?: number
+  isPassed?: boolean
 }
 
 export default function Results() {
@@ -83,6 +85,7 @@ export default function Results() {
             lowestScore: number
           }
         } = await res.json()
+        
         setResults(data.results)
         setTotalPages(data.totalPages)
         setStats(data.stats)
@@ -292,9 +295,12 @@ export default function Results() {
             /* Results List */
             <div className="space-y-4">
               {results.map((result) => {
-                const percentage = (result.score / result.totalQuestions) * 100
-                const formattedPercentage = Number.parseFloat(percentage.toFixed(1))
-                const scoreStatus = getScoreStatus(formattedPercentage)
+                // Use percentage from API if available, otherwise calculate it
+                const percentage = result.percentage !== undefined 
+                  ? result.percentage 
+                  : (result.score / result.totalQuestions) * 100;
+                const formattedPercentage = Number.parseFloat(percentage.toFixed(1));
+                const scoreStatus = getScoreStatus(formattedPercentage);
                 return (
                   <Card key={result._id} className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:shadow-md transition-shadow">
                     <CardHeader className="pb-3">

@@ -1,9 +1,9 @@
 
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import PushNotification from "@/lib/models/push-notification"
 import { connectdb } from "@/lib/connectdb"
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     await connectdb()
     

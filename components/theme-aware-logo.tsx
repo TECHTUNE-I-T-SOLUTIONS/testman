@@ -22,12 +22,13 @@ export default function ThemeAwareLogo(props: ComponentProps<typeof Image>) {
 
   if (!mounted) return null
 
-  const { width, height, className, ...rest } = props
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { width, height, className, alt, src, ...rest } = props
   return (
     <Image
       key={theme}
       src={logoSrc}
-      alt="Logo"
+      alt={alt || "Logo"}
       width={width || 40}
       height={height || 40}
       className={className}

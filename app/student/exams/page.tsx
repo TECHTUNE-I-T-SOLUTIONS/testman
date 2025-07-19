@@ -99,7 +99,7 @@ export default function Exams() {
 
   const handleUseAIStudyAssistant = () => {
     toast.info("Opening AI Study Assistant...")
-    router.push("/student/study-assistant")
+    router.push("/study-assistant")
   }
 
   const otherCourses = allCourses.filter((course) => course.facultyId !== student?.faculty?._id)

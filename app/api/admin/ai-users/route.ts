@@ -1,15 +1,38 @@
 import { NextResponse } from "next/server"
 import { connectdb } from "@/lib/connectdb"
 import AIUsage from "@/lib/models/ai-usage"
+import Student from "@/lib/models/student"
+import Faculty from "@/lib/models/faculty"
+import Department from "@/lib/models/department"
+import Level from "@/lib/models/Level"
 
 export async function GET() {
   try {
     await connectdb()
 
     const users = await AIUsage.find({})
-      .populate("studentId", "name matricNumber email faculty department")
-      .populate("studentId.faculty", "name")
-      .populate("studentId.department", "name")
+      .populate({
+        path: "studentId",
+        model: Student,
+        select: "name matricNumber email faculty department level",
+        populate: [
+          {
+            path: "faculty",
+            model: Faculty,
+            select: "name"
+          },
+          {
+            path: "department",
+            model: Department,
+            select: "name"
+          },
+          {
+            path: "level",
+            model: Level,
+            select: "name"
+          }
+        ]
+      })
       .sort({ createdAt: -1 })
 
     const stats = {

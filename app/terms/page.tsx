@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, FileText, Shield, Users, AlertTriangle, Scale, Phone } from "lucide-react"
+import { ArrowLeft, FileText, Shield, Users, AlertTriangle, Scale, Phone, Brain } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -24,37 +24,43 @@ const termsData = [
     icon: Users,
     title: "User Responsibilities",
     content:
-      "Users are expected to use the platform responsibly and respectfully. Any misuse of the testing system or platform features may lead to suspension or permanent ban. You must provide accurate information during registration and maintain the confidentiality of your account credentials.",
+      "You are expected to use the platform, including all AI-powered features, responsibly and respectfully. Any misuse of the testing system, AI tools, or platform features may result in suspension or permanent ban. You must provide accurate information during registration and maintain the confidentiality of your account credentials. You are solely responsible for your activity on the platform.",
+  },
+  {
+    icon: Brain,
+    title: "Use of AI Features",
+    content:
+      "Our platform provides AI-powered study assistance, including but not limited to practice questions, explanations, and exam simulations. The AI is intended as a study aid only and does not replace professional instruction, academic guidance, or your own independent study. You must not rely solely on AI-generated content for academic decisions, exam preparation, or coursework. All AI outputs are provided 'as is' and may contain inaccuracies or errors. You are responsible for verifying any information or answers provided by the AI.",
   },
   {
     icon: Shield,
     title: "Data Privacy",
     content:
-      "We collect and store necessary user data to enhance your learning experience. Your data will not be shared with third parties except as required by law. We implement industry-standard security measures to protect your personal information and academic records.",
+      "We collect and store necessary user data, including data related to your use of AI features, to enhance your learning experience. Your data will not be shared with third parties except as required by law. We implement industry-standard security measures to protect your personal information and academic records.",
   },
   {
     icon: FileText,
     title: "Intellectual Property",
     content:
-      "All content on this platform, including questions, designs, course materials, and software, is owned by Operation Save My CGPA or its licensors. Unauthorized reproduction, distribution, or commercial use of any content is strictly prohibited without written permission.",
+      "All content on this platform, including AI-generated questions, explanations, designs, course materials, and software, is owned by Operation Save My CGPA or its licensors. Unauthorized reproduction, distribution, or commercial use of any content is strictly prohibited without written permission.",
   },
   {
     icon: AlertTriangle,
-    title: "Limitations of Liability",
+    title: "Limitations of Liability & AI Disclaimer",
     content:
-      "We are not responsible for any loss or damage caused by your reliance on information from this platform. We provide no guarantees of academic performance improvement. The platform is provided 'as is' without warranties of any kind, express or implied.",
+      "Operation Save My CGPA, its owners, and affiliates are not liable for any direct, indirect, incidental, or consequential damages arising from your use of the platform or reliance on any information, including AI-generated content. We do not guarantee the accuracy, completeness, or suitability of any AI-generated or other content for your academic needs. The platform and all its features, including AI, are provided 'as is' without warranties of any kind, express or implied. You use the platform and its AI features at your own risk.",
   },
   {
     icon: Scale,
     title: "Modifications",
     content:
-      "These terms may be updated from time to time to reflect changes in our services or legal requirements. Users will be notified of any major changes via email or platform notifications. Continued use of the platform implies acceptance of the updated terms.",
+      "These terms may be updated from time to time to reflect changes in our services, AI capabilities, or legal requirements. Users will be notified of any major changes via email or platform notifications. Continued use of the platform implies acceptance of the updated terms.",
   },
   {
     icon: Phone,
     title: "Contact & Support",
     content:
-      "For any concerns, questions, or disputes regarding these terms, contact us via WhatsApp or email. We are committed to resolving any issues promptly and fairly. Our support team is available during business hours to assist you.",
+      "For any concerns, questions, or disputes regarding these terms or the use of AI features, contact us via WhatsApp or email. We are committed to resolving any issues promptly and fairly. Our support team is available during business hours to assist you.",
   },
 ]
 
@@ -100,7 +106,7 @@ export default function TermsPage() {
                 </div>
                 <p className="text-xl text-gray-600 dark:text-gray-200 max-w-3xl mx-auto leading-relaxed transition-colors duration-300">
                   Welcome to <span className="font-semibold text-gray-900 dark:text-white">Operation Save My CGPA</span>. By accessing
-                  or using our platform, you agree to the following terms. Please read them carefully before using our
+                  or using our platform, including any AI-powered features, you agree to the following terms. Please read them carefully before using our
                   services.
                 </p>
               </div>
@@ -122,7 +128,7 @@ export default function TermsPage() {
                   <span className="font-medium">Last updated: {new Date().toLocaleDateString()}</span>
                 </div>
                 <p className="text-blue-700 dark:text-blue-100 mt-2 text-sm">
-                  These terms are effective immediately and apply to all users of the platform.
+                  These terms are effective immediately and apply to all users of the platform, including those using AI-powered features.
                 </p>
               </CardContent>
             </Card>
@@ -161,8 +167,8 @@ export default function TermsPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed transition-colors duration-300">
-                    By creating an account or using any part of our platform, you acknowledge that you have read,
-                    understood, and agree to be bound by these Terms of Service and our Privacy Policy.
+                    By creating an account or using any part of our platform, including AI-powered features, you acknowledge that you have read,
+                    understood, and agree to be bound by these Terms of Service and our Privacy Policy. You further acknowledge that you are solely responsible for how you use the platform and any AI-generated content.
                   </p>
                 </CardContent>
               </Card>
@@ -185,7 +191,7 @@ export default function TermsPage() {
               <CardContent className="text-center py-8">
                 <h3 className="text-xl font-bold mb-4">Questions About These Terms?</h3>
                 <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-                  If you have any questions or concerns about these Terms of Service, please don&apos;t hesitate to contact
+                  If you have any questions or concerns about these Terms of Service or the use of AI features, please don&apos;t hesitate to contact
                   our support team.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -20,12 +20,14 @@ export interface IStudentAnswer {
 
 export interface IAIPracticeExam extends Document {
   studentId: mongoose.Types.ObjectId
+  courseId: mongoose.Types.ObjectId
   sessionId?: mongoose.Types.ObjectId
   title: string
   subject?: string
   questions: IQuestion[]
   duration: number
   status: "draft" | "active" | "completed" | "expired"
+  isActive: boolean
   studentAnswers: IStudentAnswer[]
   materialIds: mongoose.Types.ObjectId[]
   score?: number
@@ -62,6 +64,7 @@ const StudentAnswerSchema = new Schema<IStudentAnswer>({
 const AIPracticeExamSchema = new Schema<IAIPracticeExam>(
   {
     studentId: { type: Schema.Types.ObjectId, ref: "Student", required: true },
+    courseId: { type: Schema.Types.ObjectId, ref: "Course", required: true },
     sessionId: { type: Schema.Types.ObjectId, ref: "ChatSession" }, // optional
     title: { type: String, required: true },
     subject: String,
@@ -72,6 +75,7 @@ const AIPracticeExamSchema = new Schema<IAIPracticeExam>(
       enum: ["draft", "active", "completed", "expired"],
       default: "draft",
     },
+    isActive: { type: Boolean, default: true },
     studentAnswers: [StudentAnswerSchema],
     materialIds: [{ type: Schema.Types.ObjectId, ref: "StudyMaterial" }],
     score: Number,
@@ -84,7 +88,9 @@ const AIPracticeExamSchema = new Schema<IAIPracticeExam>(
 )
 
 AIPracticeExamSchema.index({ studentId: 1, createdAt: -1 })
+AIPracticeExamSchema.index({ courseId: 1 })
 AIPracticeExamSchema.index({ status: 1 })
+AIPracticeExamSchema.index({ isActive: 1 })
 AIPracticeExamSchema.index({ sessionId: 1 })
 
 const AIPracticeExam =

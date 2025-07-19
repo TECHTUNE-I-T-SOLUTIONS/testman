@@ -117,23 +117,25 @@ export default function CreateAdPage() {
   const expiryDate = previewDays > 0 ? new Date(Date.now() + previewDays * 24 * 60 * 60 * 1000) : null
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-gray-50 dark:bg-neutral-900 transition-colors duration-300">
       <Header title="Create Advertisement" />
 
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
-        <Card>
+      <div className="max-w-4xl mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-6 space-y-6">
+        <Card className="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 shadow-sm transition-colors">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <Plus className="h-5 w-5" />
               New Advertisement
             </CardTitle>
-            <CardDescription>Create a new advertisement to display to students</CardDescription>
+            <CardDescription className="text-gray-600 dark:text-gray-300">
+              Create a new advertisement to display to students
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Advertisement Title *</Label>
+                <Label htmlFor="title" className="text-gray-900 dark:text-gray-100">Advertisement Title *</Label>
                 <Input
                   id="title"
                   type="text"
@@ -141,18 +143,20 @@ export default function CreateAdPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   maxLength={100}
+                  className="bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition"
                 />
                 <p className="text-sm text-muted-foreground text-right">{title.length}/100 characters</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="link">Link URL (Optional)</Label>
+                <Label htmlFor="link" className="text-gray-900 dark:text-gray-100">Link URL (Optional)</Label>
                 <Input
                   id="link"
                   type="url"
                   placeholder="https://example.com"
                   value={link}
                   onChange={(e) => setLink(e.target.value)}
+                  className="bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition"
                 />
                 <p className="text-sm text-muted-foreground">Where should users go when they click the ad?</p>
               </div>
@@ -160,13 +164,13 @@ export default function CreateAdPage() {
 
             {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="description">Description *</Label>
+              <Label htmlFor="description" className="text-gray-900 dark:text-gray-100">Description *</Label>
               <Textarea
                 id="description"
                 placeholder="Enter advertisement description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="min-h-[100px] resize-none"
+                className="min-h-[100px] resize-none bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition"
                 maxLength={300}
               />
               <p className="text-sm text-muted-foreground text-right">{description.length}/300 characters</p>
@@ -174,13 +178,13 @@ export default function CreateAdPage() {
 
             {/* Image Upload */}
             <div className="space-y-2">
-              <Label>Advertisement Image *</Label>
+              <Label className="text-gray-900 dark:text-gray-100">Advertisement Image *</Label>
               {!imagePreview ? (
-                <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
-                  <ImageIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <div className="relative border-2 border-dashed border-gray-300 dark:border-neutral-700 rounded-lg p-6 sm:p-8 text-center hover:border-gray-400 dark:hover:border-neutral-500 transition-colors bg-gray-50 dark:bg-neutral-800">
+                  <ImageIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
-                    <p className="text-xs text-gray-500">PNG, JPG, GIF, WebP up to 5MB</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Click to upload or drag and drop</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF, WebP up to 5MB</p>
                   </div>
                   <input
                     type="file"
@@ -194,9 +198,14 @@ export default function CreateAdPage() {
                   <img
                     src={imagePreview || "/placeholder.svg"}
                     alt="Advertisement preview"
-                    className="w-full max-w-md mx-auto rounded-lg border"
+                    className="w-full max-w-md mx-auto rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800"
                   />
-                  <Button variant="destructive" size="sm" onClick={removeImage} className="absolute top-2 right-2">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={removeImage}
+                    className="absolute top-2 right-2"
+                  >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -204,9 +213,9 @@ export default function CreateAdPage() {
             </div>
 
             {/* Settings */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="duration">Duration (Days) *</Label>
+                <Label htmlFor="duration" className="text-gray-900 dark:text-gray-100">Duration (Days) *</Label>
                 <Input
                   id="duration"
                   type="number"
@@ -215,16 +224,17 @@ export default function CreateAdPage() {
                   onChange={(e) => setDuration(e.target.value)}
                   min="1"
                   max="365"
+                  className="bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Status</Label>
+                <Label className="text-gray-900 dark:text-gray-100">Status</Label>
                 <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700">
                     <SelectItem value="active">
                       <div className="flex items-center gap-2">
                         <Eye className="h-4 w-4" />
@@ -242,12 +252,12 @@ export default function CreateAdPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Priority</Label>
+                <Label className="text-gray-900 dark:text-gray-100">Priority</Label>
                 <Select value={priority} onValueChange={setPriority}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700">
                     <SelectItem value="high">High Priority</SelectItem>
                     <SelectItem value="medium">Medium Priority</SelectItem>
                     <SelectItem value="low">Low Priority</SelectItem>
@@ -259,20 +269,27 @@ export default function CreateAdPage() {
             {/* Preview */}
             {title && description && imagePreview && (
               <div className="space-y-2">
-                <Label>Advertisement Preview</Label>
-                <Card className="max-w-md">
+                <Label className="text-gray-900 dark:text-gray-100">Advertisement Preview</Label>
+                <Card className="max-w-md bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 shadow-sm transition-colors">
                   <CardContent className="p-4">
                     <div className="space-y-3">
-                      <img src={imagePreview || "/placeholder.svg"} alt={title} className="w-full rounded-lg" />
+                      <img
+                        src={imagePreview || "/placeholder.svg"}
+                        alt={title}
+                        className="w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-800"
+                      />
                       <div className="space-y-1">
-                        <h3 className="font-semibold text-sm">{title}</h3>
+                        <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100">{title}</h3>
                         <p className="text-xs text-muted-foreground line-clamp-2">{description}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant={status === "active" ? "default" : "secondary"} className="text-xs">
+                        <Badge
+                          variant={status === "active" ? "default" : "secondary"}
+                          className="text-xs capitalize"
+                        >
                           {status}
                         </Badge>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs capitalize">
                           {priority} priority
                         </Badge>
                       </div>
@@ -297,7 +314,7 @@ export default function CreateAdPage() {
             >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white dark:border-gray-900 mr-2" />
                   Creating Advertisement...
                 </>
               ) : (

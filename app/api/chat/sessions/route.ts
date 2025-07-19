@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { connectdb } from "@/lib/connectdb"
 import ChatSession from "@/lib/models/chat-session"
+import "@/lib/models/study-material"
 import { getStudentFromToken } from "@/utils/auth"
 
 export async function GET(req: NextRequest) {
