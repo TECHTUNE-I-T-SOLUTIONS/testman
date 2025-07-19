@@ -1,9 +1,14 @@
+import { NextResponse } from "next/server"
+import { connectdb } from "@/lib/connectdb"
+import AIPracticeExam, { IAIPracticeExam } from "@/lib/models/ai-practice-exam"
+import { getStudentFromToken } from "@/utils/auth"
+
 export async function GET(
   request: Request,
   { params }: { params: { examId: string } }
 ) {
   try {
-    await connectDB()
+    await connectdb()
 
     const studentId = await getStudentFromToken()
     if (!studentId) {
@@ -13,7 +18,7 @@ export async function GET(
     const exam = await AIPracticeExam.findOne({
       _id: params.examId,
       studentId
-    }).lean()
+    }).lean() as IAIPracticeExam | null
 
     if (!exam) {
       return NextResponse.json({ error: "Exam not found" }, { status: 404 })
@@ -21,11 +26,13 @@ export async function GET(
 
     // Transform exam to ensure all required fields are present
     const transformedExam = {
-      _id: exam._id.toString(),
+      _id: typeof exam._id === "object" && exam._id !== null && "toString" in exam._id
+        ? (exam._id as { toString: () => string }).toString()
+        : String(exam._id as string ?? ""),
       title: exam.title || "Untitled Exam",
       subject: exam.subject || exam.title || "Practice Exam",
-      questions: exam.questions || [],
-      duration: exam.duration || 30,
+      questions: Array.isArray(exam.questions) ? exam.questions : [],
+      duration: typeof exam.duration === "number" ? exam.duration : 30,
       status: exam.status || "active",
       materialIds: exam.materialIds || [],
       createdAt: exam.createdAt || new Date().toISOString(),

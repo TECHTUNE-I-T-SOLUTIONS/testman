@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -14,8 +14,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { toast } from "sonner"
-import { Search, Crown, Users, Calendar, TrendingUp, Loader2, RefreshCw } from "lucide-react"
+import { 
+  Search, 
+  Crown, 
+  Users, 
+  Calendar, 
+  TrendingUp, 
+  Loader2, 
+  RefreshCw, 
+  Mail, 
+  GraduationCap, 
+  Building,
+  ChevronLeft,
+  ChevronRight,
+  Zap,
+  Clock,
+  UserCheck,
+  BookOpen
+} from "lucide-react"
 
 interface AIUser {
   _id: string
@@ -24,8 +42,9 @@ interface AIUser {
     name: string
     matricNumber: string
     email: string
-    faculty?: { name: string }
-    department?: { name: string }
+    faculty?: { _id: string; name: string }
+    department?: { _id: string; name: string }
+    level?: { _id: string; name: string }
   }
   plan: "free" | "premium"
   dailyTokensUsed: number
@@ -35,6 +54,8 @@ interface AIUser {
   createdAt: string
 }
 
+const ITEMS_PER_PAGE = 12
+
 export default function ManageAIAccess() {
   const [users, setUsers] = useState<AIUser[]>([])
   const [loading, setLoading] = useState(true)
@@ -43,6 +64,7 @@ export default function ManageAIAccess() {
   const [selectedUser, setSelectedUser] = useState<AIUser | null>(null)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [upgrading, setUpgrading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
   const [stats, setStats] = useState({
     totalUsers: 0,
     freeUsers: 0,
@@ -115,6 +137,10 @@ export default function ManageAIAccess() {
     return matchesSearch && matchesPlan
   })
 
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE)
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -128,64 +154,80 @@ export default function ManageAIAccess() {
     return new Date() > new Date(user.premiumExpiryDate)
   }
 
+  const getInitials = (name: string) =>
+    name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+
   return (
     <div className="container mx-auto py-6 px-4 space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Manage AI Access</h1>
+          <h1 className="text-3xl font-bold text-foreground">Manage AI Access</h1>
           <p className="text-muted-foreground">Monitor and manage student AI usage and subscriptions</p>
         </div>
-        <Button onClick={fetchAIUsers} disabled={loading}>
+        <Button onClick={fetchAIUsers} disabled={loading} className="border-border bg-background text-black dark:text-white dark:bg-gray-800 hover:bg-muted">
           <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
           Refresh
         </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-border bg-card">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-600" />
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold">{stats.totalUsers}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Users</p>
+                <p className="text-2xl font-bold text-foreground">{stats.totalUsers}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border bg-card">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-green-600" />
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Free Users</p>
-                <p className="text-2xl font-bold">{stats.freeUsers}</p>
+                <p className="text-sm font-medium text-muted-foreground">Free Users</p>
+                <p className="text-2xl font-bold text-foreground">{stats.freeUsers}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border bg-card">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Crown className="h-5 w-5 text-yellow-600" />
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg">
+                <Crown className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Premium Users</p>
-                <p className="text-2xl font-bold">{stats.premiumUsers}</p>
+                <p className="text-sm font-medium text-muted-foreground">Premium Users</p>
+                <p className="text-2xl font-bold text-foreground">{stats.premiumUsers}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border bg-card">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-purple-600" />
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Tokens</p>
-                <p className="text-2xl font-bold">{stats.totalTokensUsed.toLocaleString()}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Tokens</p>
+                <p className="text-2xl font-bold text-foreground">{stats.totalTokensUsed.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>
@@ -193,22 +235,22 @@ export default function ManageAIAccess() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="border-border bg-card">
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by name, matric number, or email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-background border-border"
                 />
               </div>
             </div>
             <Select value={planFilter} onValueChange={setPlanFilter}>
-              <SelectTrigger className="w-full md:w-48">
+              <SelectTrigger className="w-full sm:w-48 border-border bg-background">
                 <SelectValue placeholder="Filter by plan" />
               </SelectTrigger>
               <SelectContent>
@@ -221,130 +263,255 @@ export default function ManageAIAccess() {
         </CardContent>
       </Card>
 
-      {/* Users Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>AI Users ({filteredUsers.length})</CardTitle>
-          <CardDescription>Manage student AI access and usage</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
-              <span className="ml-2">Loading AI users...</span>
+      {/* Results Count */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Showing {filteredUsers.length} of {users.length} AI users
+        </p>
+        {(searchTerm || planFilter !== "all") && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSearchTerm("")
+              setPlanFilter("all")
+            }}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Clear filters
+          </Button>
+        )}
+      </div>
+
+      {/* Users Cards Grid */}
+      {loading ? (
+        <Card className="border-border bg-card">
+          <CardContent className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <span className="ml-2 text-muted-foreground">Loading AI users...</span>
+          </CardContent>
+        </Card>
+      ) : paginatedUsers.length === 0 ? (
+        <Card className="border-border bg-card">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="rounded-full bg-muted p-3 mb-4">
+              <UserCheck className="h-8 w-8 text-muted-foreground" />
             </div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              {searchTerm || planFilter !== "all" ? "No users match your filters" : "No AI users found"}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2">Student</th>
-                    <th className="text-left p-2">Plan</th>
-                    <th className="text-left p-2">Daily Usage</th>
-                    <th className="text-left p-2">Total Tokens</th>
-                    <th className="text-left p-2">Last Active</th>
-                    <th className="text-left p-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map((user) => (
-                    <tr key={user._id} className="border-b hover:bg-gray-50">
-                      <td className="p-2">
-                        <div>
-                          <p className="font-medium">{user.studentId.name}</p>
-                          <p className="text-sm text-gray-500">{user.studentId.matricNumber}</p>
-                          <p className="text-xs text-gray-400">{user.studentId.email}</p>
-                        </div>
-                      </td>
-                      <td className="p-2">
-                        <div className="flex flex-col gap-1">
-                          <Badge variant={user.plan === "premium" ? "default" : "secondary"}>
-                            {user.plan === "premium" ? (
-                              <>
-                                <Crown className="h-3 w-3 mr-1" />
-                                Premium
-                              </>
-                            ) : (
-                              "Free"
-                            )}
-                          </Badge>
-                          {user.plan === "premium" && user.premiumExpiryDate && (
-                            <span className={`text-xs ${isPremiumExpired(user) ? "text-red-600" : "text-green-600"}`}>
-                              {isPremiumExpired(user) ? "Expired" : `Until ${formatDate(user.premiumExpiryDate)}`}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="p-2">
-                        <div className="text-sm">
-                          <span className="font-medium">{user.dailyTokensUsed}</span>
-                          {user.plan === "free" && <span className="text-gray-500">/15</span>}
-                        </div>
-                      </td>
-                      <td className="p-2">
-                        <span className="font-medium">{user.totalTokensUsed.toLocaleString()}</span>
-                      </td>
-                      <td className="p-2">
-                        <span className="text-sm text-gray-500">{formatDate(user.lastResetDate)}</span>
-                      </td>
-                      <td className="p-2">
-                        {user.plan === "free" && (
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              setSelectedUser(user)
-                              setShowUpgradeModal(true)
-                            }}
-                          >
-                            <Crown className="h-3 w-3 mr-1" />
-                            Upgrade
-                          </Button>
-                        )}
-                        {user.plan === "premium" && isPremiumExpired(user) && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedUser(user)
-                              setShowUpgradeModal(true)
-                            }}
-                          >
-                            <Calendar className="h-3 w-3 mr-1" />
-                            Renew
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              {searchTerm || planFilter !== "all" ? "No users found" : "No AI users available"}
+            </h3>
+            <p className="text-muted-foreground text-center max-w-md">
+              {searchTerm || planFilter !== "all"
+                ? "Try adjusting your search criteria or clear the filters to see all users."
+                : "There are currently no AI users registered in the system."
+              }
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {paginatedUsers.map((user) => (
+            <Card 
+              key={user._id} 
+              className={`transition-all duration-200 hover:shadow-lg border-border bg-card hover:bg-card/80 ${
+                isPremiumExpired(user) ? 'opacity-75' : ''
+              }`}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12 border-2 border-border">
+                      <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                        {getInitials(user.studentId.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-base font-semibold text-foreground truncate">
+                        {user.studentId.name}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {user.studentId.matricNumber}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge 
+                    variant={user.plan === "premium" ? "default" : "secondary"}
+                    className={user.plan === "premium" ? "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800" : ""}
+                  >
+                    {user.plan === "premium" ? (
+                      <>
+                        <Crown className="h-3 w-3 mr-1" />
+                        Premium
+                      </>
+                    ) : (
+                      "Free"
+                    )}
+                  </Badge>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-3">
+                {/* Email */}
+                <div className="flex items-center gap-2 text-sm">
+                  <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-muted-foreground truncate">{user.studentId.email}</span>
+                </div>
+
+                {/* Faculty */}
+                <div className="flex items-center gap-2 text-sm">
+                  <Building className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-muted-foreground truncate">
+                    {user.studentId.faculty?.name || "N/A"}
+                  </span>
+                </div>
+
+                {/* Department */}
+                <div className="flex items-center gap-2 text-sm">
+                  <GraduationCap className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-muted-foreground truncate">
+                    {user.studentId.department?.name || "N/A"}
+                  </span>
+                </div>
+
+                {/* Level */}
+                <div className="flex items-center gap-2 text-sm">
+                  <BookOpen className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-muted-foreground truncate">
+                    {user.studentId.level?.name || "N/A"}
+                  </span>
+                </div>
+
+                {/* Daily Usage */}
+                <div className="flex items-center gap-2 text-sm">
+                  <Zap className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-muted-foreground">
+                    Daily: <span className="font-medium text-foreground">{user.dailyTokensUsed}</span>
+                    {user.plan === "free" && <span className="text-muted-foreground">/15</span>}
+                  </span>
+                </div>
+
+                {/* Total Tokens */}
+                <div className="flex items-center gap-2 text-sm">
+                  <TrendingUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-muted-foreground">
+                    Total: <span className="font-medium text-foreground">{user.totalTokensUsed.toLocaleString()}</span>
+                  </span>
+                </div>
+
+                {/* Last Active */}
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-muted-foreground">
+                    Last: {formatDate(user.lastResetDate)}
+                  </span>
+                </div>
+
+                {/* Premium Expiry */}
+                {user.plan === "premium" && user.premiumExpiryDate && (
+                  <div className="pt-2">
+                    <Badge 
+                      variant="outline" 
+                      className={`${
+                        isPremiumExpired(user) 
+                          ? "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800"
+                          : "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800"
+                      }`}
+                    >
+                      <Calendar className="mr-1 h-3 w-3" />
+                      {isPremiumExpired(user) ? "Expired" : `Until ${formatDate(user.premiumExpiryDate)}`}
+                    </Badge>
+                  </div>
+                )}
+
+                {/* Action Button */}
+                <div className="pt-2">
+                  {user.plan === "free" && (
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        setSelectedUser(user)
+                        setShowUpgradeModal(true)
+                      }}
+                    >
+                      <Crown className="h-3 w-3 mr-1" />
+                      Upgrade to Premium
+                    </Button>
+                  )}
+                  {user.plan === "premium" && isPremiumExpired(user) && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full border-border text-foreground hover:bg-muted"
+                      onClick={() => {
+                        setSelectedUser(user)
+                        setShowUpgradeModal(true)
+                      }}
+                    >
+                      <Calendar className="h-3 w-3 mr-1" />
+                      Renew Premium
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <Button
+            variant="outline"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            className="border-border text-foreground hover:bg-muted"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Previous
+          </Button>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              Page {currentPage} of {totalPages}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              ({filteredUsers.length} users)
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            className="border-border text-foreground hover:bg-muted"
+          >
+            Next
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       {/* Upgrade Modal */}
       <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
-        <DialogContent>
+        <DialogContent className="border-border bg-card">
           <DialogHeader>
-            <DialogTitle>Upgrade to Premium</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Crown className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+              Upgrade to Premium
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               {selectedUser && (
                 <>
-                  Upgrade <strong>{selectedUser.studentId.name}</strong> ({selectedUser.studentId.matricNumber}) to
+                  Upgrade <strong className="text-foreground">{selectedUser.studentId.name}</strong> ({selectedUser.studentId.matricNumber}) to
                   Premium access?
                 </>
               )}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h4 className="font-medium text-yellow-800 mb-2">Premium Benefits:</h4>
-              <ul className="text-sm text-yellow-700 space-y-1">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+              <h4 className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">Premium Benefits:</h4>
+              <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
                 <li>• Unlimited AI interactions per day</li>
                 <li>• Priority support</li>
                 <li>• Advanced features access</li>
@@ -353,7 +520,11 @@ export default function ManageAIAccess() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowUpgradeModal(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowUpgradeModal(false)}
+              className="border-border text-foreground hover:bg-muted"
+            >
               Cancel
             </Button>
             <Button onClick={handleUpgradeToPremium} disabled={upgrading}>

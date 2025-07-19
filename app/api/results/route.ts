@@ -5,6 +5,7 @@ import Exam from "@/lib/models/exams";
 import { connectdb } from "@/lib/connectdb";
 import Question from "@/lib/models/question"; // ✅ Now it registers the schema
 import Student from "@/lib/models/student";
+import mongoose from "mongoose";
 
 type Answer = {
   questionId: {
@@ -17,6 +18,29 @@ type Answer = {
   studentAnswer?: string;
 };
 
+interface ResultWithPercentage {
+  _id: mongoose.Types.ObjectId;
+  studentId: {
+    _id: mongoose.Types.ObjectId;
+    name: string;
+  };
+  examId: {
+    _id: mongoose.Types.ObjectId;
+    title: string;
+    courseId: {
+      _id: mongoose.Types.ObjectId;
+      name: string;
+    };
+    duration: number;
+  };
+  score: number;
+  totalMarks: number;
+  createdAt: Date;
+  answers: Answer[];
+  percentage: number;
+  isPassed: boolean;
+}
+
 export async function GET(req: Request) {
   await connectdb();
   const { searchParams } = new URL(req.url);
@@ -25,6 +49,8 @@ export async function GET(req: Request) {
   const studentId = searchParams.get("studentId");
   const page = Number(searchParams.get("page")) || 1;
   const limit = Number(searchParams.get("limit")) || 10;
+  const search = searchParams.get("search") || "";
+  const filter = searchParams.get("filter") || "all";
   const skip = (page - 1) * limit;
 
   try {
@@ -49,11 +75,12 @@ export async function GET(req: Request) {
 
     // CASE 2: Fetch by Student
     if (studentId) {
-      const results = await NewResult.find({ studentId })
+      // Get all results for stats calculation (without pagination)
+      const allResults = await NewResult.find({ studentId })
         .populate({
           path: "examId",
           model: Exam,
-          select: "title courseId duration", // ✅ Include duration
+          select: "title courseId duration",
           populate: {
             path: "courseId",
             model: Course,
@@ -69,35 +96,47 @@ export async function GET(req: Request) {
           path: "answers.questionId",
           select: "questionText",
         })
-        .skip(skip)
-        .limit(limit)
         .lean();
 
-      const totalResults = await NewResult.countDocuments({ studentId });
-      const totalPages = Math.ceil(totalResults / limit);
+      // Calculate percentages and apply filters
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const resultsWithPercentages: ResultWithPercentage[] = allResults.map((result: any) => {
+        const percentage = (result.score / result.totalMarks) * 100;
+        return {
+          _id: result._id,
+          studentId: result.studentId,
+          examId: result.examId,
+          score: result.score,
+          totalMarks: result.totalMarks,
+          createdAt: result.createdAt,
+          answers: result.answers,
+          percentage,
+          isPassed: percentage >= 50 // 50% is passing threshold
+        };
+      });
 
-      const data = results.map((result) => ({
-        _id: result._id,
-        studentName: result.studentId?.name || "Unknown Student",
-        course: result.examId?.courseId?.name || "Unknown Course",
-        examTitle: result.examId?.title || "Unknown Exam",
-        score: result.score,
-        totalQuestions: result.totalMarks,
-        date: result.createdAt,
-        duration: result.examId?.duration || 0, // ✅ Get from exam
-        answers: (result.answers as Answer[]).map((ans) => ({
-          questionId: {
-            questionText: ans.questionId?.questionText || "Unknown Question",
-          },
-          isCorrect: ans.isCorrect,
-        })),
-      }));
+      // Apply filter
+      let filteredResults = resultsWithPercentages;
+      if (filter === "passed") {
+        filteredResults = resultsWithPercentages.filter(r => r.isPassed);
+      } else if (filter === "failed") {
+        filteredResults = resultsWithPercentages.filter(r => !r.isPassed);
+      }
 
-      const scores = results.map((r) => r.score);
-      const totalExams = scores.length;
-      const averageScore = totalExams > 0 ? scores.reduce((a, b) => a + b, 0) / totalExams : 0;
-      const highestScore = totalExams > 0 ? Math.max(...scores) : 0;
-      const lowestScore = totalExams > 0 ? Math.min(...scores) : 0;
+      // Apply search filter
+      if (search) {
+        filteredResults = filteredResults.filter(result => 
+          (result.examId && 'title' in result.examId && result.examId.title?.toLowerCase().includes(search.toLowerCase())) ||
+          (result.examId && 'courseId' in result.examId && result.examId.courseId?.name?.toLowerCase().includes(search.toLowerCase()))
+        );
+      }
+
+      // Calculate stats based on filtered results
+      const percentages = filteredResults.map(r => r.percentage);
+      const totalExams = percentages.length;
+      const averageScore = totalExams > 0 ? percentages.reduce((a, b) => a + b, 0) / totalExams : 0;
+      const highestScore = totalExams > 0 ? Math.max(...percentages) : 0;
+      const lowestScore = totalExams > 0 ? Math.min(...percentages) : 0;
 
       const stats = {
         totalExams,
@@ -105,6 +144,29 @@ export async function GET(req: Request) {
         highestScore,
         lowestScore,
       };
+
+      // Apply pagination to filtered results
+      const paginatedResults = filteredResults.slice(skip, skip + limit);
+      const totalPages = Math.ceil(filteredResults.length / limit);
+
+      const data = paginatedResults.map((result) => ({
+        _id: result._id,
+        studentName: result.studentId?.name || "Unknown Student",
+        course: result.examId?.courseId?.name || "Unknown Course",
+        examTitle: result.examId?.title || "Unknown Exam",
+        score: result.score,
+        totalQuestions: result.totalMarks,
+        date: result.createdAt,
+        duration: result.examId?.duration || 0,
+        percentage: result.percentage,
+        isPassed: result.isPassed,
+        answers: (result.answers as Answer[]).map((ans) => ({
+          questionId: {
+            questionText: ans.questionId?.questionText || "Unknown Question",
+          },
+          isCorrect: ans.isCorrect,
+        })),
+      }));
 
       return NextResponse.json({ results: data, totalPages, stats }, { status: 200 });
     }

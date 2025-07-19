@@ -19,10 +19,9 @@ export interface NotificationPayload {
   icon?: string
   badge?: string
   url?: string
-  data?: any
+  data?: Record<string, unknown>
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function sendNotification(
   subscription: WebPushSubscription,
   payload: NotificationPayload

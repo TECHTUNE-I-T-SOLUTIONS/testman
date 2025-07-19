@@ -1,14 +1,14 @@
 
 import { NextRequest, NextResponse } from "next/server"
 import PushNotification from "@/lib/models/push-notification"
-import connectDB from "@/lib/connectdb"
+import { connectdb } from "@/lib/connectdb"
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    await connectDB()
+    await connectdb()
     
     await PushNotification.findByIdAndDelete(params.id)
 

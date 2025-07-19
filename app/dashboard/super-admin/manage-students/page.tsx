@@ -191,34 +191,40 @@ export default function ManageStudents() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="space-y-8 p-4 sm:p-6 md:p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-neutral-950 transition-colors duration-300">
+      <div className="space-y-8 p-2 sm:p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Page Header */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 flex items-center gap-3">
-              <div className="p-2 bg-gray-900 rounded-lg">
-                <Users className="h-8 w-8 text-white" />
+        <div className="flex flex-col gap-4 sm:gap-6 lg:flex-row justify-between items-start lg:items-center">
+          <div className="w-full">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
+              <div className="p-2 bg-gray-900 dark:bg-gray-100 rounded-lg">
+                <Users className="h-8 w-8 text-white dark:text-gray-900" />
               </div>
-              Manage Students
+              <span>Manage Students</span>
             </h1>
-            <p className="text-gray-600 mt-2 text-lg">View, filter, and manage student accounts</p>
+            <p className="text-gray-600 dark:text-gray-300 mt-2 text-base sm:text-lg">
+              View, filter, and manage student accounts
+            </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Button onClick={resetFilters} variant="outline" className="flex items-center gap-2 bg-white">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
+            <Button
+              onClick={resetFilters}
+              variant="outline"
+              className="flex items-center gap-2 bg-white dark:bg-neutral-900 border-gray-200 dark:border-neutral-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-neutral-800 transition"
+            >
               <RefreshCw className="h-4 w-4" />
               Reset Filters
             </Button>
             <Button
               onClick={handleActivateAll}
-              className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+              className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white flex items-center gap-2 transition"
             >
               <UserCheck className="h-4 w-4" />
               Activate All
             </Button>
             <Button
               onClick={handleDeactivateAll}
-              className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
+              className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white flex items-center gap-2 transition"
             >
               <UserX className="h-4 w-4" />
               Deactivate All
@@ -227,44 +233,44 @@ export default function ManageStudents() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card className="bg-white shadow-sm border-l-4 border-l-blue-500">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+          <Card className="bg-white dark:bg-neutral-900 shadow-sm border-l-4 border-l-blue-500 dark:border-l-blue-600 transition-colors">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Students</CardTitle>
-              <Users className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Students</CardTitle>
+              <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900">{stats.total}</div>
-              <p className="text-xs text-gray-500 mt-1">Registered students</p>
+              <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Registered students</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white shadow-sm border-l-4 border-l-green-500">
+          <Card className="bg-white dark:bg-neutral-900 shadow-sm border-l-4 border-l-green-500 dark:border-l-green-600 transition-colors">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Active Students</CardTitle>
-              <UserCheck className="h-5 w-5 text-green-600" />
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Active Students</CardTitle>
+              <UserCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">{stats.active}</div>
-              <p className="text-xs text-gray-500 mt-1">Can access platform</p>
+              <div className="text-3xl font-bold text-green-600 dark:text-green-400">{stats.active}</div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Can access platform</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white shadow-sm border-l-4 border-l-red-500">
+          <Card className="bg-white dark:bg-neutral-900 shadow-sm border-l-4 border-l-red-500 dark:border-l-red-600 transition-colors">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Inactive Students</CardTitle>
-              <UserX className="h-5 w-5 text-red-600" />
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Inactive Students</CardTitle>
+              <UserX className="h-5 w-5 text-red-600 dark:text-red-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-red-600">{stats.inactive}</div>
-              <p className="text-xs text-gray-500 mt-1">Restricted access</p>
+              <div className="text-3xl font-bold text-red-600 dark:text-red-400">{stats.inactive}</div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Restricted access</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Content */}
         {loading ? (
-          <Card className="bg-white shadow-sm">
+          <Card className="bg-white dark:bg-neutral-900 shadow-sm transition-colors">
             <CardHeader>
               <Skeleton className="h-8 w-64" />
               <Skeleton className="h-4 w-full max-w-md" />
@@ -278,19 +284,19 @@ export default function ManageStudents() {
             </CardContent>
           </Card>
         ) : error ? (
-          <Alert variant="destructive" className="bg-white">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error Loading Students</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+          <Alert variant="destructive" className="bg-white dark:bg-neutral-900 border border-red-200 dark:border-red-800">
+            <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+            <AlertTitle className="text-gray-900 dark:text-gray-100">Error Loading Students</AlertTitle>
+            <AlertDescription className="text-gray-700 dark:text-gray-300">{error}</AlertDescription>
           </Alert>
         ) : (
-          <Card className="bg-white shadow-sm">
+          <Card className="bg-white dark:bg-neutral-900 shadow-sm transition-colors">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5 text-gray-600" />
+              <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                <Filter className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                 Student Management
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-600 dark:text-gray-300">
                 {filteredStudents.length} {filteredStudents.length === 1 ? "student" : "students"} found
                 {searchTerm && ` for "${searchTerm}"`}
                 {(facultyFilter || departmentFilter || levelFilter) && " with applied filters"}
@@ -299,28 +305,37 @@ export default function ManageStudents() {
             <CardContent>
               <div className="space-y-6">
                 {/* Search and Filters */}
-                <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row">
                   {/* Search */}
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <div className="relative flex-1 w-full">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                     <Input
                       placeholder="Search by name, email or matric number..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 h-12"
+                      className="pl-10 h-12 bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition"
                     />
                   </div>
 
                   {/* Status Tabs */}
                   <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="bg-gray-100">
-                      <TabsTrigger value="all" className="data-[state=active]:bg-white">
+                    <TabsList className="bg-gray-100 p-6 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg flex w-full sm:w-auto">
+                      <TabsTrigger
+                        value="all"
+                        className="data-[state=active]:bg-white data-[state=active]:dark:bg-neutral-900 data-[state=active]:text-blue-600 data-[state=active]:dark:text-blue-400 text-gray-700 dark:text-gray-200 px-3 py-2 transition"
+                      >
                         All ({stats.total})
                       </TabsTrigger>
-                      <TabsTrigger value="active" className="data-[state=active]:bg-white">
+                      <TabsTrigger
+                        value="active"
+                        className="data-[state=active]:bg-white data-[state=active]:dark:bg-neutral-900 data-[state=active]:text-green-600 data-[state=active]:dark:text-green-400 text-gray-700 dark:text-gray-200 px-3 py-2 transition"
+                      >
                         Active ({stats.active})
                       </TabsTrigger>
-                      <TabsTrigger value="inactive" className="data-[state=active]:bg-white">
+                      <TabsTrigger
+                        value="inactive"
+                        className="data-[state=active]:bg-white data-[state=active]:dark:bg-neutral-900 data-[state=active]:text-red-600 data-[state=active]:dark:text-red-400 text-gray-700 dark:text-gray-200 px-3 py-2 transition"
+                      >
                         Inactive ({stats.inactive})
                       </TabsTrigger>
                     </TabsList>
@@ -328,12 +343,12 @@ export default function ManageStudents() {
                 </div>
 
                 {/* Filter Dropdowns */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                   <Select value={facultyFilter} onValueChange={setFacultyFilter}>
-                    <SelectTrigger className="h-12">
+                    <SelectTrigger className="h-12 bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition">
                       <SelectValue placeholder="Filter by Faculty" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700">
                       {faculties.map((faculty) => (
                         <SelectItem key={faculty} value={faculty}>
                           {faculty}
@@ -343,10 +358,10 @@ export default function ManageStudents() {
                   </Select>
 
                   <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-                    <SelectTrigger className="h-12">
+                    <SelectTrigger className="h-12 bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition">
                       <SelectValue placeholder="Filter by Department" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700">
                       {departments.map((department) => (
                         <SelectItem key={department} value={department}>
                           {department}
@@ -356,10 +371,10 @@ export default function ManageStudents() {
                   </Select>
 
                   <Select value={levelFilter} onValueChange={setLevelFilter}>
-                    <SelectTrigger className="h-12">
+                    <SelectTrigger className="h-12 bg-white dark:bg-neutral-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition">
                       <SelectValue placeholder="Filter by Level" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-neutral-700">
                       {levels.map((level) => (
                         <SelectItem key={level} value={level}>
                           {level}
@@ -378,11 +393,11 @@ export default function ManageStudents() {
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="p-4 bg-gray-100 rounded-full mb-4">
-                      <AlertCircle className="h-12 w-12 text-gray-400" />
+                    <div className="p-4 bg-gray-100 dark:bg-neutral-800 rounded-full mb-4">
+                      <AlertCircle className="h-12 w-12 text-gray-400 dark:text-gray-500" />
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Students Found</h3>
-                    <p className="text-gray-600 max-w-md">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No Students Found</h3>
+                    <p className="text-gray-600 dark:text-gray-300 max-w-md">
                       {searchTerm || facultyFilter || departmentFilter || levelFilter
                         ? "Try adjusting your search or filter criteria."
                         : "No students are currently registered in the system."}

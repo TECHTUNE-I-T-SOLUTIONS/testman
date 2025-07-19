@@ -1,258 +1,161 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { connectdb } from "@/lib/connectdb"
+import AIPracticeExam from "@/lib/models/ai-practice-exam"
 import StudyMaterial from "@/lib/models/study-material"
-import AIPracticeExam, {
-  type IAIPracticeExam,
-  type IQuestion,
-} from "@/lib/models/ai-practice-exam"
-import StudyAnalytics from "@/lib/models/study-analytics"
 import { getStudentFromToken } from "@/utils/auth"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
-/* ──────────────────────────────────────────────────
-   ❶  Require a real API‑key – no hard‑coded fallback
-   ────────────────────────────────────────────────── */
-if (!process.env.GEMINI_API_KEY) {
-  throw new Error("Missing GEMINI_API_KEY environment variable")
-}
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "")
 
-/* ──────────────────────────────────────────────────
-   ❷  POST handler
-   ────────────────────────────────────────────────── */
 export async function POST(req: NextRequest) {
   try {
     await connectdb()
 
-    /* ─ Auth ─────────────────────────────────────── */
     const student = await getStudentFromToken()
     if (!student) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    /* ─ Validate body ────────────────────────────── */
-    const { materialIds, sessionId } = await req.json()
+    const { materialIds, examType = "mixed", questionCount = 10, sessionId } = await req.json()
 
-    if (!materialIds || !Array.isArray(materialIds) || materialIds.length === 0) {
-      return NextResponse.json({ error: "No study material IDs provided" }, { status: 400 })
+    if (!materialIds || materialIds.length === 0) {
+      return NextResponse.json({ error: "Material IDs are required" }, { status: 400 })
     }
 
-    /* ─ Fetch & validate materials ───────────────── */
+    // Fetch study materials
     const materials = await StudyMaterial.find({
       _id: { $in: materialIds },
       studentId: student.id,
-      processingStatus: "completed",
+      isProcessed: true,
     })
 
     if (materials.length === 0) {
-      return NextResponse.json(
-        { error: "No processed study materials found for the given IDs" },
-        { status: 404 },
-      )
+      return NextResponse.json({ error: "No processed materials found" }, { status: 404 })
     }
 
-    const combinedText = materials.map((m) => m.extractedText).join("\n\n---\n\n")
-    if (!combinedText.trim()) {
-      return NextResponse.json(
-        { error: "Extracted text is empty for the selected materials" },
-        { status: 400 },
-      )
-    }
+    // Combine extracted text from all materials
+    const combinedContent = materials.map(m => m.extractedText).join("\n\n")
 
-    const subject = materials[0]?.subject || "General Study"
-    console.log(`🧠 Generating practice exam from ${materials.length} materials…`)
+    // Generate exam using AI
+    const examData = await generateExamWithAI(combinedContent, examType, questionCount, materials[0].subject || "General")
 
-    /* ─ Create prompt for Gemini ──────────────────── */
-    const prompt = `You are Alex AI, an expert educational question generator for "Operation Save My CGPA" - helping University of Ilorin students excel academically.
-
-Generate 10-15 high-quality practice exam questions based on the following study materials. Return ONLY valid JSON format with no additional text or markdown formatting.
-
-REQUIRED JSON STRUCTURE:
-[
-  {
-    "questionText": "Your question here",
-    "questionType": "multiple-choice",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "correctAnswer": "Option A",
-    "explanation": "Why this answer is correct"
-  }
-]
-
-QUESTION TYPES TO USE:
-- multiple-choice (4 options each)
-- true-false
-- short-answer
-
-QUALITY REQUIREMENTS:
-- Questions must test understanding, not just memory
-- Include different difficulty levels (basic, intermediate, advanced)
-- Ensure clear, unambiguous wording
-- Provide detailed explanations
-- Focus on key concepts and practical applications
-
-STUDY MATERIALS:
-${combinedText}
-
-Generate questions that thoroughly cover the content above. Return ONLY the JSON array, no other text.`
-
-    /* ─ Call Gemini with retry mechanism ──────────── */
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        maxOutputTokens: 4096,
-        temperature: 0.7,
-      }
-    })
-
-    let aiRaw: string
-    let attempts = 0
-    const maxAttempts = 3
-
-    while (attempts < maxAttempts) {
-      try {
-        console.log(`🤖 Calling Gemini (attempt ${attempts + 1}/${maxAttempts})...`)
-
-        const geminiResp = await model.generateContent(prompt)
-        const response = await geminiResp.response
-
-        if (!response) {
-          throw new Error("Empty response from Gemini")
-        }
-
-        aiRaw = response.text()
-        if (!aiRaw || aiRaw.trim().length === 0) {
-          throw new Error("Empty text response from Gemini")
-        }
-
-        console.log(`✅ Gemini responded with ${aiRaw.length} characters`)
-        break
-
-      } catch (err) {
-        attempts++
-        console.error(`❌ Gemini attempt ${attempts} failed:`, err)
-
-        if (attempts >= maxAttempts) {
-          const errorMsg = err instanceof Error ? err.message : "Unknown error"
-          if (errorMsg.includes("quota") || errorMsg.includes("limit")) {
-            return NextResponse.json({ error: "AI service quota exceeded. Please try again later." }, { status: 429 })
-          }
-          return NextResponse.json({ error: "AI generation failed after multiple attempts" }, { status: 502 })
-        }
-
-        // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempts))
-      }
-    }
-
-    /* ─ Extract pure JSON (strip ```json …``` if needed) ─ */
-    const extracted = aiRaw.match(/```json\n([\s\S]*?)\n```/)?.[1] ?? aiRaw
-
-    /* ─ Parse & map to our schema ─────────────────── */
-    let questions: IQuestion[] = []
- try {
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- const rawQs: any[] = JSON.parse(extracted)
-
- questions = rawQs.map((q, idx): IQuestion => ({
- id: `q-${idx + 1}`,
- question: q.questionText ?? q.question,
- type: q.questionType,
- options: q.options ?? [],
- correctAnswer: q.correctAnswer,
- explanation: q.explanation ?? "",
- points: 1,
- }))
-
- if (
- !Array.isArray(questions) ||
- questions.some((q) => !q.question || !q.type || q.correctAnswer === undefined)
- ) {
- throw new Error("AI response missing required fields")
- }
- } catch (err) {
- console.error("Failed to parse AI JSON:", err)
- console.error("Raw AI response:", extracted)
- return NextResponse.json(
- { error: "AI failed to generate valid questions. Please try again." },
- { status: 500 },
- )
- }
-
-    /* ─ Create & save exam ────────────────────────── */
-    const examTitle = `Practice Exam: ${materials[0].title}`
-    const duration = Math.max(30, questions.length * 2) // 2 mins per Q, min 30
-
-    const newExam: IAIPracticeExam = new AIPracticeExam({
+    // Create practice exam
+    const practiceExam = new AIPracticeExam({
       studentId: student.id,
-      sessionId,                       // optional
-      title: examTitle,
-      subject,
-      questions,
-      duration,
+      sessionId: sessionId ? sessionId : undefined,
+      title: examData.title,
+      subject: examData.subject,
+      questions: examData.questions,
+      duration: examData.duration,
       status: "active",
-      materialIds: materials.map((m) => m._id),
+      materialIds: materialIds,
       createdAt: new Date(),
     })
 
-    await newExam.save()
-    console.log(`✅ Saved practice exam: ${newExam.title}`)
-
-    /* ─ Update analytics ──────────────────────────── */
-    await updateStudyAnalyticsForExamGeneration(student.id, questions.length, subject)
+    await practiceExam.save()
 
     return NextResponse.json({
       success: true,
       exam: {
-        id: newExam._id,
-        title: newExam.title,
-        questionsCount: newExam.questions.length,
-        duration: newExam.duration,
-        status: newExam.status,
+        id: practiceExam._id.toString(),
+        title: practiceExam.title,
+        questionsCount: practiceExam.questions.length,
+        duration: practiceExam.duration,
+        status: practiceExam.status,
       },
     })
-  } catch (err) {
-    console.error("Error generating practice exam:", err)
-    let msg = "Failed to generate practice exam."
-    if (err instanceof Error) {
-      msg = /503|overloaded/i.test(err.message)
-        ? "AI service is overloaded. Please try again later."
-        : /quota|limit/i.test(err.message)
-          ? "API quota exceeded. Please try again later."
-          : /network|fetch/i.test(err.message)
-            ? "Network error. Please check your connection."
-            : err.message
-    }
-    return NextResponse.json({ error: msg }, { status: 500 })
+  } catch (error) {
+    console.error("Error generating practice exam:", error)
+    return NextResponse.json({ error: "Failed to generate practice exam" }, { status: 500 })
   }
 }
 
-/* ──────────────────────────────────────────────────
-   ❸  Analytics helper
-   ────────────────────────────────────────────────── */
-async function updateStudyAnalyticsForExamGeneration(
-  studentId: string,
-  questionsGenerated: number,
-  subject: string,
+async function generateExamWithAI(
+  content: string,
+  examType: string,
+  questionCount: number,
+  subject: string
 ) {
-  try {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
-    const updateData: {
-      $inc: { questionsGenerated: number }
-      $addToSet?: { topicsStudied: string }
-    } = {
-      $inc: { questionsGenerated },
+  const examTypeInstructions = {
+    objective: "Generate only multiple-choice questions with 4 options (A, B, C, D).",
+    theory: "Generate only short-answer questions that require detailed explanations.",
+    mixed: "Generate a mix of multiple-choice questions (60%) and short-answer questions (40%)."
+  }
+
+  const prompt = `You are an expert educator creating a practice exam. Based on the following study material, generate ${questionCount} questions.
+
+${examTypeInstructions[examType as keyof typeof examTypeInstructions]}
+
+Study Material:
+${content.substring(0, 8000)} // Limit content to avoid token limits
+
+Requirements:
+- Questions should test understanding, not just memorization
+- Include a mix of difficulty levels
+- For multiple-choice: provide 4 options with only one correct answer
+- For short-answer: provide clear, detailed explanations
+- Each question should be worth 1 point
+- Questions should be relevant to the material provided
+
+Return the response in this exact JSON format:
+{
+  "title": "Practice Exam on [Subject]",
+  "subject": "${subject}",
+  "duration": ${Math.max(30, questionCount * 2)},
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Question text here?",
+      "type": "multiple-choice",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": "Option A",
+      "explanation": "Explanation of why this is correct",
+      "points": 1
     }
-    if (subject) updateData.$addToSet = { topicsStudied: subject }
+  ]
+}
 
-    await StudyAnalytics.findOneAndUpdate(
-      { studentId, date: today, studyMode: "questions" },
-      updateData,
-      { upsert: true, new: true },
-    )
-    console.log("📊 Study analytics updated")
-  } catch (err) {
-    console.error("Error updating analytics:", err)
+Ensure the JSON is valid and complete.`
+
+  try {
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    const text = response.text()
+    
+    // Extract JSON from response
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      throw new Error("Failed to parse AI response")
+    }
+
+    const examData = JSON.parse(jsonMatch[0])
+    
+    // Validate and clean the data
+    if (!examData.questions || !Array.isArray(examData.questions)) {
+      throw new Error("Invalid exam data structure")
+    }
+
+    // Ensure all questions have required fields
+    const cleanedQuestions = examData.questions.map((q: Record<string, unknown>, index: number) => ({
+      id: (q.id as string) || `q${index + 1}`,
+      question: (q.question as string) || "",
+      type: (q.type as string) || "multiple-choice",
+      options: (q.options as string[]) || [],
+      correctAnswer: (q.correctAnswer as string) || "",
+      explanation: (q.explanation as string) || "",
+      points: (q.points as number) || 1,
+    }))
+
+    return {
+      title: (examData.title as string) || `Practice Exam on ${subject}`,
+      subject: (examData.subject as string) || subject,
+      duration: (examData.duration as number) || Math.max(30, questionCount * 2),
+      questions: cleanedQuestions,
+    }
+  } catch (error) {
+    console.error("AI generation error:", error)
+    throw new Error("Failed to generate exam with AI")
   }
 }

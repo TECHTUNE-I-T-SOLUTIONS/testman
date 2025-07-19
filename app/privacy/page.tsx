@@ -14,7 +14,8 @@ const privacyData = [
   {
     icon: Eye,
     title: "Information We Collect",
-    content: "We collect information necessary to provide our educational services effectively.",
+    content:
+      "We collect information necessary to provide our educational services effectively, including when you interact with our AI-powered features.",
     details: [
       "Full name and contact information",
       "Email address for account management",
@@ -22,71 +23,83 @@ const privacyData = [
       "Login credentials (securely encrypted)",
       "Device and browser metadata for security",
       "Exam performance and academic progress data",
+      "User inputs, queries, and interactions with AI features (for service improvement and safety)",
     ],
   },
   {
     icon: UserCheck,
     title: "How We Use Your Information",
-    content: "Your data helps us provide personalized educational experiences and improve our platform.",
+    content:
+      "Your data helps us provide personalized educational experiences, including AI-driven recommendations and support, and to improve our platform.",
     details: [
-      "Provide personalized academic testing and progress tracking",
-      "Improve the quality and effectiveness of our platform",
-      "Monitor usage patterns for performance optimization",
+      "Provide personalized academic testing, progress tracking, and AI-powered study assistance",
+      "Improve the quality, safety, and effectiveness of our platform and AI features",
+      "Monitor usage patterns for performance optimization and AI model improvement",
       "Enhance security measures and prevent fraudulent activities",
       "Send important updates, reminders, and educational content",
-      "Generate anonymized analytics for platform improvement",
+      "Generate anonymized analytics for platform and AI system improvement",
+      "Ensure responsible and ethical use of AI in accordance with legal and industry standards",
     ],
   },
   {
     icon: Lock,
-    title: "Data Protection & Security",
-    content: "We implement industry-standard security measures to protect your personal information.",
+    title: "Data Protection, Security & AI Safety",
+    content:
+      "We implement industry-standard security measures to protect your personal information and ensure the safe, ethical use of AI technologies.",
     details: [
       "End-to-end encryption for sensitive data transmission",
       "Secure server infrastructure with regular security updates",
       "Regular security audits and vulnerability assessments",
-      "Strict access controls for our team members",
+      "Strict access controls for our team members and AI system operators",
       "Automated backup systems to prevent data loss",
-      "Compliance with international data protection standards",
+      "Compliance with international data protection standards (e.g., GDPR, CCPA)",
+      "Continuous monitoring and review of AI systems to prevent misuse or bias",
+      "User data used for AI training is anonymized and aggregated where possible",
     ],
   },
   {
     icon: Shield,
     title: "Your Privacy Rights",
-    content: "You have full control over your personal data and how it's used on our platform.",
+    content:
+      "You have full control over your personal data and how it's used on our platform, including data processed by AI systems.",
     details: [
       "Access and download your personal data at any time",
       "Request correction of inaccurate or incomplete information",
       "Delete your account and associated data permanently",
       "Opt-out of non-essential communications and marketing",
-      "Withdraw consent for data processing where applicable",
+      "Withdraw consent for data processing, including AI-based processing, where applicable",
       "Request data portability to another service provider",
+      "Request information about how your data is used in AI systems",
     ],
   },
   {
     icon: Cookie,
-    title: "Cookies & Tracking Technologies",
-    content: "We use cookies and similar technologies to enhance your user experience and platform functionality.",
+    title: "Cookies, Tracking Technologies & AI Personalization",
+    content:
+      "We use cookies and similar technologies to enhance your user experience, platform functionality, and to personalize AI-driven features.",
     details: [
       "Essential cookies for platform functionality and security",
       "Performance cookies to analyze usage and improve services",
       "Functional cookies to remember your preferences and settings",
-      "Analytics cookies to understand user behavior patterns",
+      "Analytics cookies to understand user behavior patterns and improve AI recommendations",
       "Session cookies that expire when you close your browser",
       "Persistent cookies that remain until manually deleted",
+      "You can manage your cookie preferences at any time",
     ],
   },
   {
     icon: FileText,
-    title: "Data Sharing & Third Parties",
-    content: "We maintain strict policies regarding data sharing and third-party access to your information.",
+    title: "Data Sharing, Third Parties & AI Providers",
+    content:
+      "We maintain strict policies regarding data sharing and third-party access to your information, including any AI service providers we use.",
     details: [
       "We never sell your personal data to third parties",
-      "Limited sharing with trusted service providers under strict agreements",
+      "Limited sharing with trusted service providers and AI vendors under strict agreements",
       "Legal compliance sharing only when required by law",
-      "Anonymous, aggregated data for research and improvement purposes",
+      "Anonymous, aggregated data for research, AI model improvement, and platform enhancement",
       "Explicit consent required for any additional data sharing",
-      "Regular audits of third-party data handling practices",
+      "Regular audits of third-party and AI provider data handling practices",
+      "AI service providers are contractually required to comply with our privacy and security standards",
     ],
   },
 ]
@@ -95,8 +108,6 @@ export default function PrivacyPolicyPage() {
   const [show, setShow] = useState(false)
   useTheme()
 
-  // Theme-based classes (using Tailwind dark: variants for consistency)
-  // See FAQ and Support pages for reference
   useEffect(() => {
     const timeout = setTimeout(() => setShow(true), 100)
     return () => clearTimeout(timeout)
@@ -136,9 +147,11 @@ export default function PrivacyPolicyPage() {
                 </div>
                 <p className="text-xl text-gray-600 dark:text-neutral-300 max-w-4xl mx-auto leading-relaxed transition-colors duration-300">
                   This Privacy Policy explains how we handle your information at{" "}
-                  <span className="font-semibold text-gray-900 dark:text-white">Operation Save My CGPA</span>. Your privacy is very
-                  important to us, and we&apos;re committed to protecting your personal data while providing you with the
-                  best educational experience.
+                  <span className="font-semibold text-gray-900 dark:text-white">Operation Save My CGPA</span>. Your privacy is extremely
+                  important to us, and we&apos;re committed to protecting your personal data—including data processed by our AI features—while providing you with the best educational experience. We use advanced security and privacy practices to ensure your information is safe, secure, and handled transparently.
+                </p>
+                <p className="text-base text-gray-500 dark:text-neutral-400 max-w-3xl mx-auto mt-4 leading-relaxed transition-colors duration-300">
+                  <strong>Use of AI:</strong> Our platform uses artificial intelligence (AI) to enhance your learning experience, provide personalized recommendations, and support your academic journey. We are committed to the responsible, ethical, and secure use of AI, and we take extra care to protect your data in all AI-powered processes.
                 </p>
               </div>
             </div>
@@ -164,7 +177,7 @@ export default function PrivacyPolicyPage() {
                   </Badge>
                 </div>
                 <p className="text-green-700 dark:text-green-300 mt-2 text-sm transition-colors duration-300">
-                  This policy is effective immediately and applies to all users of our platform.
+                  This policy is effective immediately and applies to all users of our platform, including those using AI-powered features.
                 </p>
               </CardContent>
             </Card>
@@ -221,8 +234,7 @@ export default function PrivacyPolicyPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm leading-relaxed mb-3 text-gray-700 dark:text-neutral-200 transition-colors duration-300">
-                    This Privacy Policy may be updated periodically to reflect changes in our practices or legal
-                    requirements. We will notify users of significant changes through:
+                    This Privacy Policy may be updated periodically to reflect changes in our practices, legal requirements, or the introduction of new AI features. We will notify users of significant changes through:
                   </p>
                   <ul className="text-sm text-gray-600 dark:text-neutral-400 space-y-1 transition-colors duration-300">
                     <li>• Email notifications to registered users</li>
@@ -240,9 +252,7 @@ export default function PrivacyPolicyPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm leading-relaxed text-gray-700 dark:text-neutral-200 transition-colors duration-300">
-                    Our platform is accessible globally, and we comply with international privacy laws including GDPR
-                    for European users and other applicable data protection regulations. Data may be processed in
-                    different countries while maintaining the same level of protection.
+                    Our platform is accessible globally, and we comply with international privacy laws including GDPR for European users and other applicable data protection regulations. Data may be processed in different countries while maintaining the same level of protection, including for AI-powered services.
                   </p>
                 </CardContent>
               </Card>
@@ -296,8 +306,7 @@ export default function PrivacyPolicyPage() {
                   <h3 className="text-xl font-bold">Privacy Questions or Concerns?</h3>
                 </div>
                 <p className="mb-6 max-w-2xl mx-auto text-gray-300 dark:text-neutral-300 transition-colors duration-300">
-                  If you have questions about this Privacy Policy, want to exercise your privacy rights, or have
-                  concerns about how we handle your data, please contact our privacy team.
+                  If you have questions about this Privacy Policy, want to exercise your privacy rights, or have concerns about how we handle your data—including data processed by AI features—please contact our privacy team.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button

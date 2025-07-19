@@ -13,6 +13,7 @@ export interface IStudent extends Document {
   loggedIn: "True" | "False";
   isActive: boolean;
   phoneNumber?: string; // ✅ added
+  pushSubscription?: Record<string, unknown> | null; // ✅ added for push notifications
 }
 
 const StudentSchema = new Schema<IStudent>(

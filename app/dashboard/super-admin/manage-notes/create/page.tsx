@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { Upload, FileText, Eye, Download, Search } from "lucide-react"
+import { Upload, FileText, Eye, Download, Search, Plus, X, Loader2 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,13 +13,6 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import CourseDropdown from "@/components/dashboard/manage-questions/questions/CourseDropdown"
 import Header from "@/components/dashboard/Header"
-
-// interface Course {
-//   _id: string
-//   title: string
-//   department: string
-//   faculty: string
-// }
 
 interface Note {
   _id: string
@@ -38,6 +31,7 @@ export default function ManageNotesPage() {
   const [search, setSearch] = useState<string>("")
   const [fileTypeFilter, setFileTypeFilter] = useState<string>("all")
   const [isUploading, setIsUploading] = useState(false)
+  const [showUploadForm, setShowUploadForm] = useState(false)
 
   useEffect(() => {
     if (selectedCourse) {
@@ -111,6 +105,7 @@ export default function ManageNotesPage() {
         setFile(null)
         setTitle("")
         setPreviewUrl("")
+        setShowUploadForm(false)
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : "Upload failed"
         toast.error(errorMessage)
@@ -125,14 +120,28 @@ export default function ManageNotesPage() {
   const getFileTypeColor = (fileType: string) => {
     switch (fileType.toLowerCase()) {
       case "pdf":
-        return "bg-red-100 text-red-800 border-red-200"
+        return "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800"
       case "doc":
       case "docx":
-        return "bg-blue-100 text-blue-800 border-blue-200"
+        return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800"
       case "txt":
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-300 dark:border-gray-800"
       default:
-        return "bg-purple-100 text-purple-800 border-purple-200"
+        return "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800"
+    }
+  }
+
+  const getFileTypeIcon = (fileType: string) => {
+    switch (fileType.toLowerCase()) {
+      case "pdf":
+        return "📄"
+      case "doc":
+      case "docx":
+        return "📝"
+      case "txt":
+        return "📃"
+      default:
+        return "📄"
     }
   }
 
@@ -142,16 +151,24 @@ export default function ManageNotesPage() {
     return matchesSearch && matchesFileType
   })
 
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-background">
       <Header title="Manage Notes" />
 
-      <div className="max-w-6xl mx-auto p-6 space-y-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
         {/* Course Selection */}
-        <Card>
+        <Card className="border-border bg-card">
           <CardHeader>
-            <CardTitle>Select Course</CardTitle>
-            <CardDescription>Choose a course to manage its notes</CardDescription>
+            <CardTitle className="text-foreground">Select Course</CardTitle>
+            <CardDescription className="text-muted-foreground">Choose a course to manage its notes</CardDescription>
           </CardHeader>
           <CardContent>
             <CourseDropdown selectedCourse={selectedCourse} setSelectedCourse={setSelectedCourse} />
@@ -161,103 +178,145 @@ export default function ManageNotesPage() {
         {selectedCourse && (
           <>
             {/* Upload Section */}
-            <Card>
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Upload className="h-5 w-5" />
-                  Upload New Note
-                </CardTitle>
-                <CardDescription>Add a new note for the selected course</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Note Title *</Label>
-                    <Input
-                      id="title"
-                      type="text"
-                      placeholder="Enter note title"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      maxLength={100}
-                    />
-                    <p className="text-sm text-muted-foreground text-right">{title.length}/100 characters</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2 text-foreground">
+                      <Upload className="h-5 w-5" />
+                      Course Notes
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Manage and upload notes for the selected course
+                    </CardDescription>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="file">Upload File *</Label>
-                    <Input
-                      id="file"
-                      type="file"
-                      accept=".pdf,.txt,.doc,.docx"
-                      onChange={handleFileChange}
-                      className="cursor-pointer"
-                    />
-                    <p className="text-sm text-muted-foreground">Supported: PDF, TXT, DOC, DOCX (Max 10MB)</p>
-                  </div>
+                  <Button 
+                    onClick={() => setShowUploadForm(!showUploadForm)}
+                    className="border-border bg-background text-foreground hover:bg-muted"
+                  >
+                    {showUploadForm ? (
+                      <>
+                        <X className="h-4 w-4 mr-2" />
+                        Cancel
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Upload Note
+                      </>
+                    )}
+                  </Button>
                 </div>
+              </CardHeader>
+              
+              {showUploadForm && (
+                <CardContent className="space-y-4 border-t border-border pt-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="title" className="text-foreground">Note Title *</Label>
+                      <Input
+                        id="title"
+                        type="text"
+                        placeholder="Enter note title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        maxLength={100}
+                        className="bg-background border-border text-foreground"
+                      />
+                      <p className="text-sm text-muted-foreground text-right">{title.length}/100 characters</p>
+                    </div>
 
-                {previewUrl && (
-                  <div className="space-y-2">
-                    <Label>File Preview</Label>
-                    <div className="border rounded-lg p-4 bg-gray-50">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FileText className="h-5 w-5 text-blue-600" />
-                        <span className="font-medium">{file?.name}</span>
-                        <Badge className={getFileTypeColor(file?.name.split(".").pop() || "")}>
-                          {file?.name.split(".").pop()?.toUpperCase()}
-                        </Badge>
-                      </div>
-                      <iframe src={previewUrl} className="w-full h-64 border rounded" title="File preview" />
+                    <div className="space-y-2">
+                      <Label htmlFor="file" className="text-foreground">Upload File *</Label>
+                      <Input
+                        id="file"
+                        type="file"
+                        accept=".pdf,.txt,.doc,.docx"
+                        onChange={handleFileChange}
+                        className="cursor-pointer bg-background border-border text-foreground"
+                      />
+                      <p className="text-sm text-muted-foreground">Supported: PDF, TXT, DOC, DOCX (Max 10MB)</p>
                     </div>
                   </div>
-                )}
 
-                <Button onClick={uploadNote} disabled={isUploading || !title || !file} className="w-full" size="lg">
-                  {isUploading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      Uploading Note...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Note
-                    </>
+                  {previewUrl && (
+                    <div className="space-y-2">
+                      <Label className="text-foreground">File Preview</Label>
+                      <div className="border border-border rounded-lg p-4 bg-muted/30">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          <span className="font-medium text-foreground">{file?.name}</span>
+                          <Badge className={getFileTypeColor(file?.name.split(".").pop() || "")}>
+                            {file?.name.split(".").pop()?.toUpperCase()}
+                          </Badge>
+                          {file && (
+                            <span className="text-sm text-muted-foreground">
+                              ({formatFileSize(file.size)})
+                            </span>
+                          )}
+                        </div>
+                        <iframe 
+                          src={previewUrl} 
+                          className="w-full h-64 border border-border rounded bg-background" 
+                          title="File preview" 
+                        />
+                      </div>
+                    </div>
                   )}
-                </Button>
-              </CardContent>
+
+                  <Button 
+                    onClick={uploadNote} 
+                    disabled={isUploading || !title || !file} 
+                    className="w-full border-border bg-background text-foreground hover:bg-muted" 
+                    size="lg"
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Uploading Note...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Note
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              )}
             </Card>
 
             {/* Notes List */}
-            <Card>
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-foreground">
                   <Search className="h-5 w-5" />
-                  Course Notes
+                  Course Notes ({filteredNotes.length})
                 </CardTitle>
-                <CardDescription>Manage and view all notes for this course</CardDescription>
+                <CardDescription className="text-muted-foreground">
+                  View and manage all notes for this course
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Filters */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Search Notes</Label>
+                    <Label className="text-foreground">Search Notes</Label>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input
                         placeholder="Search by title..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-background border-border text-foreground"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Filter by File Type</Label>
+                    <Label className="text-foreground">Filter by File Type</Label>
                     <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-background border-border text-foreground">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -271,27 +330,61 @@ export default function ManageNotesPage() {
                   </div>
                 </div>
 
+                {/* Results Count */}
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {filteredNotes.length} of {notes.length} notes
+                  </p>
+                  {(search || fileTypeFilter !== "all") && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSearch("")
+                        setFileTypeFilter("all")
+                      }}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      Clear filters
+                    </Button>
+                  )}
+                </div>
+
                 {/* Notes Grid */}
                 {filteredNotes.length === 0 ? (
-                  <div className="text-center py-12">
-                    <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No notes found</h3>
-                    <p className="text-gray-600">
-                      {notes.length === 0
-                        ? "No notes have been uploaded for this course yet."
-                        : "No notes match your current search and filter criteria."}
-                    </p>
-                  </div>
+                  <Card className="border-border bg-card">
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                      <div className="rounded-full bg-muted p-3 mb-4">
+                        <FileText className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
+                        {notes.length === 0 ? "No notes available" : "No notes found"}
+                      </h3>
+                      <p className="text-muted-foreground text-center max-w-md">
+                        {notes.length === 0
+                          ? "No notes have been uploaded for this course yet. Click 'Upload Note' to add the first note."
+                          : "No notes match your current search and filter criteria. Try adjusting your filters."}
+                      </p>
+                    </CardContent>
+                  </Card>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {filteredNotes.map((note) => (
-                      <Card key={note._id} className="hover:shadow-md transition-shadow">
+                      <Card 
+                        key={note._id} 
+                        className="hover:shadow-lg transition-all duration-200 border-border bg-card hover:bg-card/80"
+                      >
                         <CardContent className="p-4">
                           <div className="space-y-3">
-                            <div className="flex items-start gap-2">
-                              <FileText className="h-5 w-5 text-blue-600 mt-0.5" />
+                            <div className="flex items-start gap-3">
+                              <div className="text-2xl">{getFileTypeIcon(note.fileType)}</div>
                               <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-sm line-clamp-2">{note.title}</h3>
+                                <h3 className="font-semibold text-sm text-foreground line-clamp-2 leading-tight">
+                                  {note.title}
+                                </h3>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {note.fileType.toUpperCase()} file
+                                </p>
                               </div>
                             </div>
 
@@ -300,7 +393,12 @@ export default function ManageNotesPage() {
                             </Badge>
 
                             <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm" asChild className="flex-1 bg-transparent">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                asChild 
+                                className="flex-1 border-border bg-background text-foreground hover:bg-muted"
+                              >
                                 <a
                                   href={note.fileUrl}
                                   target="_blank"
@@ -312,7 +410,12 @@ export default function ManageNotesPage() {
                                 </a>
                               </Button>
 
-                              <Button variant="outline" size="sm" asChild className="flex-1 bg-transparent">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                asChild 
+                                className="flex-1 border-border bg-background text-foreground hover:bg-muted"
+                              >
                                 <a href={note.fileUrl} download className="flex items-center gap-1">
                                   <Download className="h-3 w-3" />
                                   Download

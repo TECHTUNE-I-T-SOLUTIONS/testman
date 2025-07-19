@@ -120,6 +120,15 @@ export default function StudentLayout({
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const router = useRouter()
 
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -168,6 +177,15 @@ export default function StudentLayout({
       setIsLoggingOut(false)
       setShowLogoutDialog(false)
     }
+  }
+
+  // If on /student/study-assistant and on mobile, hide master sidebar and trigger
+  if (pathname.startsWith('/student/study-assistant') && isMobile) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {children}
+      </div>
+    )
   }
 
   if (!showSidebar) {
